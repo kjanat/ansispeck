@@ -15,7 +15,7 @@
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
 	"exports": {
-		".": "./dist/index.mjs",
+		".": "./dist/index.js",
 		"./package.json": "./package.json"
 	},
 	"files": [

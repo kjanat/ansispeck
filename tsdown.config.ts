@@ -6,6 +6,7 @@ export default defineConfig({
 	exports: true,
 	clean: true,
 	target: 'esnext',
+	platform: 'neutral',
 	onSuccess: 'bun fmt package.json',
 	unbundle: true,
 	minify: true,
