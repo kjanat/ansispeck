@@ -5,7 +5,7 @@ const DEFAULT_COUNT = 1;
 export function register({ count = DEFAULT_COUNT } = {}): void {
 	group(() => {
 		bench('femtocolors', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/index.mjs');
+			for (let i = 0; i < count; i++) await import('../dist/index.js');
 		});
 		bench('picocolors', async () => {
 			for (let i = 0; i < count; i++) await import('picocolors');

@@ -6,7 +6,7 @@ import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import femtocolors from '../dist/index.mjs';
+import femtocolors from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 

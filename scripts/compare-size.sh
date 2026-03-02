@@ -28,8 +28,8 @@ trap 'rm -rf "${TMPDIR}"' EXIT
 # ── Build femtocolors ─────────────────────────────────────────────
 bunx --bun tsdown -l error >/dev/null 2>&1
 
-fc_runtime=dist/index.mjs
-fc_types=dist/index.d.mts
+fc_runtime=dist/index.js
+fc_types=dist/index.d.ts
 
 fc_rt_bytes=$(wc -c <"${fc_runtime}")
 fc_gz_bytes=$(gzip -c "${fc_runtime}" | wc -c)

@@ -15,7 +15,7 @@ function toKB(bytes: number): string {
 }
 
 const libs: Array<[string, string]> = [
-	['femtocolors', 'dist/index.mjs'],
+	['femtocolors', 'dist/index.js'],
 	['picocolors', 'node_modules/picocolors/picocolors.js'],
 	['colorette', 'node_modules/colorette/index.js'],
 	['kleur', 'node_modules/kleur/index.mjs'],

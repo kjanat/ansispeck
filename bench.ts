@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util';
 
 execSync('bun bd', { stdio: 'ignore' });
 
-import femtocolors from './dist/index.mjs';
+import femtocolors from './dist/index.js';
 
 declare module 'mitata' {
 	interface ctx {
