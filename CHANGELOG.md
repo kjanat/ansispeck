@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor to data-driven SGR const map as single source of truth
+- `createColors()` uses explicit `s(SGR.key)` calls, zero type assertions
+- `SgrEntry` tuple type: `[open, close]` or `[open, close, replace]`
+- Eliminated `as { isTTY?: boolean }` cast via typed `stdout` variable
+- Minified: 2,371 B (+1,001 B vs hand-rolled baseline)
+
 ## [0.1.0] - 2026-03-02
 
 ### Added
