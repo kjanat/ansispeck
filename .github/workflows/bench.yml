@@ -11,29 +11,69 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  bench:
+  bun:
     runs-on: ubuntu-latest
+    outputs:
+      bench: ${{ steps.bench.outputs.markdown }}
+      size: ${{ steps.size.outputs.markdown }}
     steps:
       - uses: actions/checkout@v6
-
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Build
+        run: bun bd
+      - name: Bench
+        id: bench
+        run: |
+          {
+            echo 'markdown<<BENCHEOF'
+            bun --bun bench.ts -f markdown
+            echo 'BENCHEOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Size
+        id: size
+        run: |
+          {
+            echo 'markdown<<SIZEEOF'
+            bash scripts/compare-size.sh --markdown
+            echo 'SIZEEOF'
+          } >> "$GITHUB_OUTPUT"
 
+  node:
+    runs-on: ubuntu-latest
+    outputs:
+      bench: ${{ steps.bench.outputs.markdown }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v6
         with:
           node-version: latest
-
       - run: bun install --frozen-lockfile
-
       - name: Build
-        run: bun --bun bd
+        run: bun bd
+      - name: Bench
+        id: bench
+        run: |
+          {
+            echo 'markdown<<BENCHEOF'
+            node bench.ts -f markdown
+            echo 'BENCHEOF'
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Benchmarks (Bun)
-        run: bun --bun bench.ts -f markdown |& tee -a "$GITHUB_STEP_SUMMARY"
-
-      - name: Benchmarks (Node)
-        run: node bench.ts -f markdown |& tee -a "$GITHUB_STEP_SUMMARY"
-
-      - name: Size comparison
-        run: bash scripts/compare-size.sh --markdown |& tee -a "$GITHUB_STEP_SUMMARY"
+  summary:
+    needs: [bun, node]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write summary
+        run: |
+          {
+            echo '## Size'
+            echo '${{ needs.bun.outputs.size }}'
+            echo ''
+            echo '## Bun'
+            echo '${{ needs.bun.outputs.bench }}'
+            echo ''
+            echo '## Node'
+            echo '${{ needs.node.outputs.bench }}'
+          } >> "$GITHUB_STEP_SUMMARY"
