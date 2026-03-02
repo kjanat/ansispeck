@@ -1,5 +1,5 @@
 /**
- * @module femtocolor
+ * @module femtocolors
  * Sub-kilobyte terminal ANSI color formatting.
  */
 
@@ -167,7 +167,7 @@ export function createColors(enabled: boolean = isColorSupported): Colors {
  *
  * @example
  * ```ts
- * import c from 'femtocolor';
+ * import c from 'femtocolors';
  * console.log(c.red('error'));
  * ```
  */

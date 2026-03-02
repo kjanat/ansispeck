@@ -1,5 +1,5 @@
 {
-	"name": "femtocolor",
+	"name": "femtocolors",
 	"version": "0.1.0",
 	"description": "Sub-kilobyte terminal ANSI color formatting. Smaller than picocolors.",
 	"keywords": [
@@ -10,7 +10,7 @@
 		"cli",
 		"console"
 	],
-	"repository": "github:kjanat/femtocolor",
+	"repository": "github:kjanat/femtocolors",
 	"license": "MIT",
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
