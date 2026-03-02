@@ -1,4 +1,4 @@
-# femtocolor
+# femtocolors
 
 Sub-kilobyte terminal ANSI color formatting. Drop-in picocolors replacement.
 
@@ -6,22 +6,22 @@ Sub-kilobyte terminal ANSI color formatting. Drop-in picocolors replacement.
 
 | Package       | Runtime      | Gzipped | Types   |
 | ------------- | ------------ | ------- | ------- |
-| femtocolor[^1] | **1.37 KB** | 0.70 KB | 2.26 KB |
+| femtocolors[^1] | **1.37 KB** | 0.70 KB | 2.26 KB |
 | picocolors[^2] | 2.66 KB     | 0.80 KB | 1.15 KB |
 
-[^1]: femtocolor 0.1.0 (`8f4ea8c`), `dist/index.mjs` minified by tsdown.
+[^1]: femtocolors 0.1.0 (`8f4ea8c`), `dist/index.mjs` minified by tsdown.
 [^2]: picocolors 1.1.1, `picocolors.js` (unminified CJS).
 
 ## Install
 
 ```sh
-npm install femtocolor
+npm install femtocolors
 ```
 
 ## Usage
 
 ```ts
-import c from 'femtocolor';
+import c from 'femtocolors';
 
 console.log(c.red('Error!'));
 console.log(c.bold(c.green('Success')));
@@ -31,7 +31,7 @@ console.log(c.bgYellow(c.black('Warning')));
 ### Explicit toggle
 
 ```ts
-import { createColors } from 'femtocolor';
+import { createColors } from 'femtocolors';
 
 const c = createColors(false); // force disable
 console.log(c.red('plain text'));
@@ -72,4 +72,4 @@ Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY statu
 
 ## License
 
-[MIT](https://github.com/kjanat/femtocolor/blob/master/LICENSE)
+[MIT](https://github.com/kjanat/femtocolors/blob/master/LICENSE)
