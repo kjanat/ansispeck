@@ -24,6 +24,8 @@ jobs:
         run: bun bd
       - name: Bench
         id: bench
+        env:
+          FORCE_COLOR: "1"
         run: |
           {
             echo 'markdown<<BENCHEOF'
@@ -54,6 +56,8 @@ jobs:
         run: bun bd
       - name: Bench
         id: bench
+        env:
+          FORCE_COLOR: "1"
         run: |
           {
             echo 'markdown<<BENCHEOF'
