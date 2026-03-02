@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Rename package from `femtocolor` to `femtocolors`
+- Benchmark harness now uses local sink + `mitata.do_not_optimize` (instead of `globalThis` sink writes) to reduce harness overhead distortion
+- `BENCHMARKS.md` now reports median values across 5 runs per runtime; `femto/#1` row now shows median ratio
 
 ### Performance
 
@@ -25,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - README size table: corrected runtime from 2.01 KB to 1.37 KB, added version footnotes
+- Benchmark CLI now handles invalid `--filter` regex input without uncaught exceptions
+- Welch CI computation now guards too-small sample sets
+- `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)` for cross-platform URL/path correctness
 
 ## [0.1.0] - 2026-03-02
 

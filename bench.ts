@@ -58,7 +58,15 @@ if (!FORMATS.includes(fmt as Format)) {
 	process.exit(1);
 }
 
-const filter = typeof values.filter === 'string' ? new RegExp(values.filter) : undefined;
+let filter: RegExp | undefined;
+if (typeof values.filter === 'string') {
+	try {
+		filter = new RegExp(values.filter);
+	} catch {
+		console.error(`Invalid regex: ${values.filter}`);
+		process.exit(1);
+	}
+}
 const isCustom = fmt === 'overview' || fmt === 'markdown';
 const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown'>);
 
@@ -71,6 +79,7 @@ interface LibStats {
 
 /** Welch's t-test: CI95 for the difference of means between two sample sets. */
 function welchCI95(a: number[], b: number[]): { ratio: number; significant: boolean } {
+	if (a.length < 2 || b.length < 2) return { ratio: NaN, significant: false };
 	const meanA = a.reduce((s, v) => s + v, 0) / a.length;
 	const meanB = b.reduce((s, v) => s + v, 0) / b.length;
 	const varA = a.reduce((s, v) => s + (v - meanA) ** 2, 0) / (a.length - 1);

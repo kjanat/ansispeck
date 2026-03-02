@@ -1,4 +1,4 @@
-import { bench, run, summary } from 'mitata';
+import { bench, do_not_optimize, run, summary } from 'mitata';
 
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
@@ -11,12 +11,12 @@ import femtocolors from '../dist/index.mjs';
 const DEFAULT_COUNT = 1;
 
 export function register({ count = DEFAULT_COUNT } = {}): void {
+	let n = 0;
+	let sink = '';
 	summary(() => {
-		let index = 1e8;
-
 		bench('femtocolors', () => {
 			for (let i = 0; i < count; i++) {
-				femtocolors.red('.')
+				sink = femtocolors.red('.')
 					+ femtocolors.yellow('.')
 					+ femtocolors.green('.')
 					+ femtocolors.bgRed(femtocolors.black(' ERROR '))
@@ -24,14 +24,15 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 						' Add plugin '
 							+ femtocolors.yellow('name')
 							+ ' to use time limit with '
-							+ femtocolors.yellow(`${++index}`),
+							+ femtocolors.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('picocolors', () => {
 			for (let i = 0; i < count; i++) {
-				picocolors.red('.')
+				sink = picocolors.red('.')
 					+ picocolors.yellow('.')
 					+ picocolors.green('.')
 					+ picocolors.bgRed(picocolors.black(' ERROR '))
@@ -39,14 +40,15 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 						' Add plugin '
 							+ picocolors.yellow('name')
 							+ ' to use time limit with '
-							+ picocolors.yellow(`${++index}`),
+							+ picocolors.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('colorette', () => {
 			for (let i = 0; i < count; i++) {
-				colorette.red('.')
+				sink = colorette.red('.')
 					+ colorette.yellow('.')
 					+ colorette.green('.')
 					+ colorette.bgRed(colorette.black(' ERROR '))
@@ -54,26 +56,28 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 						' Add plugin '
 							+ colorette.yellow('name')
 							+ ' to use time limit with '
-							+ colorette.yellow(`${++index}`),
+							+ colorette.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('kleur', () => {
 			for (let i = 0; i < count; i++) {
-				kleur.red('.')
+				sink = kleur.red('.')
 					+ kleur.yellow('.')
 					+ kleur.green('.')
 					+ kleur.bgRed(kleur.black(' ERROR '))
 					+ kleur.red(
-						' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++index}`),
+						' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('kleur/colors', () => {
 			for (let i = 0; i < count; i++) {
-				kleurColors.red('.')
+				sink = kleurColors.red('.')
 					+ kleurColors.yellow('.')
 					+ kleurColors.green('.')
 					+ kleurColors.bgRed(kleurColors.black(' ERROR '))
@@ -81,33 +85,36 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 						' Add plugin '
 							+ kleurColors.yellow('name')
 							+ ' to use time limit with '
-							+ kleurColors.yellow(`${++index}`),
+							+ kleurColors.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('chalk', () => {
 			for (let i = 0; i < count; i++) {
-				chalk.red('.')
+				sink = chalk.red('.')
 					+ chalk.yellow('.')
 					+ chalk.green('.')
 					+ chalk.bgRed(chalk.black(' ERROR '))
 					+ chalk.red(
-						' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++index}`),
+						' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 
 		bench('ansi-colors', () => {
 			for (let i = 0; i < count; i++) {
-				ansi.red('.')
+				sink = ansi.red('.')
 					+ ansi.yellow('.')
 					+ ansi.green('.')
 					+ ansi.bgRed(ansi.black(' ERROR '))
 					+ ansi.red(
-						' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++index}`),
+						' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++n}`),
 					);
 			}
+			do_not_optimize(sink);
 		});
 	});
 }

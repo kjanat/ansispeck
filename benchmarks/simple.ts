@@ -1,4 +1,4 @@
-import { bench, boxplot, run } from 'mitata';
+import { bench, boxplot, do_not_optimize, run } from 'mitata';
 
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
@@ -10,30 +10,37 @@ import femtocolors from '../dist/index.mjs';
 
 const DEFAULT_COUNT = 1;
 
-let n = 0;
-
 export function register({ count = DEFAULT_COUNT } = {}): void {
+	let n = 0;
+	let sink = '';
 	boxplot(() => {
 		bench('femtocolors', () => {
-			for (let i = 0; i < count; i++) femtocolors.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = femtocolors.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('picocolors', () => {
-			for (let i = 0; i < count; i++) picocolors.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = picocolors.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('colorette', () => {
-			for (let i = 0; i < count; i++) colorette.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = colorette.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('kleur', () => {
-			for (let i = 0; i < count; i++) kleur.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = kleur.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('kleur/colors', () => {
-			for (let i = 0; i < count; i++) kleurColors.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = kleurColors.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('chalk', () => {
-			for (let i = 0; i < count; i++) chalk.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = chalk.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 		bench('ansi-colors', () => {
-			for (let i = 0; i < count; i++) ansi.red(`Add plugin to use time limit ${++n}`);
+			for (let i = 0; i < count; i++) sink = ansi.red(`Add plugin to use time limit ${++n}`);
+			do_not_optimize(sink);
 		});
 	});
 }
