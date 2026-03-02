@@ -1,6 +1,6 @@
+import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
-import { run } from 'mitata';
 
 execSync('bun bd', { stdio: 'ignore' });
 
@@ -24,9 +24,25 @@ const { values } = parseArgs({
 	options: {
 		format: { type: 'string', short: 'f', default: 'overview' },
 		filter: { type: 'string' },
+		help: { type: 'boolean', short: 'h', default: false },
 	},
 	strict: false,
 });
+
+if (values.help) {
+	console.log(`Usage: bench.ts [options]
+
+Options:
+  -f, --format <fmt>   Output format (default: overview)
+                       overview   terminal table with rankings + CI95
+                       markdown   GitHub-flavored markdown table
+                       json       raw JSON
+                       quiet      suppress mitata output (used internally)
+                       mitata     default mitata output
+  --filter <regex>     Only run benchmarks matching <regex>
+  -h, --help           Show this help`);
+	process.exit(0);
+}
 
 simple({ count: 1 });
 complex({ count: 1 });
@@ -43,14 +59,10 @@ if (!FORMATS.includes(fmt as Format)) {
 }
 
 const filter = typeof values.filter === 'string' ? new RegExp(values.filter) : undefined;
-const isOverview = fmt === 'overview';
-const format = isOverview ? 'quiet' : (fmt as Exclude<Format, 'overview'>);
+const isCustom = fmt === 'overview' || fmt === 'markdown';
+const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown'>);
 
 const result = await run({ format, filter });
-
-if (isOverview) {
-	printOverview(result);
-}
 
 interface LibStats {
 	avg: number;
@@ -83,10 +95,20 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 	return { ratio, significant };
 }
 
-function printOverview(result: Awaited<ReturnType<typeof run>>): void {
+type BenchResult = Awaited<ReturnType<typeof run>>;
+const FEMTO = 'femtocolors';
+
+interface Parsed {
+	context: BenchResult['context'];
+	suites: Map<string, Map<string, LibStats>>;
+	libs: string[];
+	activeSuites: string[];
+	ranked: Map<string, Array<{ lib: string; stats: LibStats }>>;
+}
+
+function parse(result: BenchResult): Parsed {
 	const { context, benchmarks } = result;
 
-	// group benchmarks into suites by index
 	const suites: Map<string, Map<string, LibStats>> = new Map();
 	for (let i = 0; i < benchmarks.length; i++) {
 		const suiteIdx = Math.floor(i / LIBS_PER_SUITE);
@@ -104,7 +126,6 @@ function printOverview(result: Awaited<ReturnType<typeof run>>): void {
 		map.set(trial.alias, { avg: stats.avg, samples: stats.samples });
 	}
 
-	// collect lib names preserving order
 	const libs: string[] = [];
 	for (const trial of benchmarks.slice(0, LIBS_PER_SUITE)) {
 		if (!libs.includes(trial.alias)) libs.push(trial.alias);
@@ -112,7 +133,6 @@ function printOverview(result: Awaited<ReturnType<typeof run>>): void {
 
 	const activeSuites = [...suites.keys()];
 
-	// rank libs per suite
 	const ranked: Map<string, Array<{ lib: string; stats: LibStats }>> = new Map();
 	for (const [suite, entries] of suites) {
 		const sorted = [...entries.entries()]
@@ -121,39 +141,41 @@ function printOverview(result: Awaited<ReturnType<typeof run>>): void {
 		ranked.set(suite, sorted);
 	}
 
-	// CI95: femtocolors vs #1 (skip if femtocolors is #1)
-	const FEMTO = 'femtocolors';
-	const ci95: Map<string, string> = new Map();
-	for (const [suite, ranking] of ranked) {
+	return { context, suites, libs, activeSuites, ranked };
+}
+
+function fmtTime(ns: number): string {
+	if (ns < 1_000) return `${ns.toFixed(2)} ns`;
+	if (ns < 1_000_000) return `${(ns / 1_000).toFixed(2)} µs`;
+	return `${(ns / 1_000_000).toFixed(2)} ms`;
+}
+
+function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
+	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
+	for (const [suite, ranking] of parsed.ranked) {
 		const first = ranking[0];
-		if (!first) {
-			ci95.set(suite, '');
-			continue;
-		}
+		if (!first) continue;
 		if (first.lib === FEMTO) {
-			ci95.set(suite, '—');
+			ci95.set(suite, { label: '—', significant: true });
 			continue;
 		}
 		const femto = ranking.find(r => r.lib === FEMTO);
-		if (!femto) {
-			ci95.set(suite, '');
-			continue;
-		}
+		if (!femto) continue;
 		const { ratio, significant } = welchCI95(first.stats.samples, femto.stats.samples);
-		const label = `${ratio.toFixed(2)}x`;
-		ci95.set(suite, significant ? label : femtocolors.dim(`${label} ~`));
+		ci95.set(suite, { label: `${ratio.toFixed(2)}x`, significant });
 	}
+	return ci95;
+}
 
-	function fmtTime(ns: number): string {
-		if (ns < 1_000) return `${ns.toFixed(2)} ns`;
-		if (ns < 1_000_000) return `${(ns / 1_000).toFixed(2)} µs`;
-		return `${(ns / 1_000_000).toFixed(2)} ms`;
-	}
+function printOverview(result: BenchResult): void {
+	const parsed = parse(result);
+	const { suites, libs, activeSuites, ranked, context } = parsed;
+	const ci95 = computeCI95(parsed);
 
 	const nameW = Math.max(4, ...libs.map(l => l.length));
 	const colW = Math.max(...activeSuites.map(s => s.length), 10);
-	const tagW = 3; // " *" or "#N" — padded to fixed width
-	const fullW = colW + 1 + tagW; // value + space + tag
+	const tagW = 3;
+	const fullW = colW + 1 + tagW;
 
 	const { runtime, version, cpu: { name: cpuName } } = context;
 	console.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
@@ -180,10 +202,87 @@ function printOverview(result: Awaited<ReturnType<typeof run>>): void {
 	}
 
 	// CI95 footer row
-	const ciCells = activeSuites.map(s => (ci95.get(s) ?? '').padStart(fullW));
+	const ciCells = activeSuites.map(s => {
+		const entry = ci95.get(s);
+		if (!entry) return ''.padStart(fullW);
+		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : femtocolors.dim(`${entry.label} ~`);
+		return text.padStart(fullW);
+	});
 	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 	console.log('femto/#1'.padEnd(nameW) + '  ' + ciCells.join('  '));
 
 	console.log('');
 	console.log('  * = fastest, — = femtocolors is #1, ~ = not significant');
 }
+
+const NPM_URLS: Record<string, string> = {
+	femtocolors: 'https://www.npmjs.com/package/femtocolors',
+	picocolors: 'https://www.npmjs.com/package/picocolors',
+	colorette: 'https://www.npmjs.com/package/colorette',
+	kleur: 'https://www.npmjs.com/package/kleur',
+	'kleur/colors': 'https://www.npmjs.com/package/kleur',
+	chalk: 'https://www.npmjs.com/package/chalk',
+	'ansi-colors': 'https://www.npmjs.com/package/ansi-colors',
+};
+
+function printMarkdown(result: BenchResult): void {
+	const parsed = parse(result);
+	const { suites, libs, activeSuites, ranked, context } = parsed;
+	const ci95 = computeCI95(parsed);
+
+	const { runtime, version, cpu: { name: cpuName } } = context;
+	console.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
+	console.log(`\n> ${cpuName ?? 'unknown'}\n`);
+
+	// header
+	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
+	console.log(`| ${hdr.join(' | ')} |`);
+	console.log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
+
+	// collect ref keys for link definitions
+	const refs: Array<[string, string]> = [];
+
+	for (const lib of libs) {
+		const refKey = lib.replace(/\//g, '-');
+		const url = NPM_URLS[lib];
+		if (url) refs.push([refKey, url]);
+
+		const cells: string[] = [];
+		cells.push(`[${lib}][${refKey}]`);
+
+		for (const suite of activeSuites) {
+			const entry = suites.get(suite)?.get(lib);
+			if (entry === undefined) {
+				cells.push('—');
+				continue;
+			}
+			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
+			const val = fmtTime(entry.avg);
+			if (rank === 0) {
+				cells.push(`**${val}** 🥇`);
+			} else {
+				cells.push(`${val} #${rank + 1}`);
+			}
+		}
+		console.log(`| ${cells.join(' | ')} |`);
+	}
+
+	// CI95 footer
+	const ciCells = activeSuites.map(s => {
+		const entry = ci95.get(s);
+		if (!entry) return '';
+		if (entry.label === '—') return '**#1**';
+		return entry.significant ? entry.label : `${entry.label} ~`;
+	});
+	console.log(`| **femto/#1** | ${ciCells.join(' | ')} |`);
+
+	// link definitions
+	console.log('');
+	for (const [key, url] of refs) {
+		console.log(`[${key}]: ${url}`);
+	}
+}
+
+// dispatch — must be after all declarations to avoid TDZ
+if (fmt === 'overview') printOverview(result);
+if (fmt === 'markdown') printMarkdown(result);
