@@ -60,16 +60,72 @@ export interface Colors {
 	readonly bgWhiteBright: Formatter;
 }
 
-// Shared ANSI fragments — hoisted to avoid repeating in every formatter call
-const E = '\x1b[';
-const FG = `${E}39m`;
-const BG = `${E}49m`;
-const ME = `${E}22m`; // modifier end (bold/dim share this close code)
+// ---------------------------------------------------------------------------
+// SGR data map — single source of truth for all formatter SGR codes
+// ---------------------------------------------------------------------------
 
-/** Build an ANSI code from a numeric SGR parameter. */
-function c(n: number): string {
-	return `${E}${n}m`;
-}
+/**
+ * SGR parameter tuple.
+ * - `[open, close]` for simple styles
+ * - `[open, close, reopen]` for bold/dim (replace = close + reopen)
+ */
+type SgrEntry = readonly [open: number, close: number]
+	| readonly [open: number, close: number, reopen: number];
+
+/** Const map of formatter name → SGR parameters. */
+const SGR = {
+	reset: [0, 0],
+	bold: [1, 22, 1],
+	dim: [2, 22, 2],
+	italic: [3, 23],
+	underline: [4, 24],
+	inverse: [7, 27],
+	hidden: [8, 28],
+	strikethrough: [9, 29],
+
+	black: [30, 39],
+	red: [31, 39],
+	green: [32, 39],
+	yellow: [33, 39],
+	blue: [34, 39],
+	magenta: [35, 39],
+	cyan: [36, 39],
+	white: [37, 39],
+	gray: [90, 39],
+
+	bgBlack: [40, 49],
+	bgRed: [41, 49],
+	bgGreen: [42, 49],
+	bgYellow: [43, 49],
+	bgBlue: [44, 49],
+	bgMagenta: [45, 49],
+	bgCyan: [46, 49],
+	bgWhite: [47, 49],
+
+	blackBright: [90, 39],
+	redBright: [91, 39],
+	greenBright: [92, 39],
+	yellowBright: [93, 39],
+	blueBright: [94, 39],
+	magentaBright: [95, 39],
+	cyanBright: [96, 39],
+	whiteBright: [97, 39],
+
+	bgBlackBright: [100, 49],
+	bgRedBright: [101, 49],
+	bgGreenBright: [102, 49],
+	bgYellowBright: [103, 49],
+	bgBlueBright: [104, 49],
+	bgMagentaBright: [105, 49],
+	bgCyanBright: [106, 49],
+	bgWhiteBright: [107, 49],
+} as const satisfies Record<string, SgrEntry>;
+
+// ---------------------------------------------------------------------------
+// Runtime helpers
+// ---------------------------------------------------------------------------
+
+const E = '\x1b[';
 
 const p = globalThis.process;
 const argv: readonly string[] = p?.argv ?? [];
@@ -107,59 +163,21 @@ const noop: Formatter = (input) => '' + input;
 
 /** Create a color set with explicit enabled/disabled toggle. */
 export function createColors(enabled: boolean = isColorSupported): Colors {
-	const f = enabled ? fmt : (): Formatter => noop;
-	const fg = (n: number): Formatter => f(c(n), FG);
-	const bg = (n: number): Formatter => f(c(n), BG);
-	const R = c(0);
-	return {
-		isColorSupported: enabled,
+	const result: Partial<Colors> & Record<string, Formatter | boolean> = { isColorSupported: enabled };
 
-		reset: f(R, R),
-		bold: f(c(1), ME, ME + c(1)),
-		dim: f(c(2), ME, ME + c(2)),
-		italic: f(c(3), c(23)),
-		underline: f(c(4), c(24)),
-		inverse: f(c(7), c(27)),
-		hidden: f(c(8), c(28)),
-		strikethrough: f(c(9), c(29)),
+	for (const key in SGR) {
+		const entry = SGR[key as keyof typeof SGR];
+		if (!enabled) {
+			result[key] = noop;
+			continue;
+		}
+		const open = `${E}${entry[0]}m`;
+		const close = `${E}${entry[1]}m`;
+		const replace = entry.length === 3 ? `${close}${E}${entry[2]}m` : open;
+		result[key] = fmt(open, close, replace);
+	}
 
-		black: fg(30),
-		red: fg(31),
-		green: fg(32),
-		yellow: fg(33),
-		blue: fg(34),
-		magenta: fg(35),
-		cyan: fg(36),
-		white: fg(37),
-		gray: fg(90),
-
-		bgBlack: bg(40),
-		bgRed: bg(41),
-		bgGreen: bg(42),
-		bgYellow: bg(43),
-		bgBlue: bg(44),
-		bgMagenta: bg(45),
-		bgCyan: bg(46),
-		bgWhite: bg(47),
-
-		blackBright: fg(90),
-		redBright: fg(91),
-		greenBright: fg(92),
-		yellowBright: fg(93),
-		blueBright: fg(94),
-		magentaBright: fg(95),
-		cyanBright: fg(96),
-		whiteBright: fg(97),
-
-		bgBlackBright: bg(100),
-		bgRedBright: bg(101),
-		bgGreenBright: bg(102),
-		bgYellowBright: bg(103),
-		bgBlueBright: bg(104),
-		bgMagentaBright: bg(105),
-		bgCyanBright: bg(106),
-		bgWhiteBright: bg(107),
-	};
+	return result as Colors;
 }
 
 /**
