@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename package from `femtocolor` to `femtocolors`
 - Benchmark harness now uses local sink + `mitata.do_not_optimize` (instead of `globalThis` sink writes) to reduce harness overhead distortion
 - `BENCHMARKS.md` now reports median values across 5 runs per runtime; `femto/#1` row now shows median ratio
+- Build target platform switched to `neutral`, emitting `dist/index.js` + `dist/index.d.ts`
+- Publish flow now strips dev-only `package.json` fields, author URL metadata, and declaration-file comments during `prepack` to reduce package size
 
 ### Performance
 
