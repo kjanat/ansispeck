@@ -26,8 +26,14 @@ const libs: Array<[string, string]> = [
 
 const rows: Record<string, { raw: string; gzip: string }> = {};
 for (const [name, path] of libs) {
-	const { raw, gzip } = measure(path);
-	rows[name] = { raw: toKB(raw), gzip: toKB(gzip) };
+	try {
+		const { raw, gzip } = measure(path);
+		rows[name] = { raw: toKB(raw), gzip: toKB(gzip) };
+	} catch (error) {
+		const detail = error instanceof Error ? error.message : String(error);
+		console.warn(`[size] skipped ${name} (${path}): ${detail}`);
+		rows[name] = { raw: 'N/A', gzip: 'N/A' };
+	}
 }
 
 console.table(rows);

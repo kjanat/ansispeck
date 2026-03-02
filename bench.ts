@@ -19,6 +19,18 @@ import { register as simple } from './benchmarks/simple.ts';
 
 const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
 const LIBS_PER_SUITE = 7;
+const LIB_ORDER = [
+	'femtocolors',
+	'picocolors',
+	'colorette',
+	'kleur',
+	'kleur/colors',
+	'chalk',
+	'ansi-colors',
+] as const;
+const LIB_INDEX: ReadonlyMap<string, number> = new Map(
+	LIB_ORDER.map((name, index) => [name, index]),
+);
 
 const { values } = parseArgs({
 	options: {
@@ -79,26 +91,58 @@ interface LibStats {
 
 /** Welch's t-test: CI95 for the difference of means between two sample sets. */
 function welchCI95(a: number[], b: number[]): { ratio: number; significant: boolean } {
-	if (a.length < 2 || b.length < 2) return { ratio: NaN, significant: false };
+	if (a.length < 2 || b.length < 2) {
+		throw new Error(`welchCI95 needs >=2 samples per set (a=${a.length}, b=${b.length})`);
+	}
 	const meanA = a.reduce((s, v) => s + v, 0) / a.length;
 	const meanB = b.reduce((s, v) => s + v, 0) / b.length;
+	if (!Number.isFinite(meanA) || !Number.isFinite(meanB)) {
+		throw new Error('welchCI95 got non-finite sample mean');
+	}
+	if (meanA === 0) {
+		throw new Error('welchCI95 got zero baseline mean');
+	}
 	const varA = a.reduce((s, v) => s + (v - meanA) ** 2, 0) / (a.length - 1);
 	const varB = b.reduce((s, v) => s + (v - meanB) ** 2, 0) / (b.length - 1);
+	if (!Number.isFinite(varA) || !Number.isFinite(varB) || varA < 0 || varB < 0) {
+		throw new Error('welchCI95 got invalid sample variance');
+	}
 	const seA = varA / a.length;
 	const seB = varB / b.length;
-	const seDiff = Math.sqrt(seA + seB);
-
-	// Welch–Satterthwaite degrees of freedom
-	const num = (seA + seB) ** 2;
-	const den = seA ** 2 / (a.length - 1) + seB ** 2 / (b.length - 1);
-	const df = num / den;
-
-	// t critical value for 95% CI (two-tailed)
-	const t95 = df > 120 ? 1.96 : df > 60 ? 2.0 : df > 30 ? 2.042 : df > 15 ? 2.131 : 2.262;
+	const seDiffSq = seA + seB;
+	if (!Number.isFinite(seDiffSq) || seDiffSq < 0) {
+		throw new Error('welchCI95 got invalid standard error');
+	}
+	const seDiff = Math.sqrt(seDiffSq);
 
 	const diff = meanB - meanA; // positive = B slower
-	const lo = diff - t95 * seDiff;
+	let lo = diff;
+
+	if (seDiff !== 0) {
+		// Welch–Satterthwaite degrees of freedom
+		const num = seDiffSq ** 2;
+		const den = seA ** 2 / (a.length - 1) + seB ** 2 / (b.length - 1);
+		if (!Number.isFinite(num) || !Number.isFinite(den)) {
+			throw new Error('welchCI95 got invalid degrees-of-freedom terms');
+		}
+
+		// t critical value for 95% CI (two-tailed)
+		let t95 = 1.96;
+		if (den !== 0) {
+			const df = num / den;
+			if (!Number.isFinite(df) || df <= 0) {
+				throw new Error('welchCI95 got invalid degrees of freedom');
+			}
+			t95 = df > 120 ? 1.96 : df > 60 ? 2.0 : df > 30 ? 2.042 : df > 15 ? 2.131 : 2.262;
+		}
+
+		lo = diff - t95 * seDiff;
+	}
+
 	const ratio = meanB / meanA;
+	if (!Number.isFinite(ratio)) {
+		throw new Error('welchCI95 got non-finite ratio');
+	}
 	const significant = lo > 0; // entire CI above 0 → A is significantly faster
 
 	return { ratio, significant };
@@ -117,14 +161,17 @@ interface Parsed {
 
 function parse(result: BenchResult): Parsed {
 	const { context, benchmarks } = result;
+	const seenByLib: Map<string, number> = new Map();
 
 	const suites: Map<string, Map<string, LibStats>> = new Map();
-	for (let i = 0; i < benchmarks.length; i++) {
-		const suiteIdx = Math.floor(i / LIBS_PER_SUITE);
-		const suite = SUITES[suiteIdx];
+	for (const trial of benchmarks) {
+		const libIndex = LIB_INDEX.get(trial.alias);
+		if (libIndex === undefined) continue;
+		const seen = seenByLib.get(trial.alias) ?? 0;
+		seenByLib.set(trial.alias, seen + 1);
+		const originalIndex = seen * LIBS_PER_SUITE + libIndex;
+		const suite = SUITES[Math.floor(originalIndex / LIBS_PER_SUITE)];
 		if (suite === undefined) continue;
-		const trial = benchmarks[i];
-		if (trial === undefined) continue;
 		const stats = trial.runs[0]?.stats;
 		if (stats === undefined) continue;
 		let map = suites.get(suite);
@@ -136,8 +183,16 @@ function parse(result: BenchResult): Parsed {
 	}
 
 	const libs: string[] = [];
-	for (const trial of benchmarks.slice(0, LIBS_PER_SUITE)) {
-		if (!libs.includes(trial.alias)) libs.push(trial.alias);
+	const firstSuite = SUITES.find(suite => suites.has(suite));
+	if (firstSuite !== undefined) {
+		const firstSuiteEntries = suites.get(firstSuite);
+		if (firstSuiteEntries !== undefined) {
+			for (const lib of firstSuiteEntries.keys()) libs.push(lib);
+		}
+	} else {
+		for (const trial of benchmarks) {
+			if (!libs.includes(trial.alias)) libs.push(trial.alias);
+		}
 	}
 
 	const activeSuites = [...suites.keys()];

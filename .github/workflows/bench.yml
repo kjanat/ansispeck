@@ -65,15 +65,30 @@ jobs:
     needs: [bun, node]
     runs-on: ubuntu-latest
     steps:
+      - name: Export summary outputs
+        env:
+          BUN_SIZE_OUT: ${{ needs.bun.outputs.size }}
+          BUN_BENCH_OUT: ${{ needs.bun.outputs.bench }}
+          NODE_BENCH_OUT: ${{ needs.node.outputs.bench }}
+        run: |
+          {
+            echo 'BUN_SIZE<<BUN_SIZE_EOF'
+            printf '%s\n' "$BUN_SIZE_OUT"
+            echo 'BUN_SIZE_EOF'
+            echo 'BUN_BENCH<<BUN_BENCH_EOF'
+            printf '%s\n' "$BUN_BENCH_OUT"
+            echo 'BUN_BENCH_EOF'
+            echo 'NODE_BENCH<<NODE_BENCH_EOF'
+            printf '%s\n' "$NODE_BENCH_OUT"
+            echo 'NODE_BENCH_EOF'
+          } >> "$GITHUB_ENV"
       - name: Write summary
         run: |
           {
-            echo '## Size'
-            echo '${{ needs.bun.outputs.size }}'
-            echo ''
-            echo '## Bun'
-            echo '${{ needs.bun.outputs.bench }}'
-            echo ''
-            echo '## Node'
-            echo '${{ needs.node.outputs.bench }}'
+            printf '## Size\n'
+            printf '%s\n' "$BUN_SIZE"
+            printf '\n## Bun\n'
+            printf '%s\n' "$BUN_BENCH"
+            printf '\n## Node\n'
+            printf '%s\n' "$NODE_BENCH"
           } >> "$GITHUB_STEP_SUMMARY"
