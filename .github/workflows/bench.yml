@@ -11,40 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  bun:
+  bench:
     runs-on: ubuntu-latest
-    outputs:
-      bench: ${{ steps.bench.outputs.markdown }}
-      size: ${{ steps.size.outputs.markdown }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - name: Build
-        run: bun bd
-      - name: Bench
-        id: bench
-        env:
-          FORCE_COLOR: "1"
-        run: |
-          {
-            echo 'markdown<<BENCHEOF'
-            bun --bun bench.ts -f markdown
-            echo 'BENCHEOF'
-          } >> "$GITHUB_OUTPUT"
-      - name: Size
-        id: size
-        run: |
-          {
-            echo 'markdown<<SIZEEOF'
-            bash scripts/compare-size.sh --markdown
-            echo 'SIZEEOF'
-          } >> "$GITHUB_OUTPUT"
-
-  node:
-    runs-on: ubuntu-latest
-    outputs:
-      bench: ${{ steps.bench.outputs.markdown }}
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -54,45 +22,36 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Build
         run: bun bd
-      - name: Bench
-        id: bench
+      - name: Bun bench
         env:
           FORCE_COLOR: "1"
         run: |
           {
-            echo 'markdown<<BENCHEOF'
-            node bench.ts -f markdown
-            echo 'BENCHEOF'
-          } >> "$GITHUB_OUTPUT"
-
-  summary:
-    needs: [bun, node]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Export summary outputs
-        env:
-          BUN_SIZE_OUT: ${{ needs.bun.outputs.size }}
-          BUN_BENCH_OUT: ${{ needs.bun.outputs.bench }}
-          NODE_BENCH_OUT: ${{ needs.node.outputs.bench }}
+            echo 'BUN_BENCH<<BUN_BENCH_EOF'
+            bun --bun bench.ts -f markdown
+            echo 'BUN_BENCH_EOF'
+          } >> "$GITHUB_ENV"
+      - name: Size
         run: |
           {
             echo 'BUN_SIZE<<BUN_SIZE_EOF'
-            printf '%s\n' "$BUN_SIZE_OUT"
+            bash scripts/compare-size.sh --markdown
             echo 'BUN_SIZE_EOF'
-            echo 'BUN_BENCH<<BUN_BENCH_EOF'
-            printf '%s\n' "$BUN_BENCH_OUT"
-            echo 'BUN_BENCH_EOF'
+          } >> "$GITHUB_ENV"
+      - name: Node bench
+        env:
+          FORCE_COLOR: "1"
+        run: |
+          {
             echo 'NODE_BENCH<<NODE_BENCH_EOF'
-            printf '%s\n' "$NODE_BENCH_OUT"
+            node bench.ts -f markdown
             echo 'NODE_BENCH_EOF'
           } >> "$GITHUB_ENV"
       - name: Write summary
         run: |
           {
             printf '## Size\n'
-            printf '%s\n' "$BUN_SIZE"
-            printf '\n## Bun\n'
-            printf '%s\n' "$BUN_BENCH"
-            printf '\n## Node\n'
+            printf '%s\n\n' "$BUN_SIZE"
+            printf '%s\n\n' "$BUN_BENCH"
             printf '%s\n' "$NODE_BENCH"
           } >> "$GITHUB_STEP_SUMMARY"
