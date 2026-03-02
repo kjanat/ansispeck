@@ -11,7 +11,7 @@
 		"console"
 	],
 	"repository": "kjanat/femtocolors",
-	"license": "MIT",
+	"license": "0BSD",
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
 	"exports": {

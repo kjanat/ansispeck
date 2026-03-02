@@ -77,4 +77,4 @@ Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY statu
 
 ## License
 
-[MIT](https://github.com/kjanat/femtocolors/blob/master/LICENSE)
+0BSD
