@@ -1,10 +1,11 @@
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
+import type { Colors } from './src/index.ts';
 
 execSync('bun bd', { stdio: 'ignore' });
 
-import femtocolors from './dist/index.js';
+const { default: femtocolors }: { default: Colors } = await import('./dist/index.js');
 
 declare module 'mitata' {
 	interface ctx {

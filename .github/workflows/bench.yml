@@ -10,6 +10,9 @@ concurrency:
   group: bench-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   bench:
     runs-on: ubuntu-latest
