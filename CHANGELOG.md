@@ -10,10 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `scripts/compare-size.sh` — size comparison against picocolors (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
+- Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
 
 ### Changed
 
 - Rename package from `femtocolor` to `femtocolors`
+
+### Performance
+
+- Inline `replaceClose` into `fmt` — eliminates function call overhead, enables single return path optimization in V8/JSC
+- Benchmarks import from `dist/` (built output) instead of `src/` for accurate measurement
 
 ### Fixed
 

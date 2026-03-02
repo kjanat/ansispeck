@@ -81,25 +81,24 @@ export const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-c
 		|| (p?.stdout as { isTTY?: boolean })?.isTTY && env.TERM !== 'dumb' || env.CI);
 
 /**
- * Replaces nested occurrences of a close code so styles don't leak.
+ * Wraps input in ANSI open/close codes, replacing nested close codes to prevent style leaks.
  * @see picocolors — same approach, same correctness guarantee.
  */
-function replaceClose(s: string, close: string, replace: string, index: number): string {
-	let result = '';
-	let cursor = 0;
-	do {
-		result += s.substring(cursor, index) + replace;
-		cursor = index + close.length;
-		index = s.indexOf(close, cursor);
-	} while (~index);
-	return result + s.substring(cursor);
-}
-
 function fmt(open: string, close: string, replace: string = open): Formatter {
 	return (input) => {
-		const s = '' + input;
-		const i = s.indexOf(close, open.length);
-		return ~i ? open + replaceClose(s, close, replace, i) + close : open + s + close;
+		let s = '' + input;
+		let i = s.indexOf(close, open.length);
+		if (~i) {
+			let result = '';
+			let cursor = 0;
+			do {
+				result += s.substring(cursor, i) + replace;
+				cursor = i + close.length;
+				i = s.indexOf(close, cursor);
+			} while (~i);
+			s = result + s.substring(cursor);
+		}
+		return open + s + close;
 	};
 }
 
