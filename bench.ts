@@ -11,6 +11,10 @@ declare module 'mitata' {
 	interface ctx {
 		version: string | null;
 	}
+
+	interface trial {
+		group?: number;
+	}
 }
 
 import { register as complex } from './benchmarks/complex.ts';
@@ -19,7 +23,6 @@ import { register as recursion } from './benchmarks/recursion.ts';
 import { register as simple } from './benchmarks/simple.ts';
 
 const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
-const LIBS_PER_SUITE = 7;
 const LIB_ORDER = [
 	'femtocolors',
 	'picocolors',
@@ -29,9 +32,6 @@ const LIB_ORDER = [
 	'chalk',
 	'ansi-colors',
 ] as const;
-const LIB_INDEX: ReadonlyMap<string, number> = new Map(
-	LIB_ORDER.map((name, index) => [name, index]),
-);
 
 const { values } = parseArgs({
 	options: {
@@ -162,16 +162,20 @@ interface Parsed {
 
 function parse(result: BenchResult): Parsed {
 	const { context, benchmarks } = result;
-	const seenByLib: Map<string, number> = new Map();
+	const suiteByGroup: Map<number, (typeof SUITES)[number]> = new Map();
+	let nextSuite = 0;
 
 	const suites: Map<string, Map<string, LibStats>> = new Map();
 	for (const trial of benchmarks) {
-		const libIndex = LIB_INDEX.get(trial.alias);
-		if (libIndex === undefined) continue;
-		const seen = seenByLib.get(trial.alias) ?? 0;
-		seenByLib.set(trial.alias, seen + 1);
-		const originalIndex = seen * LIBS_PER_SUITE + libIndex;
-		const suite = SUITES[Math.floor(originalIndex / LIBS_PER_SUITE)];
+		const group = trial.group;
+		if (group === undefined) continue;
+		let suite = suiteByGroup.get(group);
+		if (suite === undefined) {
+			suite = SUITES[nextSuite];
+			if (suite === undefined) continue;
+			suiteByGroup.set(group, suite);
+			nextSuite++;
+		}
 		if (suite === undefined) continue;
 		const stats = trial.runs[0]?.stats;
 		if (stats === undefined) continue;
@@ -188,7 +192,12 @@ function parse(result: BenchResult): Parsed {
 	if (firstSuite !== undefined) {
 		const firstSuiteEntries = suites.get(firstSuite);
 		if (firstSuiteEntries !== undefined) {
-			for (const lib of firstSuiteEntries.keys()) libs.push(lib);
+			for (const lib of LIB_ORDER) {
+				if (firstSuiteEntries.has(lib)) libs.push(lib);
+			}
+			for (const lib of firstSuiteEntries.keys()) {
+				if (!libs.includes(lib)) libs.push(lib);
+			}
 		}
 	} else {
 		for (const trial of benchmarks) {
