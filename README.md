@@ -4,10 +4,13 @@ Sub-kilobyte terminal ANSI color formatting. Drop-in picocolors replacement.
 
 ## Size
 
-| Package    | Runtime     | Gzipped | Types   |
-| ---------- | ----------- | ------- | ------- |
-| femtocolor | **2.01 KB** | 0.69 KB | 2.26 KB |
-| picocolors | 2.66 KB     | —       | 1.15 KB |
+| Package       | Runtime      | Gzipped | Types   |
+| ------------- | ------------ | ------- | ------- |
+| femtocolor[^1] | **1.37 KB** | 0.70 KB | 2.26 KB |
+| picocolors[^2] | 2.66 KB     | 0.80 KB | 1.15 KB |
+
+[^1]: femtocolor 0.1.0 (`8f4ea8c`), `dist/index.mjs` minified by tsdown.
+[^2]: picocolors 1.1.1, `picocolors.js` (unminified CJS).
 
 ## Install
 
