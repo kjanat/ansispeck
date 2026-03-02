@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `scripts/compare-size.sh` — size comparison against picocolors (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
 - Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
+- CI workflow for benchmarks and size comparison on PRs/pushes to master
 
 ### Changed
 

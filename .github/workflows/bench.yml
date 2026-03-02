@@ -1,0 +1,72 @@
+name: Benchmarks
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: bench-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run benchmarks (Bun)
+        id: bench-bun
+        run: |
+          {
+            echo 'markdown<<EOF'
+            bun --bun bench.ts -f markdown
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run benchmarks (Node)
+        id: bench-node
+        run: |
+          {
+            echo 'markdown<<EOF'
+            node bench.ts -f markdown
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Compare sizes
+        id: size
+        run: |
+          {
+            echo 'markdown<<EOF'
+            bash scripts/compare-size.sh --markdown
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        run: |
+          {
+            cat <<'HEADER'
+          # Benchmark Results
+
+          ## Size
+          HEADER
+            echo '${{ steps.size.outputs.markdown }}'
+            cat <<'MID'
+
+          ## Performance
+          MID
+            echo '${{ steps.bench-bun.outputs.markdown }}'
+            echo ''
+            echo '${{ steps.bench-node.outputs.markdown }}'
+          } >> "$GITHUB_STEP_SUMMARY"
