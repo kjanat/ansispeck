@@ -29,43 +29,48 @@ jobs:
         env:
           FORCE_COLOR: "1"
         run: |
+          BUN_BENCH_COLOR="$(bun --bun bench.ts -f markdown)"
           {
             echo 'BUN_BENCH_COLOR<<BUN_BENCH_COLOR_EOF'
-            bun --bun bench.ts -f markdown
+            printf '%s\n' "$BUN_BENCH_COLOR"
             echo 'BUN_BENCH_COLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Bun bench (NO_COLOR=1)
         env:
           NO_COLOR: "1"
         run: |
+          BUN_BENCH_NOCOLOR="$(bun --bun bench.ts -f markdown)"
           {
             echo 'BUN_BENCH_NOCOLOR<<BUN_BENCH_NOCOLOR_EOF'
-            bun --bun bench.ts -f markdown
+            printf '%s\n' "$BUN_BENCH_NOCOLOR"
             echo 'BUN_BENCH_NOCOLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Size
         run: |
+          BUN_SIZE="$(bash scripts/compare-size.sh --markdown)"
           {
             echo 'BUN_SIZE<<BUN_SIZE_EOF'
-            bash scripts/compare-size.sh --markdown
+            printf '%s\n' "$BUN_SIZE"
             echo 'BUN_SIZE_EOF'
           } >> "$GITHUB_ENV"
       - name: Node bench (FORCE_COLOR=1)
         env:
           FORCE_COLOR: "1"
         run: |
+          NODE_BENCH_COLOR="$(node bench.ts -f markdown)"
           {
             echo 'NODE_BENCH_COLOR<<NODE_BENCH_COLOR_EOF'
-            node bench.ts -f markdown
+            printf '%s\n' "$NODE_BENCH_COLOR"
             echo 'NODE_BENCH_COLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Node bench (NO_COLOR=1)
         env:
           NO_COLOR: "1"
         run: |
+          NODE_BENCH_NOCOLOR="$(node bench.ts -f markdown)"
           {
             echo 'NODE_BENCH_NOCOLOR<<NODE_BENCH_NOCOLOR_EOF'
-            node bench.ts -f markdown
+            printf '%s\n' "$NODE_BENCH_NOCOLOR"
             echo 'NODE_BENCH_NOCOLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Write summary

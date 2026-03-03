@@ -10,6 +10,10 @@ function measure(path: string): { raw: number; gzip: number } {
 	return { raw: code.length, gzip: gzipSync(code).length };
 }
 
+function isFirstParty(path: string): boolean {
+	return !path.startsWith('node_modules/');
+}
+
 function toKB(bytes: number): string {
 	return `${(Math.round((bytes / 1024) * 100) / 100).toFixed(2)} KB`;
 }
@@ -32,6 +36,9 @@ for (const [name, path] of libs) {
 	} catch (error) {
 		const detail = error instanceof Error ? error.message : String(error);
 		console.warn(`[size] skipped ${name} (${path}): ${detail}`);
+		if (isFirstParty(path)) {
+			throw error;
+		}
 		rows[name] = { raw: 'N/A', gzip: 'N/A' };
 	}
 }
