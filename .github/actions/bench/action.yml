@@ -1,0 +1,20 @@
+name: Run benchmark
+description: Runs a benchmark for the given runtime and captures output to GITHUB_ENV/GITHUB_OUTPUT
+
+inputs:
+  runtime:
+    description: Runtime to benchmark (bun or node)
+    required: true
+
+outputs:
+  result:
+    description: The benchmark output (markdown table)
+    value: ${{ steps.run.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - id: run
+      shell: bash
+      env: { RUNTIME: "${{ inputs.runtime }}" }
+      run: "${{ github.action_path }}/run.sh"
