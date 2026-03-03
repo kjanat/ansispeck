@@ -25,13 +25,11 @@ jobs:
 
       - name: Bun bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
-        env: { FORCE_COLOR: "1" }
-        with: { runtime: bun }
+        with: { runtime: bun, color: force }
 
       - name: Bun bench (NO_COLOR=1)
         uses: ./.github/actions/bench
-        env: { NO_COLOR: "1" }
-        with: { runtime: bun }
+        with: { runtime: bun, color: none }
 
       - name: Size
         run: |
@@ -44,13 +42,11 @@ jobs:
 
       - name: Node bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
-        env: { FORCE_COLOR: "1" }
-        with: { runtime: node }
+        with: { runtime: node, color: force }
 
       - name: Node bench (NO_COLOR=1)
         uses: ./.github/actions/bench
-        env: { NO_COLOR: "1" }
-        with: { runtime: node }
+        with: { runtime: node, color: none }
 
       - name: Write summary
         run: |

@@ -5,6 +5,9 @@ inputs:
   runtime:
     description: Runtime to benchmark (bun or node)
     required: true
+  color:
+    description: "Color mode: 'force' sets FORCE_COLOR=1, 'none' sets NO_COLOR=1"
+    required: true
 
 outputs:
   result:
@@ -16,5 +19,5 @@ runs:
   steps:
     - id: run
       shell: bash
-      env: { RUNTIME: "${{ inputs.runtime }}" }
+      env: { RUNTIME: "${{ inputs.runtime }}", COLOR: "${{ inputs.color }}" }
       run: "${{ github.action_path }}/run.sh"
