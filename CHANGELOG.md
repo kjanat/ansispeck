@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-03-03
+## [Unreleased]
+
+## [0.1.0] - TBD
 
 ### Added
 
@@ -24,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- CI: extract bench steps into reusable composite action (`.github/actions/bench/`) with `runtime` and `color` inputs
+- CI: add `shfmt` to dprint exec config for consistent shell script formatting
 - Rename package from `femtocolors` to `ansispeck`
 - Benchmark harness now uses local sink + `mitata.do_not_optimize` (instead of `globalThis` sink writes) to reduce harness overhead distortion
 - `BENCHMARKS.md` now reports median values across 5 runs per runtime; `ansispeck/#1` row now shows median ratio
