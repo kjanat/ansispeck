@@ -54,4 +54,10 @@ femto/#1                   —           1.12x               —           1.04x
 bun bench        # both runtimes
 bun bench:bun    # bun only
 bun bench:node   # node only
+
+# CI-parity runs
+FORCE_COLOR=1 bun --bun bench.ts -f markdown
+FORCE_COLOR=1 node bench.ts -f markdown
+NO_COLOR=1 bun --bun bench.ts -f markdown
+NO_COLOR=1 node bench.ts -f markdown
 ```

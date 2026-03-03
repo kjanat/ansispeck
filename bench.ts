@@ -322,7 +322,7 @@ function printMarkdown(result: BenchResult): void {
 		if (url) refs.push([refKey, url]);
 
 		const cells: string[] = [];
-		cells.push(`[${lib}][${refKey}]`);
+		cells.push(refKey === lib ? `[${lib}]` : `[${lib}][${refKey}]`);
 
 		for (const suite of activeSuites) {
 			const entry = suites.get(suite)?.get(lib);

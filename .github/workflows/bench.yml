@@ -25,14 +25,23 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Build
         run: bun bd
-      - name: Bun bench
+      - name: Bun bench (FORCE_COLOR=1)
         env:
           FORCE_COLOR: "1"
         run: |
           {
-            echo 'BUN_BENCH<<BUN_BENCH_EOF'
+            echo 'BUN_BENCH_COLOR<<BUN_BENCH_COLOR_EOF'
             bun --bun bench.ts -f markdown
-            echo 'BUN_BENCH_EOF'
+            echo 'BUN_BENCH_COLOR_EOF'
+          } >> "$GITHUB_ENV"
+      - name: Bun bench (NO_COLOR=1)
+        env:
+          NO_COLOR: "1"
+        run: |
+          {
+            echo 'BUN_BENCH_NOCOLOR<<BUN_BENCH_NOCOLOR_EOF'
+            bun --bun bench.ts -f markdown
+            echo 'BUN_BENCH_NOCOLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Size
         run: |
@@ -41,20 +50,33 @@ jobs:
             bash scripts/compare-size.sh --markdown
             echo 'BUN_SIZE_EOF'
           } >> "$GITHUB_ENV"
-      - name: Node bench
+      - name: Node bench (FORCE_COLOR=1)
         env:
           FORCE_COLOR: "1"
         run: |
           {
-            echo 'NODE_BENCH<<NODE_BENCH_EOF'
+            echo 'NODE_BENCH_COLOR<<NODE_BENCH_COLOR_EOF'
             node bench.ts -f markdown
-            echo 'NODE_BENCH_EOF'
+            echo 'NODE_BENCH_COLOR_EOF'
+          } >> "$GITHUB_ENV"
+      - name: Node bench (NO_COLOR=1)
+        env:
+          NO_COLOR: "1"
+        run: |
+          {
+            echo 'NODE_BENCH_NOCOLOR<<NODE_BENCH_NOCOLOR_EOF'
+            node bench.ts -f markdown
+            echo 'NODE_BENCH_NOCOLOR_EOF'
           } >> "$GITHUB_ENV"
       - name: Write summary
         run: |
           {
             printf '## Size\n'
             printf '%s\n\n' "$BUN_SIZE"
-            printf '%s\n\n' "$BUN_BENCH"
-            printf '%s\n' "$NODE_BENCH"
+            printf '## Benchmarks (FORCE_COLOR=1)\n\n'
+            printf '%s\n\n' "$BUN_BENCH_COLOR"
+            printf '%s\n\n' "$NODE_BENCH_COLOR"
+            printf '## Benchmarks (NO_COLOR=1)\n\n'
+            printf '%s\n\n' "$BUN_BENCH_NOCOLOR"
+            printf '%s\n' "$NODE_BENCH_NOCOLOR"
           } >> "$GITHUB_STEP_SUMMARY"
