@@ -1,5 +1,5 @@
 /**
- * @module femtocolors
+ * @module ansispeck
  * Sub-kilobyte terminal ANSI color formatting.
  */
 
@@ -82,7 +82,7 @@ export const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-c
 
 /**
  * Wraps input in ANSI open/close codes, replacing nested close codes to prevent style leaks.
- * @see picocolors — same approach, same correctness guarantee.
+ * Uses nesting-safe close-code replacement to prevent style leaks.
  */
 function fmt(open: string, close: string, replace: string = open): Formatter {
 	return (input) => {
@@ -166,7 +166,7 @@ export function createColors(enabled: boolean = isColorSupported): Colors {
  *
  * @example
  * ```ts
- * import c from 'femtocolors';
+ * import c from 'ansispeck';
  * console.log(c.red('error'));
  * ```
  */

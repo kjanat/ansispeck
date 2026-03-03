@@ -6,15 +6,15 @@ import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import femtocolors from '../dist/index.js';
+import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 10_000;
 const input = 'lorem ipsum dolor sit amet';
 
 export function register({ count = DEFAULT_COUNT } = {}): void {
 	summary(() => {
-		bench('femtocolors', () => {
-			return femtocolors.blue(femtocolors.red(input).repeat(count));
+		bench('ansispeck', () => {
+			return ansispeck.blue(ansispeck.red(input).repeat(count));
 		});
 		bench('picocolors', () => {
 			return picocolors.blue(picocolors.red(input).repeat(count));

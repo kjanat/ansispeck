@@ -6,7 +6,7 @@ import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import femtocolors from '../dist/index.js';
+import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 
@@ -14,8 +14,8 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 	let n = 0;
 	let sink = '';
 	boxplot(() => {
-		bench('femtocolors', () => {
-			for (let i = 0; i < count; i++) sink = femtocolors.red(`Add plugin to use time limit ${++n}`);
+		bench('ansispeck', () => {
+			for (let i = 0; i < count; i++) sink = ansispeck.red(`Add plugin to use time limit ${++n}`);
 			do_not_optimize(sink);
 		});
 		bench('picocolors', () => {

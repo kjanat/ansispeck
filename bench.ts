@@ -5,7 +5,7 @@ import type { Colors } from './src/index.ts';
 
 execSync('bun bd', { stdio: 'ignore' });
 
-const { default: femtocolors }: { default: Colors } = await import('./dist/index.js');
+const { default: ansispeck }: { default: Colors } = await import('./dist/index.js');
 
 declare module 'mitata' {
 	interface ctx {
@@ -24,7 +24,7 @@ import { register as simple } from './benchmarks/simple.ts';
 
 const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
 const LIB_ORDER = [
-	'femtocolors',
+	'ansispeck',
 	'picocolors',
 	'colorette',
 	'kleur',
@@ -150,7 +150,8 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 }
 
 type BenchResult = Awaited<ReturnType<typeof run>>;
-const FEMTO = 'femtocolors';
+const SELF_LIB = 'ansispeck';
+const BASELINE_LABEL = `${SELF_LIB}/#1`;
 
 interface Parsed {
 	context: BenchResult['context'];
@@ -229,11 +230,11 @@ function computeCI95(parsed: Parsed): Map<string, { label: string; significant: 
 	for (const [suite, ranking] of parsed.ranked) {
 		const first = ranking[0];
 		if (!first) continue;
-		if (first.lib === FEMTO) {
+		if (first.lib === SELF_LIB) {
 			ci95.set(suite, { label: '—', significant: true });
 			continue;
 		}
-		const femto = ranking.find(r => r.lib === FEMTO);
+		const femto = ranking.find(r => r.lib === SELF_LIB);
 		if (!femto) continue;
 		const { ratio, significant } = welchCI95(first.stats.samples, femto.stats.samples);
 		ci95.set(suite, { label: `${ratio.toFixed(2)}x`, significant });
@@ -246,7 +247,7 @@ function printOverview(result: BenchResult): void {
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
-	const nameW = Math.max(4, ...libs.map(l => l.length));
+	const nameW = Math.max(4, BASELINE_LABEL.length, ...libs.map(l => l.length));
 	const colW = Math.max(...activeSuites.map(s => s.length), 10);
 	const tagW = 3;
 	const fullW = colW + 1 + tagW;
@@ -270,7 +271,7 @@ function printOverview(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
-			cells.push(`${val.padStart(colW)} ${femtocolors.dim(tag.padStart(tagW))}`);
+			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
 		}
 		console.log(lib.padEnd(nameW) + '  ' + cells.join('  '));
 	}
@@ -279,18 +280,18 @@ function printOverview(result: BenchResult): void {
 	const ciCells = activeSuites.map(s => {
 		const entry = ci95.get(s);
 		if (!entry) return ''.padStart(fullW);
-		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : femtocolors.dim(`${entry.label} ~`);
+		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
 		return text.padStart(fullW);
 	});
 	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	console.log('femto/#1'.padEnd(nameW) + '  ' + ciCells.join('  '));
+	console.log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
 	console.log('');
-	console.log('  * = fastest, — = femtocolors is #1, ~ = not significant');
+	console.log('  * = fastest, — = ansispeck is #1, ~ = not significant');
 }
 
 const NPM_URLS: Record<string, string> = {
-	femtocolors: 'https://www.npmjs.com/package/femtocolors',
+	ansispeck: 'https://www.npmjs.com/package/ansispeck',
 	picocolors: 'https://www.npmjs.com/package/picocolors',
 	colorette: 'https://www.npmjs.com/package/colorette',
 	kleur: 'https://www.npmjs.com/package/kleur',
@@ -348,7 +349,7 @@ function printMarkdown(result: BenchResult): void {
 		if (entry.label === '—') return '**#1**';
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
-	console.log(`| **femto/#1** | ${ciCells.join(' | ')} |`);
+	console.log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 
 	// link definitions
 	console.log('');

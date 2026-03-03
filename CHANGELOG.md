@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `scripts/compare-size.sh` — size comparison against picocolors (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
+- `scripts/compare-size.sh` — size reporting (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
 - Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
 - CI workflow for benchmarks and size comparison on PRs/pushes to master
 
 ### Changed
 
-- Rename package from `femtocolor` to `femtocolors`
+- Rename package from `femtocolors` to `ansispeck`
 - Benchmark harness now uses local sink + `mitata.do_not_optimize` (instead of `globalThis` sink writes) to reduce harness overhead distortion
-- `BENCHMARKS.md` now reports median values across 5 runs per runtime; `femto/#1` row now shows median ratio
+- `BENCHMARKS.md` now reports median values across 5 runs per runtime; `ansispeck/#1` row now shows median ratio
 - Build target platform switched to `neutral`, emitting `dist/index.js` + `dist/index.d.ts`
 - Publish flow now strips dev-only `package.json` fields, author URL metadata, and declaration-file comments during `prepack` to reduce package size
 - License switched from MIT to Zero-Clause BSD (0BSD)
@@ -45,8 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `isColorSupported` auto-detection (NO_COLOR, FORCE_COLOR, --no-color, --color, CI, TTY)
 - Nesting-safe close-code replacement (handles composed styles correctly)
 - Full TypeScript types with JSDoc
-- Default export for `import c from 'femtocolors'` usage
-- API-compatible with picocolors (drop-in replacement)
+- Default export for `import c from 'ansispeck'` usage
+- API-compatible with common tiny ANSI formatter interfaces
 
-[Unreleased]: https://github.com/kjanat/femtocolors/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/kjanat/femtocolors/releases/tag/v0.1.0
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/kjanat/ansispeck/releases/tag/v0.1.0

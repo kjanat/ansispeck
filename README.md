@@ -1,17 +1,14 @@
-# femtocolors
+# ansispeck
 
-Sub-kilobyte terminal ANSI color formatting. Drop-in picocolors replacement.
+Sub-kilobyte terminal ANSI color formatting.
 
 ## Size
 
-| Package         | Runtime     | Gzipped | Types   |
-| --------------- | ----------- | ------- | ------- |
-| femtocolors[^1] | **1.31 KB** | 0.69 KB | 2.21 KB |
-| picocolors[^2]  | 2.60 KB     | 0.80 KB | 1.12 KB |
+| Package       | Runtime     | Gzipped | Types   |
+| ------------- | ----------- | ------- | ------- |
+| ansispeck[^1] | **1.31 KB** | 0.68 KB | 2.21 KB |
 
-[^1]: femtocolors 0.1.0 (`44c48dd`), `dist/index.js` minified by tsdown.
-
-[^2]: picocolors 1.1.1, `picocolors.js` (unminified CJS).
+[^1]: ansispeck 0.1.0, `dist/index.js` minified by tsdown.
 
 ## Benchmarks
 
@@ -20,13 +17,13 @@ See [BENCHMARKS.md](BENCHMARKS.md) for full results across Bun and Node.
 ## Install
 
 ```sh
-npm install femtocolors
+npm install ansispeck
 ```
 
 ## Usage
 
 ```ts
-import c from 'femtocolors';
+import c from 'ansispeck';
 
 console.log(c.red('Error!'));
 console.log(c.bold(c.green('Success')));
@@ -36,7 +33,7 @@ console.log(c.bgYellow(c.black('Warning')));
 ### Explicit toggle
 
 ```ts
-import { createColors } from 'femtocolors';
+import { createColors } from 'ansispeck';
 
 const c = createColors(false); // force disable
 console.log(c.red('plain text'));

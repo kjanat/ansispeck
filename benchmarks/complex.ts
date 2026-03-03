@@ -6,7 +6,7 @@ import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import femtocolors from '../dist/index.js';
+import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 
@@ -14,17 +14,17 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 	let n = 0;
 	let sink = '';
 	summary(() => {
-		bench('femtocolors', () => {
+		bench('ansispeck', () => {
 			for (let i = 0; i < count; i++) {
-				sink = femtocolors.red('.')
-					+ femtocolors.yellow('.')
-					+ femtocolors.green('.')
-					+ femtocolors.bgRed(femtocolors.black(' ERROR '))
-					+ femtocolors.red(
+				sink = ansispeck.red('.')
+					+ ansispeck.yellow('.')
+					+ ansispeck.green('.')
+					+ ansispeck.bgRed(ansispeck.black(' ERROR '))
+					+ ansispeck.red(
 						' Add plugin '
-							+ femtocolors.yellow('name')
+							+ ansispeck.yellow('name')
 							+ ' to use time limit with '
-							+ femtocolors.yellow(`${++n}`),
+							+ ansispeck.yellow(`${++n}`),
 					);
 			}
 			do_not_optimize(sink);

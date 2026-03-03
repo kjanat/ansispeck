@@ -4,7 +4,7 @@ const DEFAULT_COUNT = 1;
 
 export function register({ count = DEFAULT_COUNT } = {}): void {
 	group(() => {
-		bench('femtocolors', async () => {
+		bench('ansispeck', async () => {
 			for (let i = 0; i < count; i++) await import('../dist/index.js');
 		});
 		bench('picocolors', async () => {

@@ -1,7 +1,7 @@
 {
-	"name": "femtocolors",
+	"name": "ansispeck",
 	"version": "0.1.0",
-	"description": "Sub-kilobyte terminal ANSI color formatting. Smaller than picocolors.",
+	"description": "Sub-kilobyte terminal ANSI color formatting.",
 	"keywords": [
 		"terminal",
 		"colors",
@@ -10,7 +10,7 @@
 		"cli",
 		"console"
 	],
-	"repository": "kjanat/femtocolors",
+	"repository": "kjanat/ansispeck",
 	"license": "0BSD",
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
