@@ -54,9 +54,9 @@ jobs:
             printf '## Size\n'
             printf '%s\n\n' "$BUN_SIZE"
             printf '## Benchmarks (FORCE_COLOR=1)\n\n'
-            printf '%s\n\n' "$BUN_BENCH_COLOR"
-            printf '%s\n\n' "$NODE_BENCH_COLOR"
+            printf '#%s\n\n' "$BUN_BENCH_COLOR"
+            printf '#%s\n\n' "$NODE_BENCH_COLOR"
             printf '## Benchmarks (NO_COLOR=1)\n\n'
-            printf '%s\n\n' "$BUN_BENCH_NOCOLOR"
-            printf '%s\n' "$NODE_BENCH_NOCOLOR"
+            printf '#%s\n\n' "$BUN_BENCH_NOCOLOR"
+            printf '#%s\n' "$NODE_BENCH_NOCOLOR"
           } >> "$GITHUB_STEP_SUMMARY"
