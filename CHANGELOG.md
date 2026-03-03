@@ -5,13 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-03-03
 
 ### Added
 
 - `scripts/compare-size.sh` — size reporting (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
 - Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
 - CI workflow for benchmarks and size comparison on PRs/pushes to master
+- ANSI color formatting for terminal output (8 colors + bright variants)
+- Background colors (8 + bright variants)
+- Style modifiers: bold, dim, italic, underline, inverse, hidden, strikethrough, reset
+- `createColors(enabled?)` factory for explicit color toggle
+- `isColorSupported` auto-detection (NO_COLOR, FORCE_COLOR, --no-color, --color, CI, TTY)
+- Nesting-safe close-code replacement (handles composed styles correctly)
+- Full TypeScript types with JSDoc
+- Default export for `import c from 'ansispeck'` usage
+- API-compatible with common tiny ANSI formatter interfaces
 
 ### Changed
 
@@ -34,19 +43,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Welch CI computation now guards too-small sample sets
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)` for cross-platform URL/path correctness
 
-## [0.1.0] - 2026-03-02
-
-### Added
-
-- ANSI color formatting for terminal output (8 colors + bright variants)
-- Background colors (8 + bright variants)
-- Style modifiers: bold, dim, italic, underline, inverse, hidden, strikethrough, reset
-- `createColors(enabled?)` factory for explicit color toggle
-- `isColorSupported` auto-detection (NO_COLOR, FORCE_COLOR, --no-color, --color, CI, TTY)
-- Nesting-safe close-code replacement (handles composed styles correctly)
-- Full TypeScript types with JSDoc
-- Default export for `import c from 'ansispeck'` usage
-- API-compatible with common tiny ANSI formatter interfaces
-
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/kjanat/ansispeck/releases/tag/v0.1.0
