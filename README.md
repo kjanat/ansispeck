@@ -28,6 +28,18 @@ console.log(bold('Strong'));
 console.log(bgYellow(black('Warning')));
 ```
 
+Auto behavior (`ansispeck` and `ansispeck/auto` are identical):
+
+- evaluated once at module import (palette is fixed for that process import)
+- disable if `NO_COLOR` is set or `--no-color` is present
+- else enable if `FORCE_COLOR` is set or `--color` is present
+- else enable on Windows (`process.platform === 'win32'`)
+- else enable in CI (`CI` set)
+- else enable when `stdout.isTTY` and `TERM !== 'dumb'`
+- otherwise disable
+
+Use `ansispeck/raw` or `ansispeck/noop` when you need deterministic behavior.
+
 ### Raw (always color)
 
 ```ts

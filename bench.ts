@@ -29,9 +29,9 @@ const LIB_ORDER = [
 	'ansispeck',
 	'ansispeck/auto',
 	'ansispeck/raw',
-	'ansispeck/noop',
 	'ansispeck/safe',
 	'ansispeck/rope',
+	'ansispeck/noop',
 	'picocolors',
 	'colorette',
 	'kleur',
@@ -39,6 +39,15 @@ const LIB_ORDER = [
 	'chalk',
 	'ansi-colors',
 ] as const;
+
+const ANSISPECK_EXPORT_NOTES: Record<string, string> = {
+	ansispeck: 'root auto mode; picks raw/noop once at import from env/argv/TTY checks',
+	'ansispeck/auto': 'same auto behavior as root, direct subpath import',
+	'ansispeck/raw': 'always emit ANSI (fastest path, no close-code repair)',
+	'ansispeck/safe': 'template-tag API that preserves style over interpolations',
+	'ansispeck/rope': 'chunk builder: O(1) compose + O(n) render',
+	'ansispeck/noop': 'control path: no ANSI, returns plain strings',
+};
 
 const { values } = parseArgs({
 	options: {
@@ -319,11 +328,11 @@ const readPkgVersion = async (specifier: string): Promise<string> => {
 	return version;
 };
 
+const PACKAGE_ORDER = [...new Set(LIB_ORDER.map(pkgName))];
 const NPM_URLS: Record<string, string> = Object.fromEntries(
-	await Promise.all(LIB_ORDER.map(async specifier => {
-		const name = pkgName(specifier);
-		const version = await readPkgVersion(specifier);
-		return [specifier, `https://www.npmjs.com/package/${name}/v/${version}`];
+	await Promise.all(PACKAGE_ORDER.map(async name => {
+		const version = await readPkgVersion(name);
+		return [name, `https://www.npmjs.com/package/${name}/v/${version}`];
 	})),
 );
 
@@ -335,6 +344,17 @@ function printMarkdown(result: BenchResult): void {
 	const { runtime, version, cpu: { name: cpuName } } = context;
 	console.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	console.log(`\n> ${cpuName ?? 'unknown'}\n`);
+	const ansispeckExports = libs.filter(lib => lib in ANSISPECK_EXPORT_NOTES);
+	if (ansispeckExports.length > 0) {
+		console.log('> ansispeck exports in this table:');
+		for (const lib of LIB_ORDER) {
+			if (!ansispeckExports.includes(lib)) continue;
+			const note = ANSISPECK_EXPORT_NOTES[lib];
+			if (note === undefined) continue;
+			console.log(`> - \`${lib}\`: ${note}`);
+		}
+		console.log('');
+	}
 
 	// header
 	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
@@ -343,14 +363,19 @@ function printMarkdown(result: BenchResult): void {
 
 	// collect ref keys for link definitions
 	const refs: Array<[string, string]> = [];
+	const seenRefs = new Set<string>();
 
 	for (const lib of libs) {
-		const refKey = lib.replace(/\//g, '-');
-		const url = NPM_URLS[lib];
-		if (url) refs.push([refKey, url]);
+		const pkg = pkgName(lib);
+		const refKey = pkg.replace(/\//g, '-');
+		const url = NPM_URLS[pkg];
+		if (url && !seenRefs.has(refKey)) {
+			refs.push([refKey, url]);
+			seenRefs.add(refKey);
+		}
 
 		const cells: string[] = [];
-		cells.push(refKey === lib ? `[${lib}]` : `[${lib}][${refKey}]`);
+		cells.push(`[${lib}][${refKey}]`);
 
 		for (const suite of activeSuites) {
 			const entry = suites.get(suite)?.get(lib);
