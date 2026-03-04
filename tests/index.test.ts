@@ -184,6 +184,20 @@ describe('rope entrypoint', () => {
 		expect(disabled.render(value)).toBe('axb');
 	});
 
+	test('concat preserves later chunks when leading inputs are undefined', () => {
+		const r = createRope(false);
+		expect(r.render(r.concat(undefined, 'tail'))).toBe('tail');
+		expect(r.render(r.concat(undefined, undefined, 'a', 'b'))).toBe('ab');
+		expect(r.render(r.concat(undefined))).toBe('');
+		expect(r.render(r.concat())).toBe('');
+	});
+
+	test('concat skips undefined at any position', () => {
+		const r = createRope(true);
+		const chunk = r.concat('a', undefined, r.red('b'), undefined, 'c');
+		expect(r.render(chunk)).toBe('a\x1b[31mb\x1b[39mc');
+	});
+
 	test('exports default rope palette', () => {
 		expect(typeof rope.red).toBe('function');
 		expect(typeof rope.render).toBe('function');

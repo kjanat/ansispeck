@@ -103,19 +103,17 @@ export const text = (input: Formattable): Chunk => {
 };
 
 export const concat = (...inputs: readonly Chunkable[]): Chunk => {
-	if (inputs.length === 0) return textNode('');
-	const first = inputs[0];
-	if (first === undefined) return textNode('');
-
-	let output = toChunk(first);
-	let index = 1;
+	let output: Chunk | undefined;
+	let index = 0;
 	while (index < inputs.length) {
 		const current = inputs[index];
-		if (current !== undefined) output = concatNode(output, toChunk(current));
+		if (current !== undefined) {
+			const node = toChunk(current);
+			output = output === undefined ? node : concatNode(output, node);
+		}
 		index++;
 	}
-
-	return output;
+	return output ?? textNode('');
 };
 
 type RenderFrame =
