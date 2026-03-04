@@ -52,8 +52,8 @@ import {
 import type { Formatter, Palette } from './types.ts';
 
 export const reset: Formatter = makeFormatter(RESET_OPEN, RESET_OPEN);
-export const bold: Formatter = makeFormatter(BOLD_OPEN, MODIFIER_CLOSE);
-export const dim: Formatter = makeFormatter(DIM_OPEN, MODIFIER_CLOSE);
+export const bold: Formatter = makeFormatter(BOLD_OPEN, MODIFIER_CLOSE, `${MODIFIER_CLOSE}${BOLD_OPEN}`);
+export const dim: Formatter = makeFormatter(DIM_OPEN, MODIFIER_CLOSE, `${MODIFIER_CLOSE}${DIM_OPEN}`);
 export const italic: Formatter = makeFormatter(ITALIC_OPEN, ITALIC_CLOSE);
 export const underline: Formatter = makeFormatter(UNDERLINE_OPEN, UNDERLINE_CLOSE);
 export const inverse: Formatter = makeFormatter(INVERSE_OPEN, INVERSE_CLOSE);

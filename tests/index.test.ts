@@ -62,6 +62,19 @@ describe('raw entrypoint', () => {
 		expect(raw.red(false)).toBe('\x1b[31mfalse\x1b[39m');
 		expect(raw.red(null)).toBe('\x1b[31mnull\x1b[39m');
 	});
+
+	test('reopens foreground color after embedded close code', () => {
+		expect(raw.red('hello\x1b[39mworld')).toBe('\x1b[31mhello\x1b[31mworld\x1b[39m');
+	});
+
+	test('reopens modifier styles after shared close code', () => {
+		expect(raw.bold('hello\x1b[22mworld')).toBe('\x1b[1mhello\x1b[22m\x1b[1mworld\x1b[22m');
+	});
+
+	test('preserves outer style in nested composition', () => {
+		expect(raw.red(`a${raw.yellow('x')}b`)).toBe('\x1b[31ma\x1b[33mx\x1b[31mb\x1b[39m');
+		expect(raw.bold(`a${raw.dim('x')}b`)).toBe('\x1b[1ma\x1b[2mx\x1b[22m\x1b[1mb\x1b[22m');
+	});
 });
 
 describe('noop entrypoint', () => {

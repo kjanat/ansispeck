@@ -60,8 +60,22 @@ export const BG_WHITE_BRIGHT_OPEN: string = code(107);
 
 const text = (input: Formattable): string => '' + input;
 
-export const makeFormatter = (open: string, close: string): Formatter => {
-	return (input) => `${open}${text(input)}${close}`;
+export const makeFormatter = (open: string, close: string, replace: string = open): Formatter => {
+	return (input) => {
+		let value = text(input);
+		let index = value.indexOf(close, open.length);
+		if (~index) {
+			let output = '';
+			let cursor = 0;
+			do {
+				output += `${value.substring(cursor, index)}${replace}`;
+				cursor = index + close.length;
+				index = value.indexOf(close, cursor);
+			} while (~index);
+			value = `${output}${value.substring(cursor)}`;
+		}
+		return `${open}${value}${close}`;
+	};
 };
 
 export const makeTemplateFormatter = (open: string, close: string): TemplateFormatter => {
