@@ -50,13 +50,16 @@ jobs:
 
       - name: Write summary
         run: |
+          strip() { sed '/^\[\^/d' <<<"$1"; }
+          footnotes="$(printf '%s\n%s\n%s\n%s\n%s\n' "$BUN_SIZE" "$BUN_BENCH_COLOR" "$NODE_BENCH_COLOR" "$BUN_BENCH_NOCOLOR" "$NODE_BENCH_NOCOLOR" | awk '/^\[\^/ && !seen[$0]++ { print }')"
           {
             printf '## Size\n'
-            printf '%s\n\n' "$BUN_SIZE"
+            printf '%s\n\n' "$(strip "$BUN_SIZE")"
             printf '## Benchmarks (FORCE_COLOR=1)\n\n'
-            printf '#%s\n\n' "$BUN_BENCH_COLOR"
-            printf '#%s\n\n' "$NODE_BENCH_COLOR"
+            printf '#%s\n\n' "$(strip "$BUN_BENCH_COLOR")"
+            printf '#%s\n\n' "$(strip "$NODE_BENCH_COLOR")"
             printf '## Benchmarks (NO_COLOR=1)\n\n'
-            printf '#%s\n\n' "$BUN_BENCH_NOCOLOR"
-            printf '#%s\n' "$NODE_BENCH_NOCOLOR"
+            printf '#%s\n\n' "$(strip "$BUN_BENCH_NOCOLOR")"
+            printf '#%s\n' "$(strip "$NODE_BENCH_NOCOLOR")"
+            printf '\n%s\n' "$footnotes"
           } >> "$GITHUB_STEP_SUMMARY"

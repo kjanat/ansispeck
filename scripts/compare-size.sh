@@ -13,13 +13,13 @@ package=$(bun pm pkg get name | tr -d '"')
 FMT=table
 for arg in "$@"; do
 	case "${arg}" in
-	--table) FMT=table ;;
-	--markdown) FMT=markdown ;;
-	-*)
-		printf 'unknown flag: %s\n' "${arg}" >&2
-		exit 1
-		;;
-	*) ;;
+		--table) FMT=table ;;
+		--markdown) FMT=markdown ;;
+		-*)
+			printf 'unknown flag: %s\n' "${arg}" >&2
+			exit 1
+			;;
+		*) ;;
 	esac
 done
 
@@ -55,39 +55,39 @@ link() {
 }
 
 case "${FMT}" in
-table)
-	printf '\n'
-	printf '  %-14s %10s %10s %10s\n' '' 'Runtime' 'Gzip' 'Types'
-	printf '  %-14s %10s %10s %10s\n' '──────────────' '──────────' '──────────' '──────────'
-	as_label=$(link "${npm_url}" "ansispeck")
-	printf '  %-14s %10s %10s %10s\n' "${as_label}" "${rt_kb}" "${gz_kb}" "${ts_kb}"
-	printf '\n'
-	as_ver_label=$(link "${npm_url}" "${version}")
-	as_sha_label=$(link "${commit_url}" "${commit}")
-	if [[ -n "${commit_url}" ]]; then
-		printf '  ansispeck %s (%s)\n' "${as_ver_label}" "${as_sha_label}"
-	else
-		printf '  ansispeck %s\n' "${as_ver_label}"
-	fi
-	printf '\n'
-	;;
-markdown)
-	printf '| Package | Runtime | Gzip | Types |\n'
-	printf '| --- | --- | --- | --- |\n'
-	if [[ -n "${commit_url}" ]]; then
-		printf '| ansispeck (%s)[^ansispeck] | **%s** | %s | %s |\n' "${commit}" "${rt_kb}" "${gz_kb}" "${ts_kb}"
-	else
-		printf '| ansispeck[^ansispeck] | **%s** | %s | %s |\n' "${rt_kb}" "${gz_kb}" "${ts_kb}"
-	fi
-	printf '\n'
-	if [[ -n "${commit_url}" ]]; then
-		printf '[^ansispeck]: ansispeck [v%s](%s "NPM") [%s](%s "GitHub")\n' "${version}" "${npm_url}" "${commit}" "${commit_url}"
-	else
-		printf '[^ansispeck]: ansispeck [v%s](%s "NPM")\n' "${version}" "${npm_url}"
-	fi
-	;;
-*)
-	printf 'unknown format: %s\n' "${FMT}" >&2
-	exit 1
-	;;
+	table)
+		printf '\n'
+		printf '  %-14s %10s %10s %10s\n' '' 'Runtime' 'Gzip' 'Types'
+		printf '  %-14s %10s %10s %10s\n' '──────────────' '──────────' '──────────' '──────────'
+		as_label=$(link "${npm_url}" "ansispeck")
+		printf '  %-14s %10s %10s %10s\n' "${as_label}" "${rt_kb}" "${gz_kb}" "${ts_kb}"
+		printf '\n'
+		as_ver_label=$(link "${npm_url}" "${version}")
+		as_sha_label=$(link "${commit_url}" "${commit}")
+		if [[ -n "${commit_url}" ]]; then
+			printf '  ansispeck %s (%s)\n' "${as_ver_label}" "${as_sha_label}"
+		else
+			printf '  ansispeck %s\n' "${as_ver_label}"
+		fi
+		printf '\n'
+		;;
+	markdown)
+		printf '| Package | Runtime | Gzip | Types |\n'
+		printf '| --- | --- | --- | --- |\n'
+		if [[ -n "${commit_url}" ]]; then
+			printf '| ansispeck (%s)[^ansispeck] | **%s** | %s | %s |\n' "${commit}" "${rt_kb}" "${gz_kb}" "${ts_kb}"
+		else
+			printf '| ansispeck[^ansispeck] | **%s** | %s | %s |\n' "${rt_kb}" "${gz_kb}" "${ts_kb}"
+		fi
+		printf '\n'
+		if [[ -n "${commit_url}" ]]; then
+			printf '[^ansispeck]: ansispeck [v%s](%s "NPM") [%s](%s "GitHub")\n' "${version}" "${npm_url}" "${commit}" "${commit_url}"
+		else
+			printf '[^ansispeck]: ansispeck [v%s](%s "NPM")\n' "${version}" "${npm_url}"
+		fi
+		;;
+	*)
+		printf 'unknown format: %s\n' "${FMT}" >&2
+		exit 1
+		;;
 esac
