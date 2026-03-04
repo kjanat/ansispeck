@@ -14,6 +14,7 @@ npm install ansispeck
 - `ansispeck/raw` - always emit ANSI (fastest hot path, no close-code repair)
 - `ansispeck/noop` - always plain text
 - `ansispeck/safe` - template-tag API that reopens style around interpolations
+- `ansispeck/rope` - chunk builder (O(1) compose, O(n) single render)
 
 ## Usage
 
@@ -53,6 +54,18 @@ import { red, yellow } from 'ansispeck/safe';
 
 const msg = red`Error ${yellow`E42`} while parsing`;
 console.log(msg);
+```
+
+### Rope builder
+
+```ts
+import rope, { createRope } from 'ansispeck/rope';
+
+const message = rope.red(rope.concat('Error ', rope.yellow('E42'), ' while parsing'));
+console.log(rope.render(message));
+
+const disabled = createRope(false);
+console.log(disabled.render(disabled.red('plain text')));
 ```
 
 ## API Shape

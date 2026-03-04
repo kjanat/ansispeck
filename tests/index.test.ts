@@ -1,6 +1,7 @@
 import auto, { isColorSupported, red } from 'ansispeck';
 import noop from 'ansispeck/noop';
 import raw from 'ansispeck/raw';
+import rope, { createRope } from 'ansispeck/rope';
 import safe, { isColorSupported as isSafeColorSupported } from 'ansispeck/safe';
 import { describe, expect, test } from 'bun:test';
 
@@ -106,6 +107,32 @@ describe('safe entrypoint', () => {
 		}
 
 		expect(nested).toBe('\x1b[31mError \x1b[33m42\x1b[39m\x1b[31m!\x1b[39m');
+	});
+});
+
+describe('rope entrypoint', () => {
+	test('renders nested composition without close-code scanning', () => {
+		const colored = createRope(true);
+		const value = colored.red(colored.concat('a', colored.yellow('x'), 'b'));
+		expect(colored.render(value)).toBe('\x1b[31ma\x1b[33mx\x1b[39m\x1b[31mb\x1b[39m');
+	});
+
+	test('handles shared modifier close boundaries', () => {
+		const colored = createRope(true);
+		const value = colored.bold(colored.concat('a', colored.dim('x'), 'b'));
+		expect(colored.render(value)).toBe('\x1b[1ma\x1b[2mx\x1b[22m\x1b[1mb\x1b[22m');
+	});
+
+	test('respects explicit disabled mode', () => {
+		const disabled = createRope(false);
+		const value = disabled.red(disabled.concat('a', disabled.yellow('x'), 'b'));
+		expect(disabled.render(value)).toBe('axb');
+	});
+
+	test('exports default rope palette', () => {
+		expect(typeof rope.red).toBe('function');
+		expect(typeof rope.render).toBe('function');
+		expect(typeof rope.concat).toBe('function');
 	});
 });
 

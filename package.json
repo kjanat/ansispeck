@@ -34,6 +34,10 @@
 		"#dist/ansispeck/safe": {
 			"types": "./dist/safe.d.ts",
 			"default": "./dist/safe.js"
+		},
+		"#dist/ansispeck/rope": {
+			"types": "./dist/rope.d.ts",
+			"default": "./dist/rope.js"
 		}
 	},
 	"exports": {
@@ -41,6 +45,7 @@
 		"./auto": "./dist/auto.js",
 		"./noop": "./dist/noop.js",
 		"./raw": "./dist/raw.js",
+		"./rope": "./dist/rope.js",
 		"./safe": "./dist/safe.js",
 		"./package.json": "./package.json"
 	},

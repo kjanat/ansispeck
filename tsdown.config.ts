@@ -9,6 +9,7 @@ const config: UserConfigFn = defineConfig(
 			raw: 'src/raw.ts',
 			noop: 'src/noop.ts',
 			safe: 'src/safe.ts',
+			rope: 'src/rope.ts',
 		},
 		dts: {
 			oxc: true,

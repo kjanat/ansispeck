@@ -51,12 +51,20 @@ export {
 } from './auto.ts';
 
 export type {
+	Chunk,
+	Chunkable,
+	ChunkFormatter,
+	ChunkPalette,
 	Colors,
+	ConcatChunk,
 	Formattable,
 	Formatter,
 	FormatterName,
 	Palette,
+	Rope,
+	StyledChunk,
 	StyleName,
 	TemplateFormatter,
 	TemplatePalette,
+	TextChunk,
 } from './types.ts';
