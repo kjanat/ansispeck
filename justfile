@@ -9,7 +9,8 @@ unexport NO_COLOR
 
 bench_bun_command := "bun --bun bench.ts"
 bench_node_command := "node bench.ts"
-prepack_backup_marker := ".git/.prepack-backup-dir"
+git_dir := `git rev-parse --git-dir`
+prepack_backup_dir := git_dir / ".prepack-backup"
 
 # list recipes
 default:
@@ -71,8 +72,8 @@ bench-md-forced: (bench-bun-forced "markdown") (bench-node-forced "markdown")
 # prepare package contents
 [group('release')]
 prepack:
-    if [[ -f {{ prepack_backup_marker }} ]]; then echo "prepack backup marker exists; run just postpack first" >&2; exit 1; fi
-    backup_dir="$(mktemp -d -t ansispeck-prepack.XXXXXX)" && cp package.json README.md "$backup_dir"/ && printf '%s' "$backup_dir" > {{ prepack_backup_marker }}
+    if [[ -d "{{ prepack_backup_dir }}" ]]; then echo "prepack backup dir exists; run just postpack first" >&2; exit 1; fi
+    mkdir -p "{{ prepack_backup_dir }}" && printf '*\n' > "{{ prepack_backup_dir }}/.gitignore" && cp package.json README.md "{{ prepack_backup_dir }}"/
     bun --bun bd -l error
     bun scripts/prepack.ts
     bunx prettier README.md --write >/dev/null
@@ -80,8 +81,8 @@ prepack:
 # restore files changed by prepack
 [group('release')]
 postpack:
-    if [[ ! -f {{ prepack_backup_marker }} ]]; then echo "missing prepack backup marker; refusing silent no-op" >&2; exit 1; fi
-    backup_dir="$(cat {{ prepack_backup_marker }})"; if [[ -z "$backup_dir" || ! -d "$backup_dir" ]]; then echo "invalid prepack backup dir: $backup_dir" >&2; exit 1; fi; cp "$backup_dir/package.json" package.json; cp "$backup_dir/README.md" README.md; rm -rf "$backup_dir" {{ prepack_backup_marker }}
+    if [[ ! -d "{{ prepack_backup_dir }}" ]]; then echo "missing prepack backup dir; refusing silent no-op" >&2; exit 1; fi
+    cp "{{ prepack_backup_dir }}/package.json" package.json; cp "{{ prepack_backup_dir }}/README.md" README.md; rm -rf "{{ prepack_backup_dir }}"
 
 # run publish checks
 [group('release')]

@@ -3,6 +3,9 @@ import { bench, group, run } from 'mitata';
 const DEFAULT_COUNT = 1;
 
 export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
+	if (count !== 1) {
+		throw new Error('loading benchmark requires count=1 to measure cold load cost');
+	}
 	group(() => {
 		bench('ansispeck', async () => {
 			for (let i = 0; i < count; i++) await import('#dist/ansispeck');

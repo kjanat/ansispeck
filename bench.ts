@@ -331,17 +331,20 @@ const readPkgVersion = async (specifier: string): Promise<string> => {
 };
 
 const PACKAGE_ORDER = [...new Set(LIB_ORDER.map(pkgName))];
-const NPM_URLS: Record<string, string> = Object.fromEntries(
-	await Promise.all(PACKAGE_ORDER.map(async name => {
-		const version = await readPkgVersion(name);
-		return [name, `https://www.npmjs.com/package/${name}/v/${version}`];
-	})),
-);
 
-function printMarkdown(result: BenchResult): void {
+const buildNpmUrls = async (): Promise<Record<string, string>> =>
+	Object.fromEntries(
+		await Promise.all(PACKAGE_ORDER.map(async name => {
+			const version = await readPkgVersion(name);
+			return [name, `https://www.npmjs.com/package/${name}/v/${version}`];
+		})),
+	);
+
+async function printMarkdown(result: BenchResult): Promise<void> {
 	const parsed = parse(result);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
+	const npmUrls = await buildNpmUrls();
 
 	const { runtime, version, cpu: { name: cpuName } } = context;
 	console.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
@@ -370,7 +373,7 @@ function printMarkdown(result: BenchResult): void {
 	for (const lib of libs) {
 		const pkg = pkgName(lib);
 		const refKey = pkg.replace(/\//g, '-');
-		const url = NPM_URLS[pkg];
+		const url = npmUrls[pkg];
 		if (url && !seenRefs.has(refKey)) {
 			refs.push([refKey, url]);
 			seenRefs.add(refKey);
@@ -414,4 +417,4 @@ function printMarkdown(result: BenchResult): void {
 
 // dispatch — must be after all declarations to avoid TDZ
 if (fmt === 'overview') printOverview(result);
-if (fmt === 'markdown' || fmt === 'md') printMarkdown(result);
+if (fmt === 'markdown' || fmt === 'md') await printMarkdown(result);
