@@ -1,130 +1,114 @@
-import colors, { type Colors, createColors, isColorSupported } from 'ansispeck';
+import auto, { isColorSupported, red } from 'ansispeck';
+import noop from 'ansispeck/noop';
+import raw from 'ansispeck/raw';
+import safe, { isColorSupported as isSafeColorSupported } from 'ansispeck/safe';
 import { describe, expect, test } from 'bun:test';
 
-describe('createColors', () => {
-	const enabled = createColors(true);
-	const disabled = createColors(false);
+import type { Palette, TemplatePalette } from 'ansispeck';
 
-	test('enabled flag reflects argument', () => {
-		expect(enabled.isColorSupported).toBe(true);
-		expect(disabled.isColorSupported).toBe(false);
+const formatterNames: (keyof Palette)[] = [
+	'reset',
+	'bold',
+	'dim',
+	'italic',
+	'underline',
+	'inverse',
+	'hidden',
+	'strikethrough',
+	'black',
+	'red',
+	'green',
+	'yellow',
+	'blue',
+	'magenta',
+	'cyan',
+	'white',
+	'gray',
+	'bgBlack',
+	'bgRed',
+	'bgGreen',
+	'bgYellow',
+	'bgBlue',
+	'bgMagenta',
+	'bgCyan',
+	'bgWhite',
+	'blackBright',
+	'redBright',
+	'greenBright',
+	'yellowBright',
+	'blueBright',
+	'magentaBright',
+	'cyanBright',
+	'whiteBright',
+	'bgBlackBright',
+	'bgRedBright',
+	'bgGreenBright',
+	'bgYellowBright',
+	'bgBlueBright',
+	'bgMagentaBright',
+	'bgCyanBright',
+	'bgWhiteBright',
+];
+
+describe('raw entrypoint', () => {
+	test('wraps values with expected ansi pairs', () => {
+		expect(raw.red('x')).toBe('\x1b[31mx\x1b[39m');
+		expect(raw.bold('x')).toBe('\x1b[1mx\x1b[22m');
+		expect(raw.bgRed('x')).toBe('\x1b[41mx\x1b[49m');
 	});
 
-	test('disabled returns identity', () => {
-		expect(disabled.red('hello')).toBe('hello');
-		expect(disabled.bold('hello')).toBe('hello');
-		expect(disabled.bgRed('hello')).toBe('hello');
-	});
-
-	test('disabled coerces non-string input', () => {
-		expect(disabled.red(42)).toBe('42');
-		expect(disabled.red(null)).toBe('null');
-		expect(disabled.red(undefined)).toBe('undefined');
-	});
-});
-
-describe('formatters (enabled)', () => {
-	const c = createColors(true);
-
-	test('wraps string in ANSI codes', () => {
-		expect(c.red('err')).toBe('\x1b[31merr\x1b[39m');
-		expect(c.bold('hi')).toBe('\x1b[1mhi\x1b[22m');
-		expect(c.bgRed('bg')).toBe('\x1b[41mbg\x1b[49m');
-	});
-
-	test('coerces non-string input', () => {
-		expect(c.red(0)).toBe('\x1b[31m0\x1b[39m');
-		expect(c.red(null)).toBe('\x1b[31mnull\x1b[39m');
-		expect(c.red(undefined)).toBe('\x1b[31mundefined\x1b[39m');
-	});
-
-	test('handles empty string', () => {
-		expect(c.red('')).toBe('\x1b[31m\x1b[39m');
-	});
-
-	test('handles nested close codes (replaceClose)', () => {
-		// Close code must appear after open.length offset to trigger replacement
-		const result = c.red(`hello\x1b[39mworld`);
-		expect(result).toBe('\x1b[31mhello\x1b[31mworld\x1b[39m');
-	});
-
-	test('bold/dim use compound replace for nesting', () => {
-		const result = c.bold(`hello\x1b[22mworld`);
-		expect(result).toBe('\x1b[1mhello\x1b[22m\x1b[1mworld\x1b[22m');
-	});
-});
-
-describe('all formatters exist', () => {
-	const c = createColors(true);
-	const names: (keyof Colors)[] = [
-		'reset',
-		'bold',
-		'dim',
-		'italic',
-		'underline',
-		'inverse',
-		'hidden',
-		'strikethrough',
-		'black',
-		'red',
-		'green',
-		'yellow',
-		'blue',
-		'magenta',
-		'cyan',
-		'white',
-		'gray',
-		'bgBlack',
-		'bgRed',
-		'bgGreen',
-		'bgYellow',
-		'bgBlue',
-		'bgMagenta',
-		'bgCyan',
-		'bgWhite',
-		'blackBright',
-		'redBright',
-		'greenBright',
-		'yellowBright',
-		'blueBright',
-		'magentaBright',
-		'cyanBright',
-		'whiteBright',
-		'bgBlackBright',
-		'bgRedBright',
-		'bgGreenBright',
-		'bgYellowBright',
-		'bgBlueBright',
-		'bgMagentaBright',
-		'bgCyanBright',
-		'bgWhiteBright',
-	];
-
-	for (const name of names) {
-		test(`${name} is a function`, () => {
-			expect(typeof c[name]).toBe('function');
-		});
-	}
-});
-
-describe('exports', () => {
-	test('isColorSupported is boolean', () => {
-		expect(typeof isColorSupported).toBe('boolean');
+	test('coerces non-string inputs', () => {
+		expect(raw.red(1)).toBe('\x1b[31m1\x1b[39m');
+		expect(raw.red(false)).toBe('\x1b[31mfalse\x1b[39m');
+		expect(raw.red(null)).toBe('\x1b[31mnull\x1b[39m');
 	});
 });
 
-describe('default export', () => {
-	test('is a Colors object', () => {
-		expect(typeof colors.red).toBe('function');
-		expect(typeof colors.isColorSupported).toBe('boolean');
+describe('noop entrypoint', () => {
+	test('returns plain text for all formatters', () => {
+		expect(noop.red('x')).toBe('x');
+		expect(noop.bold('x')).toBe('x');
+		expect(noop.bgRed('x')).toBe('x');
+		expect(noop.red(0)).toBe('0');
 	});
 });
 
-describe('composition', () => {
-	const c = createColors(true);
+describe('auto entrypoint', () => {
+	test('named export matches default object formatter', () => {
+		expect(red('sample')).toBe(auto.red('sample'));
+	});
 
-	test('styles compose correctly', () => {
-		const result = c.bold(c.red('error'));
-		expect(result).toBe('\x1b[1m\x1b[31merror\x1b[39m\x1b[22m');
+	test('detection routes to raw or noop behavior', () => {
+		const expected = isColorSupported ? raw.red('x') : noop.red('x');
+		expect(auto.red('x')).toBe(expected);
+	});
+});
+
+describe('safe entrypoint', () => {
+	test('exports template formatter palette', () => {
+		const names: (keyof TemplatePalette)[] = formatterNames;
+		for (const name of names) {
+			expect(typeof safe[name]).toBe('function');
+		}
+	});
+
+	test('reopens style around interpolations when colors enabled', () => {
+		const nested = safe.red`Error ${safe.yellow`42`}!`;
+		if (!isSafeColorSupported) {
+			expect(nested).toBe('Error 42!');
+			return;
+		}
+
+		expect(nested).toBe('\x1b[31mError \x1b[33m42\x1b[39m\x1b[31m!\x1b[39m');
+	});
+});
+
+describe('palette surface', () => {
+	test('all formatter names exist in raw/noop/auto default objects', () => {
+		for (const name of formatterNames) {
+			expect(typeof raw[name]).toBe('function');
+			expect(typeof noop[name]).toBe('function');
+			expect(typeof auto[name]).toBe('function');
+		}
 	});
 });

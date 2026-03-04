@@ -18,10 +18,30 @@
 		"#dist/ansispeck": {
 			"types": "./dist/index.d.ts",
 			"default": "./dist/index.js"
+		},
+		"#dist/ansispeck/auto": {
+			"types": "./dist/auto.d.ts",
+			"default": "./dist/auto.js"
+		},
+		"#dist/ansispeck/raw": {
+			"types": "./dist/raw.d.ts",
+			"default": "./dist/raw.js"
+		},
+		"#dist/ansispeck/noop": {
+			"types": "./dist/noop.d.ts",
+			"default": "./dist/noop.js"
+		},
+		"#dist/ansispeck/safe": {
+			"types": "./dist/safe.d.ts",
+			"default": "./dist/safe.js"
 		}
 	},
 	"exports": {
 		".": "./dist/index.js",
+		"./auto": "./dist/auto.js",
+		"./noop": "./dist/noop.js",
+		"./raw": "./dist/raw.js",
+		"./safe": "./dist/safe.js",
 		"./package.json": "./package.json"
 	},
 	"types": "./dist/index.d.ts",

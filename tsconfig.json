@@ -28,7 +28,10 @@
 
 		// Path aliases
 		"paths": {
-			"ansispeck": ["./src"]
+			"ansispeck": ["./src/index.ts"],
+			"ansispeck/*": ["./src/*.ts"],
+			"#dist/ansispeck": ["./src/index.ts"],
+			"#dist/ansispeck/*": ["./src/*.ts"]
 		}
 	},
 	"exclude": ["dist", "bench.mjs"]

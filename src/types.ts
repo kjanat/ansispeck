@@ -1,11 +1,14 @@
 /** Input accepted by all formatters. */
-export type Formattable = string | number | null | undefined;
+export type Formattable = string | number | boolean | bigint | null | undefined;
 
 /** Wraps input in ANSI escape codes. */
 export type Formatter = (input: Formattable) => string;
 
+/** Template-tag formatter used by `ansispeck/safe`. */
+export type TemplateFormatter = (strings: TemplateStringsArray, ...values: Formattable[]) => string;
+
 /** ANSI text style modifier names. */
-export type Style =
+export type StyleName =
 	| 'bold'
 	| 'dim'
 	| 'hidden'
@@ -16,7 +19,7 @@ export type Style =
 	| 'underline';
 
 /** Base 8 ANSI foreground color names. */
-type BaseColor =
+type BaseColorName =
 	| 'black'
 	| 'blue'
 	| 'cyan'
@@ -27,23 +30,22 @@ type BaseColor =
 	| 'white'
 	| 'yellow';
 
-/** Only these get `Bright`/`bg` variants (so `gray` won't).
- *
- * Note: `gray` is intentionally excluded from {@linkcode BaseColor} and thus from
- * {@linkcode VariantBaseColor} to prevent invalid keys like
- * `grayBright` or `bgGray`.
- */
-export type VariantBaseColor = Exclude<BaseColor, 'gray'>;
+/** Only these get `Bright`/`bg` variants (so `gray` won't). */
+type VariantBaseColorName = Exclude<BaseColorName, 'gray'>;
 
-/** Union of all valid {@linkcode Colors} property keys. */
-export type ColorKey =
-	| Style
-	| BaseColor // includes 'gray' as a direct key
-	| `${VariantBaseColor}Bright`
-	| `bg${Capitalize<VariantBaseColor>}`
-	| `bg${Capitalize<VariantBaseColor>}Bright`;
+/** Union of all valid formatter keys. */
+export type FormatterName =
+	| StyleName
+	| BaseColorName
+	| `${VariantBaseColorName}Bright`
+	| `bg${Capitalize<VariantBaseColorName>}`
+	| `bg${Capitalize<VariantBaseColorName>}Bright`;
 
-/** All available color/style formatters plus color-support flag. */
-export interface Colors extends Readonly<Record<ColorKey, Formatter>> {
-	readonly isColorSupported: boolean;
-}
+/** Plain formatter palette (raw/auto/noop entry points). */
+export interface Palette extends Readonly<Record<FormatterName, Formatter>> {}
+
+/** Template-tag palette (`ansispeck/safe`). */
+export interface TemplatePalette extends Readonly<Record<FormatterName, TemplateFormatter>> {}
+
+/** Back-compat alias retained for migration ease. */
+export type Colors = Palette;

@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const PACKAGE_JSON_PATH = 'package.json';
-const DTS_PATH = 'dist/index.d.ts';
+const DIST_PATH = 'dist';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -27,10 +27,15 @@ if (typeof author === 'string') {
 
 writeFileSync(PACKAGE_JSON_PATH, `${JSON.stringify(parsedPackageJson)}\n`);
 
-const strippedDts = readFileSync(DTS_PATH, 'utf8')
-	.replace(/\/\*\*[\s\S]*?\*\//g, '')
-	.replace(/^\/\/#[^\n]*\n?/gm, '')
-	.replace(/\n{3,}/g, '\n\n')
-	.trim();
+for (const file of readdirSync(DIST_PATH)) {
+	if (!file.endsWith('.d.ts')) continue;
 
-writeFileSync(DTS_PATH, `${strippedDts}\n`);
+	const dtsPath = `${DIST_PATH}/${file}`;
+	const strippedDts = readFileSync(dtsPath, 'utf8')
+		.replace(/\/\*\*[\s\S]*?\*\//g, '')
+		.replace(/^\/\/#[^\n]*\n?/gm, '')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
+
+	writeFileSync(dtsPath, `${strippedDts}\n`);
+}

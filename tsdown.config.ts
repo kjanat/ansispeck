@@ -3,7 +3,13 @@ import { defineConfig, type UserConfigFn } from 'tsdown';
 const config: UserConfigFn = defineConfig(
 	(_, { ci }) => ({
 		ci,
-		entry: 'src/index.ts',
+		entry: {
+			index: 'src/index.ts',
+			auto: 'src/auto.ts',
+			raw: 'src/raw.ts',
+			noop: 'src/noop.ts',
+			safe: 'src/safe.ts',
+		},
 		dts: {
 			oxc: true,
 			enabled: true,

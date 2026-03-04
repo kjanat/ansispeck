@@ -1,4 +1,4 @@
-import type { Colors } from '#dist/ansispeck';
+import type { Palette } from '#dist/ansispeck/raw';
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 
 execSync('bun bd:ci', { stdio: 'ignore', cwd: import.meta.dirname });
 
-const { default: ansispeck }: { default: Colors } = await import('#dist/ansispeck');
+const { dim }: { dim: Palette['dim'] } = await import('#dist/ansispeck/raw');
 
 declare module 'mitata' {
 	interface ctx {
@@ -273,7 +273,7 @@ function printOverview(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
-			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
+			cells.push(`${val.padStart(colW)} ${dim(tag.padStart(tagW))}`);
 		}
 		console.log(`${lib.padEnd(nameW)}  ${cells.join('  ')}`);
 	}
@@ -282,7 +282,7 @@ function printOverview(result: BenchResult): void {
 	const ciCells = activeSuites.map(s => {
 		const entry = ci95.get(s);
 		if (!entry) return ''.padStart(fullW);
-		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
+		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : dim(`${entry.label} ~`);
 		return text.padStart(fullW);
 	});
 	console.log(`${''.padStart(nameW, '─')}  ${activeSuites.map(() => ''.padStart(fullW, '─')).join('  ')}`);

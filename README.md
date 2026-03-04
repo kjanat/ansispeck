@@ -1,16 +1,6 @@
 # ansispeck
 
-Sub-kilobyte terminal ANSI color formatting.
-
-## Size
-
-| Package       | Runtime     | Gzipped | Types   |
-| ------------- | ----------- | ------- | ------- |
-| ansispeck[^1] | **1.31 KB** | 0.68 KB | 2.21 KB |
-
-## Benchmarks
-
-See [BENCHMARKS.md] for full results across Bun and Node.
+Tiny ANSI formatter with split entrypoints for speed and DX.
 
 ## Install
 
@@ -18,62 +8,71 @@ See [BENCHMARKS.md] for full results across Bun and Node.
 npm install ansispeck
 ```
 
+## Entrypoints
+
+- `ansispeck` - auto detect once (`NO_COLOR`, `FORCE_COLOR`, CLI flags, CI, TTY)
+- `ansispeck/raw` - always emit ANSI (fastest hot path)
+- `ansispeck/noop` - always plain text
+- `ansispeck/safe` - template-tag API that reopens style around interpolations
+
 ## Usage
 
-```ts
-import c from 'ansispeck';
-
-console.log(c.red('Error!'));
-console.log(c.bold(c.green('Success')));
-console.log(c.bgYellow(c.black('Warning')));
-```
-
-### Explicit toggle
+### Auto (default)
 
 ```ts
-import { createColors } from 'ansispeck';
+import { bgYellow, black, bold, red } from 'ansispeck';
 
-const c = createColors(false); // force disable
-console.log(c.red('plain text'));
+console.log(red('Error!'));
+console.log(bold('Strong'));
+console.log(bgYellow(black('Warning')));
 ```
 
-## API
+### Raw (always color)
 
-All formatters accept `string | number | null | undefined` and return `string`.
+```ts
+import { blue, red } from 'ansispeck/raw';
 
-### Styles
+console.log(blue(red('always colored')));
+```
 
-`reset` `bold` `dim` `italic` `underline` `inverse` `hidden` `strikethrough`
+### Noop (always plain text)
 
-### Colors
+```ts
+import { red } from 'ansispeck/noop';
 
-`black` `red` `green` `yellow` `blue` `magenta` `cyan` `white` `gray`
+console.log(red('no escape codes'));
+```
 
-### Bright colors
+### Safe tagged templates
 
-`blackBright` `redBright` `greenBright` `yellowBright` `blueBright` `magentaBright` `cyanBright` `whiteBright`
+```ts
+import { red, yellow } from 'ansispeck/safe';
 
-### Background
+const msg = red`Error ${yellow`E42`} while parsing`;
+console.log(msg);
+```
 
-`bgBlack` `bgRed` `bgGreen` `bgYellow` `bgBlue` `bgMagenta` `bgCyan` `bgWhite`
+## API Shape
 
-### Bright background
+All formatter functions accept:
 
-`bgBlackBright` `bgRedBright` `bgGreenBright` `bgYellowBright` `bgBlueBright` `bgMagentaBright` `bgCyanBright` `bgWhiteBright`
+- `string | number | boolean | bigint | null | undefined`
 
-### Other exports
+And return `string`.
 
-- `createColors(enabled?: boolean)` — create a color set with explicit toggle
-- `isColorSupported` — auto-detected boolean
+Formatter names:
 
-## Color detection
+- styles: `reset bold dim italic underline inverse hidden strikethrough`
+- fg: `black red green yellow blue magenta cyan white gray`
+- bg: `bgBlack bgRed bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite`
+- bright fg/bg variants for non-gray colors
 
-Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.
+## Benchmarks
+
+See [BENCHMARKS.md] for current benchmark tables.
 
 ## License
 
 0BSD
 
 [BENCHMARKS.md]: BENCHMARKS.md
-
-[^1]: ansispeck 0.1.0, `dist/index.js` minified by tsdown.
