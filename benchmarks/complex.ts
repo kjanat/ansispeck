@@ -1,7 +1,7 @@
 import { bench, do_not_optimize, run, summary } from 'mitata';
 
-import ansispeck from '#dist/ansispeck';
 import ansi from 'ansi-colors';
+import ansispeck from 'ansispeck';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
 import kleur from 'kleur';
