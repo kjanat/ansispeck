@@ -158,7 +158,12 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 
 type BenchResult = Awaited<ReturnType<typeof run>>;
 const SELF_LIB = 'ansispeck';
-const BASELINE_LABEL = `${SELF_LIB}/#1`;
+const BASELINE_LABEL = `${SELF_LIB}/ext#1`;
+const INTERNAL_PREFIX = 'ansispeck/';
+
+const isExternalLib = (lib: string): boolean => {
+	return lib !== SELF_LIB && !lib.startsWith(INTERNAL_PREFIX);
+};
 
 interface Parsed {
 	context: BenchResult['context'];
@@ -235,15 +240,18 @@ function fmtTime(ns: number): string {
 function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
 	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
 	for (const [suite, ranking] of parsed.ranked) {
-		const first = ranking[0];
-		if (!first) continue;
-		if (first.lib === SELF_LIB) {
+		const self = ranking.find(entry => entry.lib === SELF_LIB);
+		if (!self) continue;
+
+		const firstExternal = ranking.find(entry => isExternalLib(entry.lib));
+		if (!firstExternal) continue;
+
+		if (self.stats.avg <= firstExternal.stats.avg) {
 			ci95.set(suite, { label: '—', significant: true });
 			continue;
 		}
-		const femto = ranking.find(r => r.lib === SELF_LIB);
-		if (!femto) continue;
-		const { ratio, significant } = welchCI95(first.stats.samples, femto.stats.samples);
+
+		const { ratio, significant } = welchCI95(firstExternal.stats.samples, self.stats.samples);
 		ci95.set(suite, { label: `${ratio.toFixed(2)}x`, significant });
 	}
 	return ci95;
@@ -294,7 +302,7 @@ function printOverview(result: BenchResult): void {
 	console.log(`${BASELINE_LABEL.padEnd(nameW)}  ${ciCells.join('  ')}`);
 
 	console.log('');
-	console.log('  * = fastest, — = ansispeck is #1, ~ = not significant');
+	console.log('  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant');
 }
 
 /** npm package name from specifier (handles scoped + subpaths) */

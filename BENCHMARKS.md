@@ -3,7 +3,7 @@
 Measured with [mitata](https://github.com/evanwashere/mitata) on AMD Ryzen 9 3900X.
 Each runtime table uses median values across 5 full benchmark runs.
 Rankings shown per column (`*` = fastest, `#N` = Nth place).
-Bottom row: ansispeck vs the fastest library (median ratio).
+Bottom row: ansispeck vs the fastest external library (median ratio).
 
 ## Suites
 
@@ -46,7 +46,7 @@ ansi-colors    270.79 ns  #7     1.92 µs  #7   480.77 µs  #7     4.58 µs  #4
 ansispeck/#1               —           1.12x               —           1.04x
 ```
 
-`*` = fastest, `—` = ansispeck is #1
+`*` = fastest, `—` = ansispeck beats fastest external lib
 
 ## Run locally
 
