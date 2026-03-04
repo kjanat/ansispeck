@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - TBD
+## [1.0.0] - TBD
+
+### Added
+
+- Split runtime entrypoints: `ansispeck`/`ansispeck/auto`, `ansispeck/raw`, `ansispeck/noop`, `ansispeck/safe`, `ansispeck/rope`
+- `safe` tagged-template API for interpolation-safe styled composition
+- `rope` chunk builder API for O(1) composition and O(n) render
+- Benchmark coverage for ansispeck entrypoints (`auto`, `raw`, `noop`, `safe`, `rope`) in simple/complex/recursion/loading suites
+- `just` task runner workflows for auto/forced benchmark modes and release hooks (`prepack`/`postpack`)
+
+### Changed
+
+- Root `ansispeck` behavior now mirrors `ansispeck/auto` exactly (import-time one-shot env detection)
+- Benchmark CI95 baseline now compares `ansispeck` against fastest external library (`ansispeck/ext#1`)
+- Build/package config now emits and exports dedicated entrypoint artifacts (`dist/{auto,raw,noop,safe,rope}`)
+- README and benchmark docs now describe entrypoint semantics and forced/auto benchmark commands
+
+### Fixed
+
+- Auto color detection precedence now respects `FORCE_COLOR` / `--color` before `NO_COLOR` / `--no-color`
+- Benchmark recursion suite now avoids constant-fold artifacts and stabilizes baseline reporting
+
+## [0.1.0] - 2026-03-03
 
 ### Added
 
@@ -47,4 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Welch CI computation now guards too-small sample sets
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)` for cross-platform URL/path correctness
 
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.1.0...HEAD
+[1.0.0]: https://github.com/kjanat/ansispeck/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/kjanat/ansispeck/releases/tag/v0.1.0
+
+<!--markdownlint-disable-file MD024-->
