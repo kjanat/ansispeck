@@ -15,6 +15,21 @@ const ME = `${E}22m`; // modifier end (bold/dim share this close code)
 /** Build an ANSI code from a numeric SGR parameter. */
 const c = (n: number): string => `${E}${n}m`;
 
+const RESET = c(0);
+const BOLD = c(1);
+const DIM = c(2);
+const ITALIC = c(3);
+const UNDERLINE = c(4);
+const INVERSE = c(7);
+const HIDDEN = c(8);
+const STRIKETHROUGH = c(9);
+
+const ITALIC_END = c(23);
+const UNDERLINE_END = c(24);
+const INVERSE_END = c(27);
+const HIDDEN_END = c(28);
+const STRIKETHROUGH_END = c(29);
+
 const p = globalThis.process;
 const argv: readonly string[] = p?.argv ?? [];
 const env: Record<string, string | undefined> = p?.env ?? {};
@@ -53,75 +68,22 @@ function fmt(open: string, close: string, replace: string = open): Formatter {
 
 const noop: Formatter = (input) => '' + input;
 
-// If colors are disabled, return a single shared object instead of building ~30 closures.
-const disabledColors: Colors = {
-	isColorSupported: false,
-
-	reset: noop,
-	bold: noop,
-	dim: noop,
-	italic: noop,
-	underline: noop,
-	inverse: noop,
-	hidden: noop,
-	strikethrough: noop,
-
-	black: noop,
-	red: noop,
-	green: noop,
-	yellow: noop,
-	blue: noop,
-	magenta: noop,
-	cyan: noop,
-	white: noop,
-	gray: noop,
-
-	bgBlack: noop,
-	bgRed: noop,
-	bgGreen: noop,
-	bgYellow: noop,
-	bgBlue: noop,
-	bgMagenta: noop,
-	bgCyan: noop,
-	bgWhite: noop,
-
-	blackBright: noop,
-	redBright: noop,
-	greenBright: noop,
-	yellowBright: noop,
-	blueBright: noop,
-	magentaBright: noop,
-	cyanBright: noop,
-	whiteBright: noop,
-
-	bgBlackBright: noop,
-	bgRedBright: noop,
-	bgGreenBright: noop,
-	bgYellowBright: noop,
-	bgBlueBright: noop,
-	bgMagentaBright: noop,
-	bgCyanBright: noop,
-	bgWhiteBright: noop,
-};
-
 /** Create a color set with explicit enabled/disabled toggle. */
 function createColors(enabled: boolean = isColorSupported): Colors {
-	if (!enabled) return disabledColors;
-	const f = enabled ? fmt : (): Formatter => noop;
-	const fg = (n: number): Formatter => f(c(n), FG);
-	const bg = (n: number): Formatter => f(c(n), BG);
-	const R = c(0);
+	const formatterFactory = enabled ? fmt : (): Formatter => noop;
+	const fg = (n: number): Formatter => formatterFactory(c(n), FG);
+	const bg = (n: number): Formatter => formatterFactory(c(n), BG);
 	return {
 		isColorSupported: enabled,
 
-		reset: f(R, R),
-		bold: f(c(1), ME, ME + c(1)),
-		dim: f(c(2), ME, ME + c(2)),
-		italic: f(c(3), c(23)),
-		underline: f(c(4), c(24)),
-		inverse: f(c(7), c(27)),
-		hidden: f(c(8), c(28)),
-		strikethrough: f(c(9), c(29)),
+		reset: formatterFactory(RESET, RESET),
+		bold: formatterFactory(BOLD, ME, ME + BOLD),
+		dim: formatterFactory(DIM, ME, ME + DIM),
+		italic: formatterFactory(ITALIC, ITALIC_END),
+		underline: formatterFactory(UNDERLINE, UNDERLINE_END),
+		inverse: formatterFactory(INVERSE, INVERSE_END),
+		hidden: formatterFactory(HIDDEN, HIDDEN_END),
+		strikethrough: formatterFactory(STRIKETHROUGH, STRIKETHROUGH_END),
 
 		black: fg(30),
 		red: fg(31),
