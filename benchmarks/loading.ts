@@ -2,10 +2,10 @@ import { bench, group, run } from 'mitata';
 
 const DEFAULT_COUNT = 1;
 
-export function register({ count = DEFAULT_COUNT } = {}): void {
+export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
 	group(() => {
 		bench('ansispeck', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/index.js');
+			for (let i = 0; i < count; i++) await import('#dist/ansispeck');
 		});
 		bench('picocolors', async () => {
 			for (let i = 0; i < count; i++) await import('picocolors');

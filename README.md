@@ -8,11 +8,9 @@ Sub-kilobyte terminal ANSI color formatting.
 | ------------- | ----------- | ------- | ------- |
 | ansispeck[^1] | **1.31 KB** | 0.68 KB | 2.21 KB |
 
-[^1]: ansispeck 0.1.0, `dist/index.js` minified by tsdown.
-
 ## Benchmarks
 
-See [BENCHMARKS.md](BENCHMARKS.md) for full results across Bun and Node.
+See [BENCHMARKS.md] for full results across Bun and Node.
 
 ## Install
 
@@ -75,3 +73,7 @@ Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY statu
 ## License
 
 0BSD
+
+[BENCHMARKS.md]: BENCHMARKS.md
+
+[^1]: ansispeck 0.1.0, `dist/index.js` minified by tsdown.

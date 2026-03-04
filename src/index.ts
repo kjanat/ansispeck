@@ -2,83 +2,32 @@
  * @module ansispeck
  * Sub-kilobyte terminal ANSI color formatting.
  */
+/** biome-ignore-all lint/style/useTemplate: perf */
 
-/** Input accepted by all formatters. */
-export type Formattable = string | number | null | undefined;
-
-/** Wraps input in ANSI escape codes. */
-export type Formatter = (input: Formattable) => string;
-
-/** All available color/style formatters plus color-support flag. */
-export interface Colors {
-	readonly isColorSupported: boolean;
-
-	readonly reset: Formatter;
-	readonly bold: Formatter;
-	readonly dim: Formatter;
-	readonly italic: Formatter;
-	readonly underline: Formatter;
-	readonly inverse: Formatter;
-	readonly hidden: Formatter;
-	readonly strikethrough: Formatter;
-
-	readonly black: Formatter;
-	readonly red: Formatter;
-	readonly green: Formatter;
-	readonly yellow: Formatter;
-	readonly blue: Formatter;
-	readonly magenta: Formatter;
-	readonly cyan: Formatter;
-	readonly white: Formatter;
-	readonly gray: Formatter;
-
-	readonly bgBlack: Formatter;
-	readonly bgRed: Formatter;
-	readonly bgGreen: Formatter;
-	readonly bgYellow: Formatter;
-	readonly bgBlue: Formatter;
-	readonly bgMagenta: Formatter;
-	readonly bgCyan: Formatter;
-	readonly bgWhite: Formatter;
-
-	readonly blackBright: Formatter;
-	readonly redBright: Formatter;
-	readonly greenBright: Formatter;
-	readonly yellowBright: Formatter;
-	readonly blueBright: Formatter;
-	readonly magentaBright: Formatter;
-	readonly cyanBright: Formatter;
-	readonly whiteBright: Formatter;
-
-	readonly bgBlackBright: Formatter;
-	readonly bgRedBright: Formatter;
-	readonly bgGreenBright: Formatter;
-	readonly bgYellowBright: Formatter;
-	readonly bgBlueBright: Formatter;
-	readonly bgMagentaBright: Formatter;
-	readonly bgCyanBright: Formatter;
-	readonly bgWhiteBright: Formatter;
-}
+import type { Colors, Formatter } from './types.ts';
 
 // Shared ANSI fragments — hoisted to avoid repeating in every formatter call
-const E = '\x1b[';
+const E = `\u{1b}[`; // `\u{1b}` is equal to `\x1b`, ``, and `\u001b`
 const FG = `${E}39m`;
 const BG = `${E}49m`;
 const ME = `${E}22m`; // modifier end (bold/dim share this close code)
 
 /** Build an ANSI code from a numeric SGR parameter. */
-function c(n: number): string {
-	return `${E}${n}m`;
-}
+const c = (n: number): string => `${E}${n}m`;
 
 const p = globalThis.process;
 const argv: readonly string[] = p?.argv ?? [];
 const env: Record<string, string | undefined> = p?.env ?? {};
 
 /** Whether the current environment supports ANSI colors. */
-export const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-color'))
-	&& !!(env.FORCE_COLOR || argv.includes('--color') || p?.platform === 'win32'
-		|| (p?.stdout as { isTTY?: boolean })?.isTTY && env.TERM !== 'dumb' || env.CI);
+const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-color'))
+	&& !!(
+		env.FORCE_COLOR
+		|| argv.includes('--color')
+		|| p?.platform === 'win32'
+		|| ((p?.stdout as { isTTY?: boolean })?.isTTY && env.TERM !== 'dumb')
+		|| env.CI
+	);
 
 /**
  * Wraps input in ANSI open/close codes, replacing nested close codes to prevent style leaks.
@@ -86,26 +35,78 @@ export const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-c
  */
 function fmt(open: string, close: string, replace: string = open): Formatter {
 	return (input) => {
-		let s = '' + input;
-		let i = s.indexOf(close, open.length);
-		if (~i) {
-			let result = '';
-			let cursor = 0;
+		let inputAsString = '' + input;
+		let closeIndex = inputAsString.indexOf(close, open.length);
+		if (~closeIndex) {
+			let rebuiltString = '';
+			let readCursor = 0;
 			do {
-				result += s.substring(cursor, i) + replace;
-				cursor = i + close.length;
-				i = s.indexOf(close, cursor);
-			} while (~i);
-			s = result + s.substring(cursor);
+				rebuiltString += inputAsString.substring(readCursor, closeIndex) + replace;
+				readCursor = closeIndex + close.length;
+				closeIndex = inputAsString.indexOf(close, readCursor);
+			} while (~closeIndex);
+			inputAsString = rebuiltString + inputAsString.substring(readCursor);
 		}
-		return open + s + close;
+		return open + inputAsString + close;
 	};
 }
 
 const noop: Formatter = (input) => '' + input;
 
+// If colors are disabled, return a single shared object instead of building ~30 closures.
+const disabledColors: Colors = {
+	isColorSupported: false,
+
+	reset: noop,
+	bold: noop,
+	dim: noop,
+	italic: noop,
+	underline: noop,
+	inverse: noop,
+	hidden: noop,
+	strikethrough: noop,
+
+	black: noop,
+	red: noop,
+	green: noop,
+	yellow: noop,
+	blue: noop,
+	magenta: noop,
+	cyan: noop,
+	white: noop,
+	gray: noop,
+
+	bgBlack: noop,
+	bgRed: noop,
+	bgGreen: noop,
+	bgYellow: noop,
+	bgBlue: noop,
+	bgMagenta: noop,
+	bgCyan: noop,
+	bgWhite: noop,
+
+	blackBright: noop,
+	redBright: noop,
+	greenBright: noop,
+	yellowBright: noop,
+	blueBright: noop,
+	magentaBright: noop,
+	cyanBright: noop,
+	whiteBright: noop,
+
+	bgBlackBright: noop,
+	bgRedBright: noop,
+	bgGreenBright: noop,
+	bgYellowBright: noop,
+	bgBlueBright: noop,
+	bgMagentaBright: noop,
+	bgCyanBright: noop,
+	bgWhiteBright: noop,
+};
+
 /** Create a color set with explicit enabled/disabled toggle. */
-export function createColors(enabled: boolean = isColorSupported): Colors {
+function createColors(enabled: boolean = isColorSupported): Colors {
+	if (!enabled) return disabledColors;
 	const f = enabled ? fmt : (): Formatter => noop;
 	const fg = (n: number): Formatter => f(c(n), FG);
 	const bg = (n: number): Formatter => f(c(n), BG);
@@ -165,10 +166,12 @@ export function createColors(enabled: boolean = isColorSupported): Colors {
  * Default color instance, auto-detected from environment.
  *
  * @example
- * ```ts
  * import c from 'ansispeck';
+ *
  * console.log(c.red('error'));
- * ```
  */
 const colors: Colors = createColors();
-export default colors;
+
+// export default colors;
+export { colors, colors as default, createColors, isColorSupported };
+export type { Colors, Formattable, Formatter } from './types.ts';

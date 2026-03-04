@@ -14,25 +14,27 @@
 	"license": "0BSD",
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
+	"imports": {
+		"#dist/ansispeck": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
 	"exports": {
 		".": "./dist/index.js",
 		"./package.json": "./package.json"
 	},
+	"types": "./dist/index.d.ts",
 	"files": [
 		"dist"
 	],
 	"scripts": {
 		"bd": "tsdown",
-		"bench": "bun bench:bun; bun bench:node",
-		"bench:bun": "bun --bun bench.ts",
-		"bench:node": "node bench.ts",
-		"dev": "tsdown --watch",
+		"bd:ci": "CI=1 tsdown",
 		"fmt": "dprint fmt",
-		"lint": "biome check src/",
-		"prepack": "bun --bun bd -l error && bun scripts/prepack.ts && bunx prettier README.md --write >/dev/null",
-		"postpack": "git restore package.json README.md >/dev/null",
-		"prepublishOnly": "bun test && bun --bun typecheck",
-		"tar": "bun pm pack --quiet | awk 'NF{line=$0} END{print line}'",
+		"prepack": "just prepack",
+		"postpack": "just postpack",
+		"prepublishOnly": "just prepublishOnly",
 		"test": "bun test",
 		"typecheck": "tsgo --noEmit"
 	},
@@ -50,6 +52,7 @@
 		"mitata": "^1.0.34",
 		"picocolors": "^1.1.1",
 		"publint": "^0.3",
+		"rust-just": "^1.46.0",
 		"tsdown": "0.21.0-beta.2",
 		"typescript": "^5"
 	},

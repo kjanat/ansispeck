@@ -16,6 +16,7 @@ delete parsedPackageJson.scripts;
 delete parsedPackageJson.devDependencies;
 delete parsedPackageJson.packageManager;
 delete parsedPackageJson.volta;
+delete parsedPackageJson.imports;
 
 const author = parsedPackageJson.author;
 if (typeof author === 'string') {

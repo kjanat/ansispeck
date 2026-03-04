@@ -22,7 +22,14 @@
 		// Stricter flags
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": false
+		"noPropertyAccessFromIndexSignature": false,
+		"isolatedDeclarations": true,
+		"composite": true,
+
+		// Path aliases
+		"paths": {
+			"ansispeck": ["./src"]
+		}
 	},
-	"exclude": ["dist"]
+	"exclude": ["dist", "bench.mjs"]
 }

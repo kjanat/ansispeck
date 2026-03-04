@@ -51,13 +51,15 @@ ansispeck/#1               —           1.12x               —           1.04x
 ## Run locally
 
 ```sh
-bun bench        # both runtimes
-bun bench:bun    # bun only
-bun bench:node   # node only
+just bench        # both runtimes, current env
+just bench-bun    # bun only, current env
+just bench-node   # node only, current env
 
 # CI-parity runs
-FORCE_COLOR=1 bun --bun bench.ts -f markdown
-FORCE_COLOR=1 node bench.ts -f markdown
-NO_COLOR=1 bun --bun bench.ts -f markdown
-NO_COLOR=1 node bench.ts -f markdown
+just bench-md-forced
+just bench-md-auto
+
+# Explicit env behavior (useful if .envrc sets FORCE_COLOR)
+just bench-node-forced
+just bench-node-auto
 ```

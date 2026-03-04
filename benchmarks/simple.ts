@@ -1,16 +1,16 @@
 import { bench, boxplot, do_not_optimize, run } from 'mitata';
 
+import ansispeck from '#dist/ansispeck';
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 
-export function register({ count = DEFAULT_COUNT } = {}): void {
+export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
 	let n = 0;
 	let sink = '';
 	boxplot(() => {

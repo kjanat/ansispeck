@@ -1,11 +1,13 @@
+import type { Colors } from '#dist/ansispeck';
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import { basename, relative } from 'node:path';
 import { parseArgs } from 'node:util';
-import type { Colors } from './src/index.ts';
 
-execSync('bun bd', { stdio: 'ignore' });
+execSync('bun bd:ci', { stdio: 'ignore', cwd: import.meta.dirname });
 
-const { default: ansispeck }: { default: Colors } = await import('./dist/index.js');
+const { default: ansispeck }: { default: Colors } = await import('#dist/ansispeck');
 
 declare module 'mitata' {
 	interface ctx {
@@ -36,22 +38,22 @@ const LIB_ORDER = [
 const { values } = parseArgs({
 	options: {
 		format: { type: 'string', short: 'f', default: 'overview' },
-		filter: { type: 'string' },
+		filter: { type: 'string', short: 'F' },
 		help: { type: 'boolean', short: 'h', default: false },
 	},
 	strict: false,
 });
 
 if (values.help) {
-	console.log(`Usage: bench.ts [options]
+	console.log(`Usage: ${relative(process.cwd(), import.meta.filename) || basename(import.meta.filename)} [options]
 
 Options:
   -f, --format <fmt>   Output format (default: overview)
-                       overview   terminal table with rankings + CI95
-                       markdown   GitHub-flavored markdown table
-                       json       raw JSON
-                       quiet      suppress mitata output (used internally)
-                       mitata     default mitata output
+                       overview      terminal table with rankings + CI95
+                       markdown|md   GitHub-flavored markdown table
+                       json          raw JSON
+                       quiet         suppress mitata output (used internally)
+                       mitata        default mitata output
   --filter <regex>     Only run benchmarks matching <regex>
   -h, --help           Show this help`);
 	process.exit(0);
@@ -62,7 +64,7 @@ complex({ count: 1 });
 recursion({ count: 10_000 });
 loading({ count: 1 });
 
-const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown'] as const;
+const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown', 'md'] as const;
 type Format = (typeof FORMATS)[number];
 
 const fmt = String(values.format);
@@ -80,8 +82,8 @@ if (typeof values.filter === 'string') {
 		process.exit(1);
 	}
 }
-const isCustom = fmt === 'overview' || fmt === 'markdown';
-const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown'>);
+const isCustom = fmt === 'overview' || fmt === 'markdown' || fmt === 'md';
+const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown' | 'md'>);
 
 const result = await run({ format, filter });
 
@@ -256,8 +258,8 @@ function printOverview(result: BenchResult): void {
 	console.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	console.log(''.padStart(nameW) + '  ' + activeSuites.map(s => s.padStart(fullW)).join('  '));
-	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	console.log(`${''.padStart(nameW)}  ${activeSuites.map(s => s.padStart(fullW)).join('  ')}`);
+	console.log(`${''.padStart(nameW, '─')}  ${activeSuites.map(() => ''.padStart(fullW, '─')).join('  ')}`);
 
 	// rows
 	for (const lib of libs) {
@@ -273,7 +275,7 @@ function printOverview(result: BenchResult): void {
 			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
 			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
 		}
-		console.log(lib.padEnd(nameW) + '  ' + cells.join('  '));
+		console.log(`${lib.padEnd(nameW)}  ${cells.join('  ')}`);
 	}
 
 	// CI95 footer row
@@ -283,22 +285,34 @@ function printOverview(result: BenchResult): void {
 		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
 		return text.padStart(fullW);
 	});
-	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	console.log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
+	console.log(`${''.padStart(nameW, '─')}  ${activeSuites.map(() => ''.padStart(fullW, '─')).join('  ')}`);
+	console.log(`${BASELINE_LABEL.padEnd(nameW)}  ${ciCells.join('  ')}`);
 
 	console.log('');
 	console.log('  * = fastest, — = ansispeck is #1, ~ = not significant');
 }
 
-const NPM_URLS: Record<string, string> = {
-	ansispeck: 'https://www.npmjs.com/package/ansispeck',
-	picocolors: 'https://www.npmjs.com/package/picocolors',
-	colorette: 'https://www.npmjs.com/package/colorette',
-	kleur: 'https://www.npmjs.com/package/kleur',
-	'kleur/colors': 'https://www.npmjs.com/package/kleur',
-	chalk: 'https://www.npmjs.com/package/chalk',
-	'ansi-colors': 'https://www.npmjs.com/package/ansi-colors',
+/** npm package name from specifier (handles scoped + subpaths) */
+const pkgName = (s: string): string => s.startsWith('@') ? s.split('/').slice(0, 2).join('/') : s.split('/')[0] ?? s;
+
+/** Read installed version from the resolved package's package.json */
+const readPkgVersion = async (specifier: string): Promise<string> => {
+	const name = pkgName(specifier);
+	const entry = import.meta.resolve(specifier);
+	const marker = `node_modules/${name}/`;
+	const i = entry.lastIndexOf(marker);
+	const base = i !== -1 ? entry.slice(0, i + marker.length) : new URL('.', import.meta.url).href;
+	const { version }: { version: string } = JSON.parse(await readFile(new URL('package.json', base), 'utf-8'));
+	return version;
 };
+
+const NPM_URLS: Record<string, string> = Object.fromEntries(
+	await Promise.all(LIB_ORDER.map(async specifier => {
+		const name = pkgName(specifier);
+		const version = await readPkgVersion(specifier);
+		return [specifier, `https://www.npmjs.com/package/${name}/v/${version}`];
+	})),
+);
 
 function printMarkdown(result: BenchResult): void {
 	const parsed = parse(result);
@@ -360,4 +374,4 @@ function printMarkdown(result: BenchResult): void {
 
 // dispatch — must be after all declarations to avoid TDZ
 if (fmt === 'overview') printOverview(result);
-if (fmt === 'markdown') printMarkdown(result);
+if (fmt === 'markdown' || fmt === 'md') printMarkdown(result);

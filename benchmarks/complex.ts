@@ -1,16 +1,16 @@
 import { bench, do_not_optimize, run, summary } from 'mitata';
 
+import ansispeck from '#dist/ansispeck';
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 
-export function register({ count = DEFAULT_COUNT } = {}): void {
+export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
 	let n = 0;
 	let sink = '';
 	summary(() => {
@@ -69,7 +69,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ kleur.green('.')
 					+ kleur.bgRed(kleur.black(' ERROR '))
 					+ kleur.red(
-						' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++n}`),
+						` Add plugin ${kleur.yellow('name')} to use time limit with ${kleur.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);
@@ -98,7 +98,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ chalk.green('.')
 					+ chalk.bgRed(chalk.black(' ERROR '))
 					+ chalk.red(
-						' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++n}`),
+						` Add plugin ${chalk.yellow('name')} to use time limit with ${chalk.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);
@@ -111,7 +111,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ ansi.green('.')
 					+ ansi.bgRed(ansi.black(' ERROR '))
 					+ ansi.red(
-						' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++n}`),
+						` Add plugin ${ansi.yellow('name')} to use time limit with ${ansi.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);
