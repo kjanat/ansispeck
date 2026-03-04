@@ -20,11 +20,12 @@ declare module 'mitata' {
 }
 
 import { register as complex } from './benchmarks/complex.ts';
+import { register as deferred } from './benchmarks/deferred.ts';
 import { register as loading } from './benchmarks/loading.ts';
 import { register as recursion } from './benchmarks/recursion.ts';
 import { register as simple } from './benchmarks/simple.ts';
 
-const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
+const SUITES = ['simple', 'complex', 'recursion', 'deferred-build', 'loading'] as const;
 const LIB_ORDER = [
 	'ansispeck',
 	'ansispeck/auto',
@@ -76,6 +77,7 @@ Options:
 simple({ count: 1 });
 complex({ count: 1 });
 recursion({ count: 10_000 });
+deferred({ layers: 32, repeat: 32 });
 loading({ count: 1 });
 
 const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown', 'md'] as const;

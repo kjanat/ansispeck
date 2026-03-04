@@ -10,16 +10,6 @@ unexport NO_COLOR
 bench_bun_command := "bun --bun bench.ts"
 bench_node_command := "node bench.ts"
 prepack_backup_marker := ".git/.prepack-backup-dir"
-prepack_cleanup_command := if shell('test -f "$1" && printf 1 || printf 0', prepack_backup_marker) == "1" {
-    "previous_backup_dir=\"$(cat " + prepack_backup_marker + ")\"; [[ -n \"$previous_backup_dir\" ]] && rm -rf \"$previous_backup_dir\"; rm -f " + prepack_backup_marker
-} else {
-    "true"
-}
-postpack_restore_command := if shell('test -f "$1" && printf 1 || printf 0', prepack_backup_marker) == "1" {
-    "backup_dir=\"$(cat " + prepack_backup_marker + ")\"; cp \"$backup_dir/package.json\" package.json; cp \"$backup_dir/README.md\" README.md; rm -rf \"$backup_dir\" " + prepack_backup_marker
-} else {
-    "true"
-}
 
 # list recipes
 default:
@@ -81,7 +71,7 @@ bench-md-forced: (bench-bun-forced "markdown") (bench-node-forced "markdown")
 # prepare package contents
 [group('release')]
 prepack:
-    {{ prepack_cleanup_command }}
+    if [[ -f {{ prepack_backup_marker }} ]]; then echo "prepack backup marker exists; run just postpack first" >&2; exit 1; fi
     backup_dir="$(mktemp -d -t ansispeck-prepack.XXXXXX)" && cp package.json README.md "$backup_dir"/ && printf '%s' "$backup_dir" > {{ prepack_backup_marker }}
     bun --bun bd -l error
     bun scripts/prepack.ts
@@ -90,7 +80,8 @@ prepack:
 # restore files changed by prepack
 [group('release')]
 postpack:
-    {{ postpack_restore_command }}
+    if [[ ! -f {{ prepack_backup_marker }} ]]; then echo "missing prepack backup marker; refusing silent no-op" >&2; exit 1; fi
+    backup_dir="$(cat {{ prepack_backup_marker }})"; if [[ -z "$backup_dir" || ! -d "$backup_dir" ]]; then echo "invalid prepack backup dir: $backup_dir" >&2; exit 1; fi; cp "$backup_dir/package.json" package.json; cp "$backup_dir/README.md" README.md; rm -rf "$backup_dir" {{ prepack_backup_marker }}
 
 # run publish checks
 [group('release')]

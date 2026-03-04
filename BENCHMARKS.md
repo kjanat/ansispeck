@@ -9,12 +9,13 @@ Bottom row: ansispeck vs the fastest external library (ratio).
 
 ## Suites
 
-| Suite         | What it measures                                                     |
-| ------------- | -------------------------------------------------------------------- |
-| **simple**    | Single `red()` call — raw per-call overhead                          |
-| **complex**   | 10 nested/chained style calls — real-world formatting                |
-| **recursion** | `blue(red(input).repeat(10_000))` — large string with nested escapes |
-| **loading**   | `await import(...)` — module parse + init time                       |
+| Suite              | What it measures                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| **simple**         | Single `red()` call — raw per-call overhead                                             |
+| **complex**        | 10 nested/chained style calls — real-world formatting                                   |
+| **recursion**      | `blue(red(input).repeat(10_000))` — large string with nested escapes                    |
+| **deferred-build** | 32 staged wrappers over repeated payload; rope only builds chunk tree (render deferred) |
+| **loading**        | `await import(...)` — module parse + init time                                          |
 
 ## ansispeck exports in tables
 
@@ -30,18 +31,18 @@ Bottom row: ansispeck vs the fastest external library (ratio).
 ```text
                          simple         complex       recursion         loading
 ───────────────  ──────────────  ──────────────  ──────────────  ──────────────
-ansispeck          72.28 ns  #2   176.97 ns  #3   434.11 ns  #4     2.22 µs   *
-ansispeck/auto     73.62 ns  #3   181.31 ns  #4   424.75 ns  #3     2.42 µs  #6
-ansispeck/raw      76.30 ns  #4   172.95 ns  #2   424.38 ns  #2     2.31 µs  #4
-ansispeck/safe    154.10 ns  #5   338.46 ns  #5   456.32 ns  #5     2.27 µs  #3
-ansispeck/rope    933.63 ns #12     4.43 µs #12     1.63 ms #11     2.26 µs  #2
-ansispeck/noop     71.76 ns   *    76.33 ns   *   395.09 ns   *     2.38 µs  #5
-picocolors        172.69 ns  #7   801.98 ns  #6   854.10 µs  #9     3.35 µs #12
-colorette         168.76 ns  #6   888.19 ns  #7     1.76 ms #12     2.84 µs  #8
-kleur             187.27 ns  #9     1.40 µs  #9   653.42 µs  #7     3.24 µs #10
-kleur/colors      178.84 ns  #8     1.03 µs  #8   629.58 µs  #6     2.94 µs  #9
-chalk             189.12 ns #10     1.60 µs #10     1.49 ms #10     2.81 µs  #7
-ansi-colors       329.21 ns #11     2.07 µs #11   660.49 µs  #8     3.24 µs #11
+ansispeck          56.96 ns   *   129.91 ns  #4   331.61 ns  #4     1.64 µs   *
+ansispeck/auto     59.73 ns  #3   128.69 ns  #2   329.94 ns  #3     1.76 µs  #4
+ansispeck/raw      60.53 ns  #4   128.84 ns  #3   326.50 ns  #2     1.76 µs  #5
+ansispeck/safe    123.30 ns  #5   240.90 ns  #5   365.02 ns  #5     1.75 µs  #2
+ansispeck/rope    310.66 ns #12     3.71 µs #12     1.18 ms #11     1.78 µs  #6
+ansispeck/noop     58.03 ns  #2    63.82 ns   *   297.92 ns   *     1.75 µs  #3
+picocolors        144.87 ns  #8   603.19 ns  #6   660.85 µs  #9     2.48 µs #12
+colorette         134.29 ns  #6   698.55 ns  #7     1.33 ms #12     2.24 µs  #9
+kleur             151.20 ns #10     1.10 µs #10   483.55 µs  #8     2.20 µs  #8
+kleur/colors      137.47 ns  #7   804.98 ns  #8   464.18 µs  #6     2.28 µs #10
+chalk             146.46 ns  #9   844.53 ns  #9     1.12 ms #10     2.17 µs  #7
+ansi-colors       250.63 ns #11     1.66 µs #11   480.52 µs  #7     2.46 µs #11
 ───────────────  ──────────────  ──────────────  ──────────────  ──────────────
 ansispeck/ext#1               —               —               —               —
 ```
@@ -51,20 +52,20 @@ ansispeck/ext#1               —               —               —           
 ```text
                          simple         complex       recursion         loading
 ───────────────  ──────────────  ──────────────  ──────────────  ──────────────
-ansispeck          53.96 ns  #3   228.39 ns  #2   184.68 ns  #4     7.52 µs  #8
-ansispeck/auto     51.99 ns  #2   231.83 ns  #3   182.81 ns  #3     5.40 µs   *
-ansispeck/raw      54.51 ns  #4   233.72 ns  #4   181.38 ns  #2     5.41 µs  #2
-ansispeck/safe     85.73 ns  #5   438.67 ns  #6   251.43 ns  #5     5.44 µs  #3
-ansispeck/rope    691.47 ns #12     3.76 µs #12     3.23 ms #11     5.45 µs  #4
-ansispeck/noop     39.94 ns   *    49.66 ns   *   155.81 ns   *     5.47 µs  #5
-picocolors         91.41 ns  #7   342.58 ns  #5   765.72 µs  #9    12.30 µs #12
-colorette          87.24 ns  #6   542.95 ns  #7               —    10.68 µs #11
-kleur             104.44 ns  #9   779.65 ns  #9   662.07 µs  #7    10.66 µs #10
-kleur/colors       99.81 ns  #8   682.76 ns  #8   655.60 µs  #6     8.11 µs  #9
-chalk             110.67 ns #10   981.54 ns #10     1.32 ms #10     6.14 µs  #6
-ansi-colors       325.17 ns #11     2.51 µs #11   679.63 µs  #8     6.97 µs  #7
+ansispeck          44.04 ns  #4   174.98 ns  #4   166.18 ns  #2     5.03 µs  #9
+ansispeck/auto     42.60 ns  #2   171.90 ns  #3   167.39 ns  #4     4.94 µs  #6
+ansispeck/raw      43.51 ns  #3   170.36 ns  #2   166.86 ns  #3     4.92 µs  #5
+ansispeck/safe     62.07 ns  #5   301.34 ns  #6   213.71 ns  #5     4.88 µs  #4
+ansispeck/rope    531.32 ns #12     2.86 µs #12     2.18 ms #11     4.83 µs   *
+ansispeck/noop     32.17 ns   *    38.19 ns   *   155.43 ns   *     4.86 µs  #3
+picocolors         70.10 ns  #6   256.74 ns  #5   572.43 µs  #9     5.79 µs #12
+colorette          70.10 ns  #7   398.28 ns  #7               —     5.57 µs #10
+kleur              84.50 ns  #9   593.96 ns  #9   523.49 µs  #7     4.95 µs  #7
+kleur/colors       75.11 ns  #8   496.00 ns  #8   521.47 µs  #6     4.85 µs  #2
+chalk              85.01 ns #10   835.04 ns #10   944.52 µs #10     4.99 µs  #8
+ansi-colors       275.53 ns #11     2.01 µs #11   534.66 µs  #8     5.74 µs #11
 ───────────────  ──────────────  ──────────────  ──────────────  ──────────────
-ansispeck/ext#1               —               —               —           1.22x
+ansispeck/ext#1               —               —               —           1.04x
 ```
 
 `*` = fastest, `—` = ansispeck beats fastest external lib

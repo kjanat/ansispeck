@@ -11,6 +11,7 @@
 | Single-call overhead suite         | `simple.ts`    | Must keep local sink + `do_not_optimize`               |
 | Chained realistic formatting suite | `complex.ts`   | Mirrors practical multi-style composition              |
 | Large repeated-string suite        | `recursion.ts` | Uses varying input to avoid constant-folding artifacts |
+| Deferred-build composition suite   | `deferred.ts`  | Build-time staged wrapping cost, rope render deferred  |
 | Import/init overhead suite         | `loading.ts`   | Dynamic import timings for each library/entrypoint     |
 | Bundle size comparison             | `size.ts`      | Used by CI markdown summary                            |
 | Aggregation and ranking logic      | `../bench.ts`  | CI95 row compares `ansispeck` vs fastest external lib  |
@@ -19,7 +20,7 @@
 
 - Benchmark ansispeck variants via `#dist/ansispeck*` aliases, not direct `src/*` imports.
 - Keep `ansispeck/noop` as control-path measurement; interpret its wins separately.
-- Preserve suite names (`simple`, `complex`, `recursion`, `loading`) for stable table columns.
+- Preserve suite names (`simple`, `complex`, `recursion`, `deferred-build`, `loading`) for stable table columns.
 - Prefer local mutable `sink` + `do_not_optimize` to reduce harness-side distortion.
 
 ## ANTI-PATTERNS

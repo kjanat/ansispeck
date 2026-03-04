@@ -73,7 +73,9 @@ console.log(msg);
 ```ts
 import rope, { createRope } from 'ansispeck/rope';
 
-const message = rope.red(rope.concat('Error ', rope.yellow('E42'), ' while parsing'));
+const message = rope.red(
+	rope.concat('Error ', rope.yellow('E42'), ' while parsing'),
+);
 console.log(rope.render(message));
 
 const disabled = createRope(false);
@@ -104,3 +106,5 @@ See [BENCHMARKS.md] for current benchmark tables.
 0BSD
 
 [BENCHMARKS.md]: BENCHMARKS.md
+
+<!--markdownlint-disable-file MD010-->
