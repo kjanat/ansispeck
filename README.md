@@ -1,6 +1,6 @@
 # ansispeck
 
-Tiny ANSI formatter with split entrypoints for speed and DX.
+ANSI that slips in and gets to work.
 
 ## Install
 

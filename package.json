@@ -1,7 +1,7 @@
 {
 	"name": "ansispeck",
 	"version": "0.1.0",
-	"description": "Sub-kilobyte terminal ANSI color formatting.",
+	"description": "ANSI that slips in and gets to work.",
 	"keywords": [
 		"terminal",
 		"colors",
