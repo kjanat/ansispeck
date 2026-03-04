@@ -18,7 +18,7 @@ Bottom row: ansispeck vs the fastest external library (ratio).
 
 ## ansispeck exports in tables
 
-- `ansispeck`: root auto mode; picks `raw` or `noop` once at import from env/argv/TTY checks
+- `ansispeck`: root auto mode; picks `raw` or `noop` once at import (`FORCE_COLOR` / `--color` wins)
 - `ansispeck/auto`: same as `ansispeck`, direct subpath import
 - `ansispeck/raw`: always emit ANSI (fast path, no close-code repair)
 - `ansispeck/safe`: template-tag API that preserves style over interpolations

@@ -35,7 +35,7 @@ src/
 ## CONVENTIONS
 
 - `ansispeck` root import and `ansispeck/auto` must stay behavior-identical.
-- Auto precedence: `NO_COLOR` / `--no-color` first, then force-color, then platform/CI/TTY checks.
+- Auto precedence: force-color flags first, then no-color flags, then platform/CI/TTY checks.
 - `raw` is intentionally unsafe for embedded close-code repair (perf tradeoff).
 - `safe` is correctness path for nested/interpolated styling.
 - `rope` returns chunk nodes from formatters; callers must `render(...)` for final string.

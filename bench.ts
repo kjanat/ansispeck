@@ -41,7 +41,7 @@ const LIB_ORDER = [
 ] as const;
 
 const ANSISPECK_EXPORT_NOTES: Record<string, string> = {
-	ansispeck: 'root auto mode; picks raw/noop once at import from env/argv/TTY checks',
+	ansispeck: 'root auto mode; picks raw/noop once at import (`FORCE_COLOR`/`--color` wins)',
 	'ansispeck/auto': 'same auto behavior as root, direct subpath import',
 	'ansispeck/raw': 'always emit ANSI (fastest path, no close-code repair)',
 	'ansispeck/safe': 'template-tag API that preserves style over interpolations',

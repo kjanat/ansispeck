@@ -68,7 +68,7 @@
 - Do not use `raw` for interpolation-heavy nested styling correctness tests.
 - Do not remove `do_not_optimize` sinks from benchmark suites.
 - Do not move benchmark dispatch above declarations in `bench.ts` (TDZ hazard).
-- Do not change auto detection precedence casually (`NO_COLOR`/`--no-color` wins first).
+- Do not change auto detection precedence casually (`FORCE_COLOR`/`--color` wins over `NO_COLOR`/`--no-color`).
 
 ## UNIQUE STYLES
 

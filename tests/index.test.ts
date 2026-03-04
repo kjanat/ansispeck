@@ -51,6 +51,48 @@ const formatterNames: (keyof Palette)[] = [
 	'bgWhiteBright',
 ];
 
+const detectAutoInSubprocess = (
+	envOverrides: Readonly<Record<string, string | undefined>>,
+	argv: readonly string[] = [],
+): boolean => {
+	const env: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		if (value !== undefined) env[key] = value;
+	}
+	for (const [key, value] of Object.entries(envOverrides)) {
+		if (value === undefined) {
+			delete env[key];
+			continue;
+		}
+		env[key] = value;
+	}
+
+	const script =
+		"import { isColorSupported } from 'ansispeck/auto'; process.stdout.write(isColorSupported ? '1' : '0');";
+	const cmd = argv.length === 0
+		? [process.execPath, '--eval', script]
+		: [process.execPath, '--eval', script, '--', ...argv];
+
+	const result = Bun.spawnSync({
+		cmd,
+		cwd: process.cwd(),
+		env,
+		stdout: 'pipe',
+		stderr: 'pipe',
+	});
+
+	const stdout = new TextDecoder().decode(result.stdout).trim();
+	if (result.exitCode !== 0) {
+		const stderr = new TextDecoder().decode(result.stderr).trim();
+		throw new Error(`detect child failed (${result.exitCode}): ${stderr}`);
+	}
+	if (stdout !== '0' && stdout !== '1') {
+		throw new Error(`unexpected detect output: ${stdout}`);
+	}
+
+	return stdout === '1';
+};
+
 describe('raw entrypoint', () => {
 	test('wraps values with expected ansi pairs', () => {
 		expect(raw.red('x')).toBe('\x1b[31mx\x1b[39m');
@@ -88,6 +130,19 @@ describe('auto entrypoint', () => {
 	test('detection routes to raw or noop behavior', () => {
 		const expected = isColorSupported ? raw.red('x') : noop.red('x');
 		expect(auto.red('x')).toBe(expected);
+	});
+
+	test('FORCE_COLOR overrides NO_COLOR', () => {
+		expect(detectAutoInSubprocess({ FORCE_COLOR: '1', NO_COLOR: '1' })).toBe(true);
+	});
+
+	test('--color overrides --no-color', () => {
+		expect(detectAutoInSubprocess({ FORCE_COLOR: undefined, NO_COLOR: undefined }, ['--no-color', '--color']))
+			.toBe(true);
+	});
+
+	test('NO_COLOR disables when force is absent', () => {
+		expect(detectAutoInSubprocess({ FORCE_COLOR: undefined, NO_COLOR: '1' })).toBe(false);
 	});
 });
 
