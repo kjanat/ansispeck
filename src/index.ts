@@ -12,23 +12,56 @@ const FG = `${E}39m`;
 const BG = `${E}49m`;
 const ME = `${E}22m`; // modifier end (bold/dim share this close code)
 
-/** Build an ANSI code from a numeric SGR parameter. */
-const c = (n: number): string => `${E}${n}m`;
+const RESET = `${E}0m`;
+const BOLD = `${E}1m`;
+const DIM = `${E}2m`;
+const ITALIC = `${E}3m`;
+const UNDERLINE = `${E}4m`;
+const INVERSE = `${E}7m`;
+const HIDDEN = `${E}8m`;
+const STRIKETHROUGH = `${E}9m`;
 
-const RESET = c(0);
-const BOLD = c(1);
-const DIM = c(2);
-const ITALIC = c(3);
-const UNDERLINE = c(4);
-const INVERSE = c(7);
-const HIDDEN = c(8);
-const STRIKETHROUGH = c(9);
+const ITALIC_END = `${E}23m`;
+const UNDERLINE_END = `${E}24m`;
+const INVERSE_END = `${E}27m`;
+const HIDDEN_END = `${E}28m`;
+const STRIKETHROUGH_END = `${E}29m`;
 
-const ITALIC_END = c(23);
-const UNDERLINE_END = c(24);
-const INVERSE_END = c(27);
-const HIDDEN_END = c(28);
-const STRIKETHROUGH_END = c(29);
+const BLACK = `${E}30m`;
+const RED = `${E}31m`;
+const GREEN = `${E}32m`;
+const YELLOW = `${E}33m`;
+const BLUE = `${E}34m`;
+const MAGENTA = `${E}35m`;
+const CYAN = `${E}36m`;
+const WHITE = `${E}37m`;
+const GRAY = `${E}90m`;
+
+const BG_BLACK = `${E}40m`;
+const BG_RED = `${E}41m`;
+const BG_GREEN = `${E}42m`;
+const BG_YELLOW = `${E}43m`;
+const BG_BLUE = `${E}44m`;
+const BG_MAGENTA = `${E}45m`;
+const BG_CYAN = `${E}46m`;
+const BG_WHITE = `${E}47m`;
+
+const RED_BRIGHT = `${E}91m`;
+const GREEN_BRIGHT = `${E}92m`;
+const YELLOW_BRIGHT = `${E}93m`;
+const BLUE_BRIGHT = `${E}94m`;
+const MAGENTA_BRIGHT = `${E}95m`;
+const CYAN_BRIGHT = `${E}96m`;
+const WHITE_BRIGHT = `${E}97m`;
+
+const BG_BLACK_BRIGHT = `${E}100m`;
+const BG_RED_BRIGHT = `${E}101m`;
+const BG_GREEN_BRIGHT = `${E}102m`;
+const BG_YELLOW_BRIGHT = `${E}103m`;
+const BG_BLUE_BRIGHT = `${E}104m`;
+const BG_MAGENTA_BRIGHT = `${E}105m`;
+const BG_CYAN_BRIGHT = `${E}106m`;
+const BG_WHITE_BRIGHT = `${E}107m`;
 
 const p = globalThis.process;
 const argv: readonly string[] = p?.argv ?? [];
@@ -71,8 +104,6 @@ const noop: Formatter = (input) => '' + input;
 /** Create a color set with explicit enabled/disabled toggle. */
 function createColors(enabled: boolean = isColorSupported): Colors {
 	const formatterFactory = enabled ? fmt : (): Formatter => noop;
-	const fg = (n: number): Formatter => formatterFactory(c(n), FG);
-	const bg = (n: number): Formatter => formatterFactory(c(n), BG);
 	return {
 		isColorSupported: enabled,
 
@@ -85,42 +116,42 @@ function createColors(enabled: boolean = isColorSupported): Colors {
 		hidden: formatterFactory(HIDDEN, HIDDEN_END),
 		strikethrough: formatterFactory(STRIKETHROUGH, STRIKETHROUGH_END),
 
-		black: fg(30),
-		red: fg(31),
-		green: fg(32),
-		yellow: fg(33),
-		blue: fg(34),
-		magenta: fg(35),
-		cyan: fg(36),
-		white: fg(37),
-		gray: fg(90),
+		black: formatterFactory(BLACK, FG),
+		red: formatterFactory(RED, FG),
+		green: formatterFactory(GREEN, FG),
+		yellow: formatterFactory(YELLOW, FG),
+		blue: formatterFactory(BLUE, FG),
+		magenta: formatterFactory(MAGENTA, FG),
+		cyan: formatterFactory(CYAN, FG),
+		white: formatterFactory(WHITE, FG),
+		gray: formatterFactory(GRAY, FG),
 
-		bgBlack: bg(40),
-		bgRed: bg(41),
-		bgGreen: bg(42),
-		bgYellow: bg(43),
-		bgBlue: bg(44),
-		bgMagenta: bg(45),
-		bgCyan: bg(46),
-		bgWhite: bg(47),
+		bgBlack: formatterFactory(BG_BLACK, BG),
+		bgRed: formatterFactory(BG_RED, BG),
+		bgGreen: formatterFactory(BG_GREEN, BG),
+		bgYellow: formatterFactory(BG_YELLOW, BG),
+		bgBlue: formatterFactory(BG_BLUE, BG),
+		bgMagenta: formatterFactory(BG_MAGENTA, BG),
+		bgCyan: formatterFactory(BG_CYAN, BG),
+		bgWhite: formatterFactory(BG_WHITE, BG),
 
-		blackBright: fg(90),
-		redBright: fg(91),
-		greenBright: fg(92),
-		yellowBright: fg(93),
-		blueBright: fg(94),
-		magentaBright: fg(95),
-		cyanBright: fg(96),
-		whiteBright: fg(97),
+		blackBright: formatterFactory(GRAY, FG),
+		redBright: formatterFactory(RED_BRIGHT, FG),
+		greenBright: formatterFactory(GREEN_BRIGHT, FG),
+		yellowBright: formatterFactory(YELLOW_BRIGHT, FG),
+		blueBright: formatterFactory(BLUE_BRIGHT, FG),
+		magentaBright: formatterFactory(MAGENTA_BRIGHT, FG),
+		cyanBright: formatterFactory(CYAN_BRIGHT, FG),
+		whiteBright: formatterFactory(WHITE_BRIGHT, FG),
 
-		bgBlackBright: bg(100),
-		bgRedBright: bg(101),
-		bgGreenBright: bg(102),
-		bgYellowBright: bg(103),
-		bgBlueBright: bg(104),
-		bgMagentaBright: bg(105),
-		bgCyanBright: bg(106),
-		bgWhiteBright: bg(107),
+		bgBlackBright: formatterFactory(BG_BLACK_BRIGHT, BG),
+		bgRedBright: formatterFactory(BG_RED_BRIGHT, BG),
+		bgGreenBright: formatterFactory(BG_GREEN_BRIGHT, BG),
+		bgYellowBright: formatterFactory(BG_YELLOW_BRIGHT, BG),
+		bgBlueBright: formatterFactory(BG_BLUE_BRIGHT, BG),
+		bgMagentaBright: formatterFactory(BG_MAGENTA_BRIGHT, BG),
+		bgCyanBright: formatterFactory(BG_CYAN_BRIGHT, BG),
+		bgWhiteBright: formatterFactory(BG_WHITE_BRIGHT, BG),
 	};
 }
 
