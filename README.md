@@ -11,7 +11,7 @@ npm install ansispeck
 ## Entrypoints
 
 - `ansispeck` - auto detect once (`NO_COLOR`, `FORCE_COLOR`, CLI flags, CI, TTY)
-- `ansispeck/raw` - always emit ANSI (fastest hot path)
+- `ansispeck/raw` - always emit ANSI (fastest hot path, no close-code repair)
 - `ansispeck/noop` - always plain text
 - `ansispeck/safe` - template-tag API that reopens style around interpolations
 
@@ -34,6 +34,9 @@ import { blue, red } from 'ansispeck/raw';
 
 console.log(blue(red('always colored')));
 ```
+
+`raw` is speed-first and does not repair embedded/nested close codes.
+Use `ansispeck/safe` for interpolation-safe composition.
 
 ### Noop (always plain text)
 
