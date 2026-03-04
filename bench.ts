@@ -27,6 +27,11 @@ import { register as simple } from './benchmarks/simple.ts';
 const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
 const LIB_ORDER = [
 	'ansispeck',
+	'ansispeck/auto',
+	'ansispeck/raw',
+	'ansispeck/noop',
+	'ansispeck/safe',
+	'ansispeck/rope',
 	'picocolors',
 	'colorette',
 	'kleur',
