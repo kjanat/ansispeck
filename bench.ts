@@ -391,7 +391,11 @@ async function printMarkdown(result: BenchResult): Promise<void> {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			if (rank === 0) {
-				cells.push(`**${val}** 🥇`);
+				cells.push(`<ins>**${val}**</ins> 🥇`);
+			} else if (rank === 1) {
+				cells.push(`***${val}*** 🥈`);
+			} else if (rank === 2) {
+				cells.push(`*${val}* 🥉`);
 			} else {
 				cells.push(`${val} #${rank + 1}`);
 			}
