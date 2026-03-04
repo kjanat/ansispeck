@@ -2,7 +2,12 @@ const processRef = globalThis.process;
 const argv: readonly string[] = processRef?.argv ?? [];
 const env: Record<string, string | undefined> = processRef?.env ?? {};
 
-/** Detect whether ANSI colors should be enabled for auto entrypoints. */
+/**
+ * Detect whether ANSI colors should be enabled for auto entrypoints.
+ *
+ * @see https://force-color.org/
+ * @see https://no-color.org/
+ */
 export const detectColorSupport = (): boolean => {
 	if (env.FORCE_COLOR || argv.includes('--color')) return true;
 	if (env.NO_COLOR || argv.includes('--no-color')) return false;

@@ -68,7 +68,7 @@ Options:
                        json          raw JSON
                        quiet         suppress mitata output (used internally)
                        mitata        default mitata output
-  --filter <regex>     Only run benchmarks matching <regex>
+  -F, --filter <regex> Only run benchmarks matching <regex>
   -h, --help           Show this help`);
 	process.exit(0);
 }
