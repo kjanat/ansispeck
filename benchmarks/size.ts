@@ -1,10 +1,9 @@
+import { table, warn } from 'node:console';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-
+const root = dirname(import.meta.dirname);
 function measure(path: string): { raw: number; gzip: number } {
 	const code = readFileSync(resolve(root, path));
 	return { raw: code.length, gzip: gzipSync(code).length };
@@ -35,7 +34,7 @@ for (const [name, path] of libs) {
 		rows[name] = { raw: toKB(raw), gzip: toKB(gzip) };
 	} catch (error) {
 		const detail = error instanceof Error ? error.message : String(error);
-		console.warn(`[size] skipped ${name} (${path}): ${detail}`);
+		warn(`[size] skipped ${name} (${path}): ${detail}`);
 		if (isFirstParty(path)) {
 			throw error;
 		}
@@ -43,4 +42,4 @@ for (const [name, path] of libs) {
 	}
 }
 
-console.table(rows);
+table(rows);

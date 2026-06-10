@@ -1,7 +1,7 @@
 {
 	"name": "ansispeck",
 	"version": "0.1.0",
-	"description": "~1 KB (gzipped) terminal ANSI color formatting.",
+	"description": "~2 KB (gzipped) terminal ANSI color formatting with explicit entrypoints.",
 	"keywords": [
 		"terminal",
 		"colors",
@@ -14,10 +14,41 @@
 	"license": "0BSD",
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
+	"imports": {
+		"#*": "./src/*.ts",
+		"#ansispeck": "./src/index.ts",
+		"#ansispeck-dist": "./dist/index.js",
+		"#ansispeck-dist/*": "./dist/*.{js,d.ts}",
+		"#ansispeck-dist/*.d.ts": "./dist/*.d.ts",
+		"#ansispeck/*": "./src/*.ts",
+		"#bench/*": "./benchmarks/*.ts",
+		"#internal/*.ts": "./src/internal/*.ts",
+		"#pkg": "./package.json"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
 			"default": "./dist/index.js"
+		},
+		"./auto": {
+			"types": "./dist/auto.d.ts",
+			"default": "./dist/auto.js"
+		},
+		"./noop": {
+			"types": "./dist/noop.d.ts",
+			"default": "./dist/noop.js"
+		},
+		"./raw": {
+			"types": "./dist/raw.d.ts",
+			"default": "./dist/raw.js"
+		},
+		"./rope": {
+			"types": "./dist/rope.d.ts",
+			"default": "./dist/rope.js"
+		},
+		"./safe": {
+			"types": "./dist/safe.d.ts",
+			"default": "./dist/safe.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -29,14 +60,14 @@
 	"scripts": {
 		"bd": "run build",
 		"build": "tsdown",
-		"bench": "run -s bench:bun bun bench:node",
+		"build:quiet": "tsdown -l error",
+		"bench": "run -s bench:bun bench:node",
 		"bench:bun": "bun --bun bench.ts",
 		"bench:node": "node bench.ts",
 		"dev": "run build --watch",
 		"fmt": "dprint fmt",
 		"lint": "biome check src/",
-		"prepack": "run -s prepack:build prepack:script",
-		"prepack:build": "run bd -l error",
+		"prepack": "run -s build:quiet prepack:script",
 		"prepack:script": "bun scripts/prepack.ts",
 		"postpack": "git restore package.json >/dev/null",
 		"prepublishOnly": "run -p test typecheck",

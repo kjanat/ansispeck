@@ -1,0 +1,35 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+	"formatter": [
+		// Fallback to the dprint CLI in case the lsp fucks up, which it does sometimes for some reason...
+		{ "external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] } },
+		{ "language_server": { "name": "dprint" } }
+	],
+	"prettier": { "allowed": false },
+	"languages": {
+		"TypeScript": {
+			"language_servers": ["vtsls", "biome", "..."],
+			"formatter": [{
+				"language_server": { "name": "biome" }
+			}, {
+				"external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] }
+			}],
+			"code_actions_on_format": {
+				"source.fixAll.biome": true,
+				"source.organizeImports.biome": false,
+				"source.useSortedInterfaceMembers.biome": true
+			}
+		}
+	},
+	"lsp": {
+		"biome": {
+			"settings": {
+				"config_path": "./biome.json",
+				"require_config_file": true
+			}
+		}
+	}
+}

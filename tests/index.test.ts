@@ -1,5 +1,5 @@
+import colors, { type Colors, createColors, isColorSupported, strip } from '#ansispeck';
 import { describe, expect, test } from 'bun:test';
-import colors, { type Colors, createColors, isColorSupported, strip } from '../src/index.ts';
 
 describe('createColors', () => {
 	const enabled = createColors(true);
@@ -47,9 +47,17 @@ describe('formatters (enabled)', () => {
 		expect(result).toBe('\x1b[31mhello\x1b[31mworld\x1b[39m');
 	});
 
-	test('handles close code at start of input', () => {
+	test('bare close in the scan-skip prefix is intentionally not replaced', () => {
+		// A composed close is always preceded by its own open, so the scan
+		// starts at min(open, close) length for speed (picocolors tradeoff).
+		// Only a bare, uncomposed close this early goes unreplaced.
 		const result = c.red(`\x1b[39mworld`);
-		expect(result).toBe('\x1b[31m\x1b[31mworld\x1b[39m');
+		expect(result).toBe('\x1b[31m\x1b[39mworld\x1b[39m');
+	});
+
+	test('composed close right after open is still replaced (long truecolor open)', () => {
+		const result = c.rgb(255, 136, 0)(c.red('in') + 'out');
+		expect(result).toBe('\x1b[38;2;255;136;0m\x1b[31min\x1b[38;2;255;136;0mout\x1b[39m');
 	});
 
 	test('bold/dim use compound replace for nesting', () => {

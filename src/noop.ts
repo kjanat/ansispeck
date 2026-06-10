@@ -1,18 +1,12 @@
 /**
- * @module ansispeck
- * Terminal ANSI color formatting with explicit entrypoints:
- * `ansispeck/auto` (this, auto-detected), `ansispeck/raw`,
- * `ansispeck/noop`, `ansispeck/safe`, `ansispeck/rope`.
+ * @module ansispeck/noop
+ * Passthrough entrypoint: formatters coerce input to string, no ANSI codes.
  */
 
-import { strip } from '#internal/ansi';
 import { createColors } from '#internal/colors';
-import { detectColorSupport } from '#internal/detect';
 import type { Colors } from '#types';
 
-const colors: Colors = createColors(detectColorSupport());
-
-export { createColors, detectColorSupport, strip };
+const noop: Colors = createColors(false);
 
 export const {
 	bg256,
@@ -67,25 +61,8 @@ export const {
 	whiteBright,
 	yellow,
 	yellowBright,
-} = colors;
+} = noop;
 
-export default colors;
+export default noop;
 
-export type {
-	Chunk,
-	Chunkable,
-	ChunkFormatter,
-	ChunkPalette,
-	Colors,
-	Factories,
-	Formattable,
-	Formatter,
-	FormatterName,
-	LinkFormatter,
-	Palette,
-	Rope,
-	SafeColors,
-	StyleName,
-	TemplateFormatter,
-	TemplatePalette,
-} from '#types';
+export type { Colors, Formattable, Formatter, FormatterName, LinkFormatter, Palette, StyleName } from '#types';
