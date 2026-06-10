@@ -55,22 +55,27 @@ export type Wrap<T> = (open: string, close: string, replace?: string) => T;
  * Wraps input in ANSI open/close codes, replacing nested close codes to prevent style leaks.
  */
 export function fmt(open: string, close: string, replace: string = open): Formatter {
-	// Any close produced by composition is preceded by its own open (>= skip
-	// chars), so starting the scan there is safe — and lets indexOf bail
-	// without scanning when the input is shorter than the skip.
+	// Any close produced by composition is preceded by its own open (>= skip chars),
+	// so starting the scan at `skip` is safe.
+	// A nested close also needs `close.length` chars after that offset — inputs shorter
+	// than `least` provably contain none, so they skip the scan call entirely
+	// and return via pure O(1) concat.
 	const skip = open.length < close.length ? open.length : close.length;
+	const least = skip + close.length;
 	return (input) => {
 		let s = '' + input;
-		let i = s.indexOf(close, skip);
-		if (~i) {
-			let result = '';
-			let cursor = 0;
-			do {
-				result += s.substring(cursor, i) + replace;
-				cursor = i + close.length;
-				i = s.indexOf(close, cursor);
-			} while (~i);
-			s = result + s.substring(cursor);
+		if (s.length >= least) {
+			let i = s.indexOf(close, skip);
+			if (~i) {
+				let result = '';
+				let cursor = 0;
+				do {
+					result += s.substring(cursor, i) + replace;
+					cursor = i + close.length;
+					i = s.indexOf(close, cursor);
+				} while (~i);
+				s = result + s.substring(cursor);
+			}
 		}
 		return open + s + close;
 	};

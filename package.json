@@ -17,10 +17,15 @@
 	"imports": {
 		"#*": "./src/*.ts",
 		"#ansispeck": "./src/index.ts",
-		"#ansispeck-dist": "./dist/index.js",
-		"#ansispeck-dist/*": "./dist/*.{js,d.ts}",
-		"#ansispeck-dist/*.d.ts": "./dist/*.d.ts",
 		"#ansispeck/*": "./src/*.ts",
+		"#ansispeck-dist": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"#ansispeck-dist/*": {
+			"types": "./dist/*.d.ts",
+			"default": "./dist/*.js"
+		},
 		"#bench/*": "./benchmarks/*.ts",
 		"#internal/*.ts": "./src/internal/*.ts",
 		"#pkg": "./package.json"

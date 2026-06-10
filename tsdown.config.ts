@@ -24,15 +24,8 @@ export default defineConfig({
 	onSuccess: 'run fmt package.json',
 	minify: true,
 	outputOptions: {
-		advancedChunks: {
-			// One shared chunk for the core internals: the default import chain
-			// loads 2 files instead of 3 (module-load count shows up in import
-			// time). template.ts is excluded so only `safe` pays for it.
-			groups: [{ name: 'internal', test: /[\\/]src[\\/]internal[\\/](?:ansi|colors|detect)\./ }],
-		},
+		codeSplitting: { groups: [{ name: 'internal', test: /[\\/]src[\\/]internal[\\/](?:ansi|colors|detect)\./ }] },
 	},
 	publint: true,
-	attw: {
-		ignoreRules: ['cjs-resolves-to-esm', 'no-resolution'],
-	},
+	attw: { ignoreRules: ['cjs-resolves-to-esm', 'no-resolution'] },
 });
