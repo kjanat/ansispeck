@@ -14,14 +14,12 @@ jobs:
   bench:
     runs-on: ubuntu-latest
     steps:
-      - { uses: actions/checkout@v6 }
-      - { uses: oven-sh/setup-bun@v2 }
-      - { uses: actions/setup-node@v6, with: { node-version: latest } }
-
-      - run: bun install --frozen-lockfile
-
-      - name: Build
-        run: bun bd
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
+        with: { node-version-file: .node-version }
+      - uses: kjanat/runner@master
+      - run: runner install --frozen bd
 
       - name: Bun bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
@@ -33,12 +31,11 @@ jobs:
 
       - name: Size
         run: |
-          BUN_SIZE="$(bash scripts/compare-size.sh --markdown)"
-          {
-            echo 'BUN_SIZE<<BUN_SIZE_EOF'
-            printf '%s\n' "$BUN_SIZE"
-            echo 'BUN_SIZE_EOF'
-          } >> "$GITHUB_ENV"
+          cat >> "$GITHUB_ENV" <<EOF
+          BUN_SIZE<<BUN_SIZE_EOF
+          $(bash scripts/compare-size.sh --markdown)
+          BUN_SIZE_EOF
+          EOF
 
       - name: Node bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
@@ -50,13 +47,19 @@ jobs:
 
       - name: Write summary
         run: |
-          {
-            printf '## Size\n'
-            printf '%s\n\n' "$BUN_SIZE"
-            printf '## Benchmarks (FORCE_COLOR=1)\n\n'
-            printf '#%s\n\n' "$BUN_BENCH_COLOR"
-            printf '#%s\n\n' "$NODE_BENCH_COLOR"
-            printf '## Benchmarks (NO_COLOR=1)\n\n'
-            printf '#%s\n\n' "$BUN_BENCH_NOCOLOR"
-            printf '#%s\n' "$NODE_BENCH_NOCOLOR"
-          } >> "$GITHUB_STEP_SUMMARY"
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Size
+          $BUN_SIZE
+
+          ## Benchmarks (FORCE_COLOR=1)
+
+          #$BUN_BENCH_COLOR
+
+          #$NODE_BENCH_COLOR
+
+          ## Benchmarks (NO_COLOR=1)
+
+          #$BUN_BENCH_NOCOLOR
+
+          #$NODE_BENCH_NOCOLOR
+          EOF
