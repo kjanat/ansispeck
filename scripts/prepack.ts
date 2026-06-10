@@ -1,7 +1,7 @@
 import { file, fileURLToPath, write } from 'bun';
 
 const PACKAGE_JSON_PATH = fileURLToPath(import.meta.resolve('#pkg'));
-const DTS_PATH = fileURLToPath(import.meta.resolve('#ansispeck-dist/index.d.ts'));
+const DTS_PATH = fileURLToPath(new URL('dist/index.d.ts', import.meta.resolve('#pkg')));
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);

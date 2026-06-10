@@ -1,0 +1,44 @@
+name: Publish to npm
+run-name: Publish ${{ github.ref_type == 'tag' && github.ref_name || 'manual' }}
+on: { push: { tags: [v*] }, workflow_dispatch: {} }
+permissions: { contents: read, id-token: write }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - name: Validate tag
+        if: github.ref_type == 'tag'
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "invalid tag: $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
+        with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
+      - run: bun install --frozen-lockfile
+      - name: Build dist
+        run: bun run build
+      - name: Stamp version from tag
+        if: github.ref_type == 'tag'
+        run: bun pm version from-git --allow-same-version --no-git-tag-version
+      - name: Tests + typecheck
+        run: bun run prepublishOnly
+      - name: Pack + publish
+        id: publish
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { existsSync } = await import('node:fs');
+            const { default: pkg } = await import("${{ github.workspace }}/package.json", { with: { type: "json" } });
+            core.setOutput('name', pkg.name);
+            core.setOutput('version', pkg.version);
+            const tag = pkg.version.includes('-') ? 'next' : 'latest';
+            core.setOutput('npm_url', `https://npm.im/package/${pkg.name}/v/${pkg.version}`);
+            const { stdout } = await exec.getExecOutput('bun', ['run', 'tar']);
+            const tarball = stdout.trim();
+            if (!tarball || !existsSync(tarball)) { core.setFailed(`bun run tar produced no tarball (got ${JSON.stringify(tarball)})`); return }
+            await exec.getExecOutput('bunx', ['npm@latest', 'publish', '--provenance', '--access', 'public', '--tag', tag, tarball]);
