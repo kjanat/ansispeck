@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+: GITHUB_ENV="${GITHUB_ENV:-/dev/stderr}"
+: GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
+: RUNTIME="${RUNTIME:-}"
+: COLOR="${COLOR:-}"
+
 # Set color env from input
-case "$COLOR" in
+case "${COLOR}" in
 	force)
 		unset NO_COLOR
 		export FORCE_COLOR=1
@@ -14,7 +19,7 @@ case "$COLOR" in
 		mode="NOCOLOR"
 		;;
 	*)
-		echo "Unknown color mode: $COLOR (expected 'force' or 'none')" >&2
+		echo "Unknown color mode: ${COLOR} (expected 'force' or 'none')" >&2
 		exit 1
 		;;
 esac
@@ -23,11 +28,11 @@ esac
 var="${RUNTIME^^}_BENCH_${mode}"
 
 # Build command based on runtime
-case "$RUNTIME" in
+case "${RUNTIME}" in
 	bun) set -- bun --bun bench.ts -f markdown ;;
 	node) set -- node bench.ts -f markdown ;;
 	*)
-		echo "Unknown runtime: $RUNTIME" >&2
+		echo "Unknown runtime: ${RUNTIME}" >&2
 		exit 1
 		;;
 esac
@@ -38,14 +43,14 @@ emit() {
 	local key="$1" target="$2"
 	{
 		echo "${key}<<${key}_EOF"
-		printf '%s\n' "$output"
+		printf '%s\n' "${output}"
 		echo "${key}_EOF"
-	} >>"$target"
+	} >>"${target}"
 }
 
 echo "::group::${var}"
-printf '%s\n' "$output"
+printf '%s\n' "${output}"
 echo "::endgroup::"
 
-emit "$var" "$GITHUB_ENV"
-emit result "$GITHUB_OUTPUT"
+emit "${var}" "${GITHUB_ENV}"
+emit result "${GITHUB_OUTPUT}"

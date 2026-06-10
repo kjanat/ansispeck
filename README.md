@@ -1,18 +1,20 @@
 # ansispeck
 
-~1 KB (gzipped) terminal ANSI color formatting.
+~2 KB (gzipped) terminal ANSI color formatting with explicit entrypoints.
 
 ## Size
 
 | Package       | Runtime     | Gzipped | Types   |
 | ------------- | ----------- | ------- | ------- |
-| ansispeck[^1] | **1.31 KB** | 0.68 KB | 2.21 KB |
+| ansispeck[^1] | **4.05 KB** | 1.79 KB | 9.03 KB |
 
-[^1]: ansispeck [`5625fc7`](https://github.com/kjanat/ansispeck/commit/5625fc7), `dist/index.js` minified by tsdown.
+[^1]:
+    Default entry's full import chain (entry + shared chunks), minified by tsdown;\
+    measured by `scripts/compare-size.sh`, regenerated at release.
 
 ## Benchmarks
 
-See [BENCHMARKS.md](BENCHMARKS.md) for full results across Bun and Node.
+See [BENCHMARKS] for full results across Bun and Node.
 
 ## Install
 
@@ -37,6 +39,38 @@ import { createColors } from "ansispeck";
 
 const c = createColors(false); // force disable
 console.log(c.red("plain text"));
+```
+
+## Entrypoints
+
+| Import           | Behavior                                                              |
+| ---------------- | --------------------------------------------------------------------- |
+| `ansispeck`      | Auto-detected color support (alias: `ansispeck/auto`)                 |
+| `ansispeck/raw`  | Always emits ANSI codes                                               |
+| `ansispeck/noop` | Never emits codes — plain string coercion                             |
+| `ansispeck/safe` | Template tags that re-open styles across interpolations (leak-proof)  |
+| `ansispeck/rope` | Chunk/rope builders — O(1) styled composition, O(n) structural render |
+
+All plain-formatter entrypoints (`auto`/`raw`/`noop`) share nesting-safe
+close-code replacement, so composed styles never leak.
+
+### safe
+
+```ts
+import { red, bold } from "ansispeck/safe";
+
+const user = "wo\x1b[39mrld"; // hostile input cannot break the style
+console.log(red`hello ${user}!`);
+console.log(bold`${red`nested`} works too`);
+```
+
+### rope
+
+```ts
+import { red, blue, concat, render } from "ansispeck/rope";
+
+const chunk = red(concat("a", blue("b"), "c")); // O(1), no string scans
+console.log(render(chunk)); // re-opens red after blue closes — structurally
 ```
 
 ## API
@@ -89,13 +123,20 @@ console.log(c.link`https://example.com/issues/${42}`); // template tag, text = u
 ### Other exports
 
 - `createColors(enabled?: boolean)` — create a color set with explicit toggle
+- `createSafeColors(enabled?)` (from `ansispeck/safe`) — template-tag color set
+- `createRope(enabled?)` (from `ansispeck/rope`) — rope color set
 - `isColorSupported` — auto-detected boolean
+- `detectColorSupport()` — run detection on demand
 - `strip(input)` — remove all ANSI SGR and OSC sequences
 
 ## Color detection
 
 Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.
+Explicit force (`FORCE_COLOR`/`--color`) beats explicit disable (`NO_COLOR`/`--no-color`),
+which beats platform heuristics.
 
 ## License
 
 0BSD
+
+[BENCHMARKS]: BENCHMARKS.md

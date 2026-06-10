@@ -1,11 +1,19 @@
+import type { Colors } from '#ansispeck';
+import pkg from '#pkg' with { type: 'json' };
+
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
+import { error, log } from 'node:console';
+import { exit } from 'node:process';
 import { parseArgs } from 'node:util';
-import type { Colors } from './src/index.ts';
 
-execSync('bun bd', { stdio: 'ignore' });
+import { register as complex } from '#bench/complex';
+import { register as loading } from '#bench/loading';
+import { register as recursion } from '#bench/recursion';
+import { register as simple } from '#bench/simple';
 
-const { default: ansispeck }: { default: Colors } = await import('./dist/index.js');
+execSync('run build', { stdio: 'ignore' });
+const { default: ansispeck }: { default: Colors } = await import('#ansispeck-dist');
 
 declare module 'mitata' {
 	interface ctx {
@@ -16,11 +24,6 @@ declare module 'mitata' {
 		group?: number;
 	}
 }
-
-import { register as complex } from './benchmarks/complex.ts';
-import { register as loading } from './benchmarks/loading.ts';
-import { register as recursion } from './benchmarks/recursion.ts';
-import { register as simple } from './benchmarks/simple.ts';
 
 const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
 const LIB_ORDER = [
@@ -43,7 +46,7 @@ const { values } = parseArgs({
 });
 
 if (values.help) {
-	console.log(`Usage: bench.ts [options]
+	log(`Usage: bench.ts [options]
 
 Options:
   -f, --format <fmt>   Output format (default: overview)
@@ -54,7 +57,7 @@ Options:
                        mitata     default mitata output
   --filter <regex>     Only run benchmarks matching <regex>
   -h, --help           Show this help`);
-	process.exit(0);
+	exit(0);
 }
 
 simple({ count: 1 });
@@ -67,8 +70,8 @@ type Format = (typeof FORMATS)[number];
 
 const fmt = String(values.format);
 if (!FORMATS.includes(fmt as Format)) {
-	console.error(`Unknown format: ${fmt}\nValid: ${FORMATS.join(', ')}`);
-	process.exit(1);
+	error(`Unknown format: ${fmt}\nValid: ${FORMATS.join(', ')}`);
+	exit(1);
 }
 
 let filter: RegExp | undefined;
@@ -76,8 +79,8 @@ if (typeof values.filter === 'string') {
 	try {
 		filter = new RegExp(values.filter);
 	} catch {
-		console.error(`Invalid regex: ${values.filter}`);
-		process.exit(1);
+		error(`Invalid regex: ${values.filter}`);
+		exit(1);
 	}
 }
 const isCustom = fmt === 'overview' || fmt === 'markdown';
@@ -253,11 +256,11 @@ function printOverview(result: BenchResult): void {
 	const fullW = colW + 1 + tagW;
 
 	const { runtime, version, cpu: { name: cpuName } } = context;
-	console.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
+	log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	console.log(''.padStart(nameW) + '  ' + activeSuites.map(s => s.padStart(fullW)).join('  '));
-	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	log(''.padStart(nameW) + '  ' + activeSuites.map(s => s.padStart(fullW)).join('  '));
+	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 
 	// rows
 	for (const lib of libs) {
@@ -273,7 +276,7 @@ function printOverview(result: BenchResult): void {
 			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
 			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
 		}
-		console.log(lib.padEnd(nameW) + '  ' + cells.join('  '));
+		log(lib.padEnd(nameW) + '  ' + cells.join('  '));
 	}
 
 	// CI95 footer row
@@ -283,21 +286,21 @@ function printOverview(result: BenchResult): void {
 		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
 		return text.padStart(fullW);
 	});
-	console.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	console.log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
+	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
-	console.log('');
-	console.log('  * = fastest, — = ansispeck is #1, ~ = not significant');
+	log('');
+	log('  * = fastest, — = ansispeck is #1, ~ = not significant');
 }
 
 const NPM_URLS: Record<string, string> = {
-	ansispeck: 'https://www.npmjs.com/package/ansispeck',
-	picocolors: 'https://www.npmjs.com/package/picocolors',
-	colorette: 'https://www.npmjs.com/package/colorette',
-	kleur: 'https://www.npmjs.com/package/kleur',
-	'kleur/colors': 'https://www.npmjs.com/package/kleur',
-	chalk: 'https://www.npmjs.com/package/chalk',
-	'ansi-colors': 'https://www.npmjs.com/package/ansi-colors',
+	ansispeck: `https://npm.im/${pkg.name}`,
+	'ansi-colors': 'https://npm.im/ansi-colors',
+	'kleur/colors': 'https://npm.im/kleur',
+	chalk: 'https://npm.im/chalk',
+	colorette: 'https://npm.im/colorette',
+	kleur: 'https://npm.im/kleur',
+	picocolors: 'https://npm.im/picocolors',
 };
 
 function printMarkdown(result: BenchResult): void {
@@ -306,13 +309,13 @@ function printMarkdown(result: BenchResult): void {
 	const ci95 = computeCI95(parsed);
 
 	const { runtime, version, cpu: { name: cpuName } } = context;
-	console.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
-	console.log(`\n> ${cpuName ?? 'unknown'}\n`);
+	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
+	log(`\n> ${cpuName ?? 'unknown'}\n`);
 
 	// header
 	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
-	console.log(`| ${hdr.join(' | ')} |`);
-	console.log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
+	log(`| ${hdr.join(' | ')} |`);
+	log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
 
 	// collect ref keys for link definitions
 	const refs: Array<[string, string]> = [];
@@ -339,7 +342,7 @@ function printMarkdown(result: BenchResult): void {
 				cells.push(`${val} #${rank + 1}`);
 			}
 		}
-		console.log(`| ${cells.join(' | ')} |`);
+		log(`| ${cells.join(' | ')} |`);
 	}
 
 	// CI95 footer
@@ -349,12 +352,12 @@ function printMarkdown(result: BenchResult): void {
 		if (entry.label === '—') return '**#1**';
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
-	console.log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
+	log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 
 	// link definitions
-	console.log('');
+	log('');
 	for (const [key, url] of refs) {
-		console.log(`[${key}]: ${url}`);
+		log(`[${key}]: ${url}`);
 	}
 }
 

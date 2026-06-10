@@ -1,13 +1,13 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { file, fileURLToPath, write } from 'bun';
 
-const PACKAGE_JSON_PATH = 'package.json';
-const DTS_PATH = 'dist/index.d.ts';
+const PACKAGE_JSON_PATH = fileURLToPath(import.meta.resolve('#pkg'));
+const DTS_PATH = fileURLToPath(import.meta.resolve('#ansispeck-dist/index.d.ts'));
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-const parsedPackageJson: unknown = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf8'));
+const parsedPackageJson: unknown = await file(PACKAGE_JSON_PATH).json();
 if (!isObjectRecord(parsedPackageJson)) {
 	throw new Error('package.json must be a JSON object');
 }
@@ -24,12 +24,12 @@ if (typeof author === 'string') {
 	delete author.url;
 }
 
-writeFileSync(PACKAGE_JSON_PATH, `${JSON.stringify(parsedPackageJson)}\n`);
+await write(PACKAGE_JSON_PATH, `${JSON.stringify(parsedPackageJson)}\n`);
 
-const strippedDts = readFileSync(DTS_PATH, 'utf8')
+const strippedDts = (await file(DTS_PATH).text())
 	.replace(/\/\*\*[\s\S]*?\*\//g, '')
 	.replace(/^\/\/#[^\n]*\n?/gm, '')
 	.replace(/\n{3,}/g, '\n\n')
 	.trim();
 
-writeFileSync(DTS_PATH, `${strippedDts}\n`);
+await write(DTS_PATH, `${strippedDts}\n`);

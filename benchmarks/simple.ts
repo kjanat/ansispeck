@@ -1,12 +1,12 @@
 import { bench, boxplot, do_not_optimize, run } from 'mitata';
 
+import ansispeck from '#ansispeck-dist';
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
 import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import picocolors from 'picocolors';
-import ansispeck from '../dist/index.js';
 
 const DEFAULT_COUNT = 1;
 

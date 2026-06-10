@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `fg256(n)` / `bg256(n)` — 256-color palette formatters
 - `rgb(r, g, b)` / `bgRgb(r, g, b)`, `hex(color)` / `bgHex(color)` — truecolor formatters (`#rgb` and `#rrggbb`)
 - `strip(input)` — remove all ANSI SGR and OSC sequences
+- Explicit entrypoints with subpath exports: `ansispeck/auto`, `ansispeck/raw`, `ansispeck/noop`, `ansispeck/safe`, `ansispeck/rope`
+- `ansispeck/safe` — template-tag palette that re-opens styles after every interpolation (leak-proof against hostile values); `createSafeColors(enabled?)`
+- `ansispeck/rope` — chunk/rope API (`text`, `concat`, `render`, `createRope`) with O(1) styled composition and a stack-based renderer that re-opens enclosing styles structurally
+- `detectColorSupport()` export for on-demand detection
+- Derived type layer (`src/types.ts`): `FormatterName` built from template-literal types, `Palette`/`TemplatePalette`/`ChunkPalette`, `SafeColors`, `Rope`, branded `Chunk` nodes
 - `scripts/compare-size.sh` — size reporting (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
 - Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
 - CI workflow for benchmarks and size comparison on PRs/pushes to master
@@ -29,7 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Size claim rebranded from "Sub-kilobyte (gzipped)" to "~1 KB (gzipped)" — new formatters grew the bundle past 1 KB gzipped
+- `FORCE_COLOR`/`--color` now takes precedence over `NO_COLOR`/`--no-color` (explicit force beats explicit disable)
+- Runtime split into `src/internal/{ansi,detect,colors,template}`; every palette flavor is built from a single `mapPalette` code table
+- `Formattable` widened with `boolean | bigint`
+- `scripts/compare-size.sh` now measures the default entry's full import chain (entry + shared chunks)
+- Size claim rebranded from "Sub-kilobyte (gzipped)" to "~1 KB (gzipped)", then to "~2 KB (gzipped)" with the entrypoint architecture
 - CI: extract bench steps into reusable composite action (`.github/actions/bench/`) with `runtime` and `color` inputs
 - CI: add `shfmt` to dprint exec config for consistent shell script formatting
 - Rename package from `femtocolors` to `ansispeck`
@@ -46,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Nested close codes within the first `open.length` characters of input are now replaced; previously missed, which leaked styles with long truecolor open codes
+- Nested close-code scan now starts at `min(open, close)` length instead of `open.length` — fixes style leaks with long truecolor open codes while keeping the short-input fast path (`indexOf` bails without scanning when the input is shorter than the skip)
 - README size table: corrected runtime from 2.01 KB to 1.37 KB, added version footnotes
 - Benchmark CLI now handles invalid `--filter` regex input without uncaught exceptions
 - Welch CI computation now guards too-small sample sets
