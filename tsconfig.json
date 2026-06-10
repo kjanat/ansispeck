@@ -22,7 +22,10 @@
 		// Stricter flags
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": false
+		"noPropertyAccessFromIndexSignature": false,
+
+		// Types
+		"types": ["bun"]
 	},
 	"exclude": ["dist"]
 }

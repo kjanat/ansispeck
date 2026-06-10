@@ -1,7 +1,7 @@
 {
 	"name": "ansispeck",
 	"version": "0.1.0",
-	"description": "Sub-kilobyte terminal ANSI color formatting.",
+	"description": "~1 KB (gzipped) terminal ANSI color formatting.",
 	"keywords": [
 		"terminal",
 		"colors",
@@ -15,46 +15,56 @@
 	"author": "Kaj Kowalski <info@kajkowalski.nl> (https://github.com/kjanat)",
 	"type": "module",
 	"exports": {
-		".": "./dist/index.js",
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [
-		"dist"
+		"/dist",
+		"/LICENSE",
+		"/README.md"
 	],
 	"scripts": {
-		"bd": "tsdown",
-		"bench": "bun bench:bun; bun bench:node",
+		"bd": "run build",
+		"build": "tsdown",
+		"bench": "run -s bench:bun bun bench:node",
 		"bench:bun": "bun --bun bench.ts",
 		"bench:node": "node bench.ts",
-		"dev": "tsdown --watch",
+		"dev": "run build --watch",
 		"fmt": "dprint fmt",
 		"lint": "biome check src/",
-		"prepack": "bun --bun bd -l error && bun scripts/prepack.ts && bunx prettier README.md --write >/dev/null",
-		"postpack": "git restore package.json README.md >/dev/null",
-		"prepublishOnly": "bun test && bun --bun typecheck",
+		"prepack": "run -s prepack:build prepack:script",
+		"prepack:build": "run bd -l error",
+		"prepack:script": "bun scripts/prepack.ts",
+		"postpack": "git restore package.json >/dev/null",
+		"prepublishOnly": "run -p test typecheck",
 		"tar": "bun pm pack --quiet | awk 'NF{line=$0} END{print line}'",
 		"test": "bun test",
 		"typecheck": "tsgo --noEmit"
 	},
 	"devDependencies": {
-		"@arethetypeswrong/core": "^0.18",
-		"@biomejs/biome": "^2",
-		"@types/bun": "^1.3",
-		"@types/node": "^25",
-		"@typescript/native-preview": "^7.0.0-dev.20260301.1",
+		"@arethetypeswrong/core": "^0.18.3",
+		"@biomejs/biome": "^2.4.16",
+		"@types/bun": "^1.3.14",
+		"@types/node": "^25.9.2",
+		"@typescript/native-preview": "^7.0.0-dev.20260610.1",
 		"ansi-colors": "^4.1.3",
 		"chalk": "^5.6.2",
 		"colorette": "^2.0.20",
-		"dprint": "latest",
+		"dprint": "^0.54.0",
 		"kleur": "^4.1.5",
 		"mitata": "^1.0.34",
 		"picocolors": "^1.1.1",
-		"publint": "^0.3",
-		"tsdown": "0.21.0-beta.2",
-		"typescript": "^5"
+		"publint": "^0.3.21",
+		"runner-run": "^0.12.2",
+		"tsdown": "0.22.2",
+		"typescript": "^6.0.3"
 	},
-	"packageManager": "bun@1.3.10",
+	"packageManager": "bun@1.3.14",
 	"volta": {
-		"node": "25.7.0"
+		"node": "26.3.0",
+		"npm": "11.16.0"
 	}
 }

@@ -1,6 +1,6 @@
 /**
  * @module ansispeck
- * Sub-kilobyte terminal ANSI color formatting.
+ * ~1 KB (gzipped) terminal ANSI color formatting.
  */
 
 /** Input accepted by all formatters. */
@@ -8,6 +8,12 @@ export type Formattable = string | number | null | undefined;
 
 /** Wraps input in ANSI escape codes. */
 export type Formatter = (input: Formattable) => string;
+
+/** Wraps text in an OSC 8 terminal hyperlink. Text defaults to the URL. */
+export interface LinkFormatter {
+	(url: string | URL, text?: Formattable | URL): string;
+	(strings: TemplateStringsArray, ...values: readonly unknown[]): string;
+}
 
 /** All available color/style formatters plus color-support flag. */
 export interface Colors {
@@ -21,6 +27,9 @@ export interface Colors {
 	readonly inverse: Formatter;
 	readonly hidden: Formatter;
 	readonly strikethrough: Formatter;
+	readonly overline: Formatter;
+	readonly doubleUnderline: Formatter;
+	readonly blink: Formatter;
 
 	readonly black: Formatter;
 	readonly red: Formatter;
@@ -58,17 +67,45 @@ export interface Colors {
 	readonly bgMagentaBright: Formatter;
 	readonly bgCyanBright: Formatter;
 	readonly bgWhiteBright: Formatter;
+
+	readonly link: LinkFormatter;
+
+	readonly fg256: (n: number) => Formatter;
+	readonly bg256: (n: number) => Formatter;
+	readonly rgb: (r: number, g: number, b: number) => Formatter;
+	readonly bgRgb: (r: number, g: number, b: number) => Formatter;
+	readonly hex: (color: string) => Formatter;
+	readonly bgHex: (color: string) => Formatter;
 }
 
 // Shared ANSI fragments — hoisted to avoid repeating in every formatter call
-const E = '\x1b[';
+const ESC = '\x1b';
+const E = `${ESC}[`;
 const FG = `${E}39m`;
 const BG = `${E}49m`;
 const ME = `${E}22m`; // modifier end (bold/dim share this close code)
+const OSC8 = '\x1b]8;;';
+const ST = '\x1b\\'; // string terminator
 
 /** Build an ANSI code from a numeric SGR parameter. */
 function c(n: number): string {
 	return `${E}${n}m`;
+}
+
+/** Parse '#rgb' or '#rrggbb' into an 'r;g;b' SGR fragment. */
+function hx(color: string): string {
+	let h = color.replace('#', '');
+	if (h.length === 3) h = h.replace(/[\da-f]/gi, '$&$&');
+	const n = parseInt(h, 16);
+	return `${(n >> 16) & 255};${(n >> 8) & 255};${n & 255}`;
+}
+
+/** Matches SGR codes and OSC sequences (BEL- or ST-terminated). */
+const ANSI = new RegExp(`${ESC}\\[[\\d;]*m|${ESC}\\][\\s\\S]*?(?:\\x07|${ESC}\\\\)`, 'g');
+
+/** Remove all ANSI SGR and OSC escape sequences from input. */
+export function strip(input: Formattable): string {
+	return ('' + input).replace(ANSI, '');
 }
 
 const p = globalThis.process;
@@ -87,7 +124,7 @@ export const isColorSupported: boolean = !(env.NO_COLOR || argv.includes('--no-c
 function fmt(open: string, close: string, replace: string = open): Formatter {
 	return (input) => {
 		let s = '' + input;
-		let i = s.indexOf(close, open.length);
+		let i = s.indexOf(close);
 		if (~i) {
 			let result = '';
 			let cursor = 0;
@@ -103,6 +140,25 @@ function fmt(open: string, close: string, replace: string = open): Formatter {
 }
 
 const noop: Formatter = (input) => '' + input;
+
+/** Join a template literal's strings and interpolated values. */
+function join(strings: TemplateStringsArray, values: readonly unknown[]): string {
+	let s = strings[0] ?? '';
+	for (let i = 0; i < values.length; i++) s += String(values[i]) + (strings[i + 1] ?? '');
+	return s;
+}
+
+/** Build a LinkFormatter handling both call styles: (url, text?) and template tag. */
+function mkLink(wrap: (url: string, text: string) => string): LinkFormatter {
+	return (first: string | URL | TemplateStringsArray, ...rest: readonly unknown[]): string => {
+		if (typeof first === 'object' && 'raw' in first) {
+			const url = join(first, rest);
+			return wrap(url, url);
+		}
+		const url = String(first);
+		return wrap(url, rest[0] === undefined ? url : String(rest[0]));
+	};
+}
 
 /** Create a color set with explicit enabled/disabled toggle. */
 export function createColors(enabled: boolean = isColorSupported): Colors {
@@ -121,6 +177,9 @@ export function createColors(enabled: boolean = isColorSupported): Colors {
 		inverse: f(c(7), c(27)),
 		hidden: f(c(8), c(28)),
 		strikethrough: f(c(9), c(29)),
+		overline: f(c(53), c(55)),
+		doubleUnderline: f(c(21), c(24)),
+		blink: f(c(5), c(25)),
 
 		black: fg(30),
 		red: fg(31),
@@ -158,6 +217,19 @@ export function createColors(enabled: boolean = isColorSupported): Colors {
 		bgMagentaBright: bg(105),
 		bgCyanBright: bg(106),
 		bgWhiteBright: bg(107),
+
+		link: mkLink(
+			enabled
+				? (url, text) => OSC8 + url + ST + text + OSC8 + ST
+				: (_url, text) => text,
+		),
+
+		fg256: (n) => f(`${E}38;5;${n}m`, FG),
+		bg256: (n) => f(`${E}48;5;${n}m`, BG),
+		rgb: (r, g, b) => f(`${E}38;2;${r};${g};${b}m`, FG),
+		bgRgb: (r, g, b) => f(`${E}48;2;${r};${g};${b}m`, BG),
+		hex: (color) => f(`${E}38;2;${hx(color)}m`, FG),
+		bgHex: (color) => f(`${E}48;2;${hx(color)}m`, BG),
 	};
 }
 

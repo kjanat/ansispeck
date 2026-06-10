@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import colors, { type Colors, createColors, isColorSupported } from '../src/index.ts';
+import colors, { type Colors, createColors, isColorSupported, strip } from '../src/index.ts';
 
 describe('createColors', () => {
 	const enabled = createColors(true);
@@ -43,9 +43,13 @@ describe('formatters (enabled)', () => {
 	});
 
 	test('handles nested close codes (replaceClose)', () => {
-		// Close code must appear after open.length offset to trigger replacement
 		const result = c.red(`hello\x1b[39mworld`);
 		expect(result).toBe('\x1b[31mhello\x1b[31mworld\x1b[39m');
+	});
+
+	test('handles close code at start of input', () => {
+		const result = c.red(`\x1b[39mworld`);
+		expect(result).toBe('\x1b[31m\x1b[31mworld\x1b[39m');
 	});
 
 	test('bold/dim use compound replace for nesting', () => {
@@ -65,6 +69,9 @@ describe('all formatters exist', () => {
 		'inverse',
 		'hidden',
 		'strikethrough',
+		'overline',
+		'doubleUnderline',
+		'blink',
 		'black',
 		'red',
 		'green',
@@ -105,6 +112,130 @@ describe('all formatters exist', () => {
 			expect(typeof c[name]).toBe('function');
 		});
 	}
+});
+
+describe('link', () => {
+	const c = createColors(true);
+	const d = createColors(false);
+
+	test('wraps text in OSC 8 hyperlink', () => {
+		expect(c.link('https://example.com', 'docs'))
+			.toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
+	});
+
+	test('text defaults to url', () => {
+		expect(c.link('https://example.com'))
+			.toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
+	});
+
+	test('accepts URL instance', () => {
+		expect(c.link(new URL('https://example.com'), 'docs'))
+			.toBe('\x1b]8;;https://example.com/\x1b\\docs\x1b]8;;\x1b\\');
+	});
+
+	test('coerces non-string text', () => {
+		expect(c.link('https://example.com', 42))
+			.toBe('\x1b]8;;https://example.com\x1b\\42\x1b]8;;\x1b\\');
+	});
+
+	test('disabled returns plain text', () => {
+		expect(d.link('https://example.com', 'docs')).toBe('docs');
+		expect(d.link('https://example.com')).toBe('https://example.com');
+	});
+
+	test('template tag', () => {
+		const id = 42;
+		expect(c.link`https://example.com/issues/${id}`)
+			.toBe('\x1b]8;;https://example.com/issues/42\x1b\\https://example.com/issues/42\x1b]8;;\x1b\\');
+	});
+
+	test('template tag without interpolation', () => {
+		expect(c.link`https://example.com`)
+			.toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
+	});
+
+	test('template tag disabled returns url', () => {
+		expect(d.link`https://example.com/${'a'}`).toBe('https://example.com/a');
+	});
+});
+
+describe('extended modifiers', () => {
+	const c = createColors(true);
+
+	test('overline, doubleUnderline, blink', () => {
+		expect(c.overline('x')).toBe('\x1b[53mx\x1b[55m');
+		expect(c.doubleUnderline('x')).toBe('\x1b[21mx\x1b[24m');
+		expect(c.blink('x')).toBe('\x1b[5mx\x1b[25m');
+	});
+
+	test('underline nests inside doubleUnderline (shared close 24)', () => {
+		expect(c.doubleUnderline(c.underline('in') + 'out'))
+			.toBe('\x1b[21m\x1b[4min\x1b[21mout\x1b[24m');
+	});
+});
+
+describe('256-color and truecolor', () => {
+	const c = createColors(true);
+	const d = createColors(false);
+
+	test('fg256/bg256', () => {
+		expect(c.fg256(208)('x')).toBe('\x1b[38;5;208mx\x1b[39m');
+		expect(c.bg256(17)('x')).toBe('\x1b[48;5;17mx\x1b[49m');
+	});
+
+	test('rgb/bgRgb', () => {
+		expect(c.rgb(255, 136, 0)('x')).toBe('\x1b[38;2;255;136;0mx\x1b[39m');
+		expect(c.bgRgb(0, 0, 0)('x')).toBe('\x1b[48;2;0;0;0mx\x1b[49m');
+	});
+
+	test('hex/bgHex 6-digit', () => {
+		expect(c.hex('#ff8800')('x')).toBe('\x1b[38;2;255;136;0mx\x1b[39m');
+		expect(c.bgHex('#ff8800')('x')).toBe('\x1b[48;2;255;136;0mx\x1b[49m');
+	});
+
+	test('hex 3-digit expands', () => {
+		expect(c.hex('#f80')('x')).toBe('\x1b[38;2;255;136;0mx\x1b[39m');
+	});
+
+	test('hex without # prefix', () => {
+		expect(c.hex('ff8800')('x')).toBe('\x1b[38;2;255;136;0mx\x1b[39m');
+	});
+
+	test('nested named color close is replaced (long open)', () => {
+		expect(c.rgb(255, 136, 0)(c.red('in') + 'out'))
+			.toBe('\x1b[38;2;255;136;0m\x1b[31min\x1b[38;2;255;136;0mout\x1b[39m');
+	});
+
+	test('disabled returns identity', () => {
+		expect(d.fg256(208)('x')).toBe('x');
+		expect(d.rgb(1, 2, 3)('x')).toBe('x');
+		expect(d.hex('#f80')('x')).toBe('x');
+	});
+});
+
+describe('strip', () => {
+	const c = createColors(true);
+
+	test('removes SGR codes', () => {
+		expect(strip(c.bold(c.red('err')))).toBe('err');
+	});
+
+	test('removes truecolor codes', () => {
+		expect(strip(c.rgb(255, 136, 0)('warn'))).toBe('warn');
+	});
+
+	test('removes OSC 8 links, keeps text', () => {
+		expect(strip(c.link('https://example.com', 'docs'))).toBe('docs');
+	});
+
+	test('plain text untouched', () => {
+		expect(strip('hello')).toBe('hello');
+	});
+
+	test('coerces non-string input', () => {
+		expect(strip(42)).toBe('42');
+		expect(strip(null)).toBe('null');
+	});
 });
 
 describe('exports', () => {
