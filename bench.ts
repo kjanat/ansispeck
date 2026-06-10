@@ -1,19 +1,14 @@
-import type { Colors } from '#ansispeck';
-import pkg from '#pkg' with { type: 'json' };
-
+import type { Palette } from '#dist/ansispeck/raw';
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { error, log } from 'node:console';
+import { readFile } from 'node:fs/promises';
 import { exit } from 'node:process';
 import { parseArgs } from 'node:util';
 
-import { register as complex } from '#bench/complex';
-import { register as loading } from '#bench/loading';
-import { register as recursion } from '#bench/recursion';
-import { register as simple } from '#bench/simple';
+execSync('bun bd:ci', { stdio: 'ignore', cwd: import.meta.dirname });
 
-execSync('run build', { stdio: 'ignore' });
-const { default: ansispeck }: { default: Colors } = await import('#ansispeck-dist');
+const { dim }: { dim: Palette['dim'] } = await import('#dist/ansispeck/raw');
 
 declare module 'mitata' {
 	interface ctx {
@@ -25,9 +20,20 @@ declare module 'mitata' {
 	}
 }
 
-const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
+import { register as complex } from '#bench/complex';
+import { register as deferred } from '#bench/deferred';
+import { register as loading } from '#bench/loading';
+import { register as recursion } from '#bench/recursion';
+import { register as simple } from '#bench/simple';
+
+const SUITES = ['simple', 'complex', 'recursion', 'deferred-build', 'loading'] as const;
 const LIB_ORDER = [
 	'ansispeck',
+	'ansispeck/auto',
+	'ansispeck/raw',
+	'ansispeck/safe',
+	'ansispeck/rope',
+	'ansispeck/noop',
 	'picocolors',
 	'colorette',
 	'kleur',
@@ -36,10 +42,19 @@ const LIB_ORDER = [
 	'ansi-colors',
 ] as const;
 
+const ANSISPECK_EXPORT_NOTES: Record<string, string> = {
+	ansispeck: 'root auto mode; color support detected once at import (`FORCE_COLOR`/`--color` wins)',
+	'ansispeck/auto': 'same auto behavior as root, direct subpath import',
+	'ansispeck/raw': 'always emit ANSI regardless of environment (nesting-safe close-code scan)',
+	'ansispeck/safe': 'template-tag API that preserves style over interpolations',
+	'ansispeck/rope': 'chunk builder: O(1) compose + O(n) render',
+	'ansispeck/noop': 'control path: no ANSI, returns plain strings',
+};
+
 const { values } = parseArgs({
 	options: {
 		format: { type: 'string', short: 'f', default: 'overview' },
-		filter: { type: 'string' },
+		filter: { type: 'string', short: 'F' },
 		help: { type: 'boolean', short: 'h', default: false },
 	},
 	strict: false,
@@ -50,12 +65,12 @@ if (values.help) {
 
 Options:
   -f, --format <fmt>   Output format (default: overview)
-                       overview   terminal table with rankings + CI95
-                       markdown   GitHub-flavored markdown table
-                       json       raw JSON
-                       quiet      suppress mitata output (used internally)
-                       mitata     default mitata output
-  --filter <regex>     Only run benchmarks matching <regex>
+                       overview      terminal table with rankings + CI95
+                       markdown|md   GitHub-flavored markdown table
+                       json          raw JSON
+                       quiet         suppress mitata output (used internally)
+                       mitata        default mitata output
+  -F, --filter <regex> Only run benchmarks matching <regex>
   -h, --help           Show this help`);
 	exit(0);
 }
@@ -63,9 +78,10 @@ Options:
 simple({ count: 1 });
 complex({ count: 1 });
 recursion({ count: 10_000 });
+deferred({ layers: 32, repeat: 32 });
 loading({ count: 1 });
 
-const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown'] as const;
+const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown', 'md'] as const;
 type Format = (typeof FORMATS)[number];
 
 const fmt = String(values.format);
@@ -83,8 +99,8 @@ if (typeof values.filter === 'string') {
 		exit(1);
 	}
 }
-const isCustom = fmt === 'overview' || fmt === 'markdown';
-const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown'>);
+const isCustom = fmt === 'overview' || fmt === 'markdown' || fmt === 'md';
+const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown' | 'md'>);
 
 const result = await run({ format, filter });
 
@@ -154,7 +170,12 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 
 type BenchResult = Awaited<ReturnType<typeof run>>;
 const SELF_LIB = 'ansispeck';
-const BASELINE_LABEL = `${SELF_LIB}/#1`;
+const BASELINE_LABEL = `${SELF_LIB}/ext#1`;
+const INTERNAL_PREFIX = 'ansispeck/';
+
+const isExternalLib = (lib: string): boolean => {
+	return lib !== SELF_LIB && !lib.startsWith(INTERNAL_PREFIX);
+};
 
 interface Parsed {
 	context: BenchResult['context'];
@@ -231,15 +252,18 @@ function fmtTime(ns: number): string {
 function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
 	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
 	for (const [suite, ranking] of parsed.ranked) {
-		const first = ranking[0];
-		if (!first) continue;
-		if (first.lib === SELF_LIB) {
+		const self = ranking.find(entry => entry.lib === SELF_LIB);
+		if (!self) continue;
+
+		const firstExternal = ranking.find(entry => isExternalLib(entry.lib));
+		if (!firstExternal) continue;
+
+		if (self.stats.avg <= firstExternal.stats.avg) {
 			ci95.set(suite, { label: '—', significant: true });
 			continue;
 		}
-		const femto = ranking.find(r => r.lib === SELF_LIB);
-		if (!femto) continue;
-		const { ratio, significant } = welchCI95(first.stats.samples, femto.stats.samples);
+
+		const { ratio, significant } = welchCI95(firstExternal.stats.samples, self.stats.samples);
 		ci95.set(suite, { label: `${ratio.toFixed(2)}x`, significant });
 	}
 	return ci95;
@@ -259,8 +283,8 @@ function printOverview(result: BenchResult): void {
 	log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	log(''.padStart(nameW) + '  ' + activeSuites.map(s => s.padStart(fullW)).join('  '));
-	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	log(`${''.padStart(nameW)}  ${activeSuites.map(s => s.padStart(fullW)).join('  ')}`);
+	log(`${''.padStart(nameW, '─')}  ${activeSuites.map(() => ''.padStart(fullW, '─')).join('  ')}`);
 
 	// rows
 	for (const lib of libs) {
@@ -274,59 +298,90 @@ function printOverview(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
-			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
+			cells.push(`${val.padStart(colW)} ${dim(tag.padStart(tagW))}`);
 		}
-		log(lib.padEnd(nameW) + '  ' + cells.join('  '));
+		log(`${lib.padEnd(nameW)}  ${cells.join('  ')}`);
 	}
 
 	// CI95 footer row
 	const ciCells = activeSuites.map(s => {
 		const entry = ci95.get(s);
 		if (!entry) return ''.padStart(fullW);
-		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
+		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : dim(`${entry.label} ~`);
 		return text.padStart(fullW);
 	});
-	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
+	log(`${''.padStart(nameW, '─')}  ${activeSuites.map(() => ''.padStart(fullW, '─')).join('  ')}`);
+	log(`${BASELINE_LABEL.padEnd(nameW)}  ${ciCells.join('  ')}`);
 
 	log('');
-	log('  * = fastest, — = ansispeck is #1, ~ = not significant');
+	log('  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant');
 }
 
-const NPM_URLS: Record<string, string> = {
-	ansispeck: `https://npm.im/${pkg.name}`,
-	'ansi-colors': 'https://npm.im/ansi-colors',
-	'kleur/colors': 'https://npm.im/kleur',
-	chalk: 'https://npm.im/chalk',
-	colorette: 'https://npm.im/colorette',
-	kleur: 'https://npm.im/kleur',
-	picocolors: 'https://npm.im/picocolors',
+/** npm package name from specifier (handles scoped + subpaths) */
+const pkgName = (s: string): string => s.startsWith('@') ? s.split('/').slice(0, 2).join('/') : s.split('/')[0] ?? s;
+
+/** Read installed version from the resolved package's package.json */
+const readPkgVersion = async (specifier: string): Promise<string> => {
+	const name = pkgName(specifier);
+	const entry = import.meta.resolve(specifier);
+	const marker = `node_modules/${name}/`;
+	const i = entry.lastIndexOf(marker);
+	const base = i !== -1 ? entry.slice(0, i + marker.length) : new URL('.', import.meta.url).href;
+	const { version }: { version: string } = JSON.parse(await readFile(new URL('package.json', base), 'utf-8'));
+	return version;
 };
 
-function printMarkdown(result: BenchResult): void {
+const PACKAGE_ORDER = [...new Set(LIB_ORDER.map(pkgName))];
+
+const buildNpmFootnotes = async (): Promise<Record<string, { version: string; url: string }>> =>
+	Object.fromEntries(
+		await Promise.all(PACKAGE_ORDER.map(async name => {
+			const version = await readPkgVersion(name);
+			return [name, { version, url: `https://www.npmjs.com/package/${name}/v/${version}` }];
+		})),
+	);
+
+async function printMarkdown(result: BenchResult): Promise<void> {
 	const parsed = parse(result);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
+	const npmInfo = await buildNpmFootnotes();
 
 	const { runtime, version, cpu: { name: cpuName } } = context;
 	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	log(`\n> ${cpuName ?? 'unknown'}\n`);
+	const ansispeckExports = libs.filter(lib => lib in ANSISPECK_EXPORT_NOTES);
+	if (ansispeckExports.length > 0) {
+		log('> ansispeck exports in this table:');
+		for (const lib of LIB_ORDER) {
+			if (!ansispeckExports.includes(lib)) continue;
+			const note = ANSISPECK_EXPORT_NOTES[lib];
+			if (note === undefined) continue;
+			log(`> - \`${lib}\`: ${note}`);
+		}
+		log('');
+	}
 
 	// header
 	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
 	log(`| ${hdr.join(' | ')} |`);
 	log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
 
-	// collect ref keys for link definitions
-	const refs: Array<[string, string]> = [];
+	// collect footnote definitions
+	const footnotes: Array<[string, string, { version: string; url: string }]> = [];
+	const seenRefs = new Set<string>();
 
 	for (const lib of libs) {
-		const refKey = lib.replace(/\//g, '-');
-		const url = NPM_URLS[lib];
-		if (url) refs.push([refKey, url]);
+		const pkg = pkgName(lib);
+		const refKey = pkg.replace(/\//g, '-');
+		const info = npmInfo[pkg];
+		if (info && !seenRefs.has(refKey)) {
+			footnotes.push([refKey, pkg, info]);
+			seenRefs.add(refKey);
+		}
 
 		const cells: string[] = [];
-		cells.push(refKey === lib ? `[${lib}]` : `[${lib}][${refKey}]`);
+		cells.push(`${lib}[^${refKey}]`);
 
 		for (const suite of activeSuites) {
 			const entry = suites.get(suite)?.get(lib);
@@ -337,7 +392,11 @@ function printMarkdown(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			if (rank === 0) {
-				cells.push(`**${val}** 🥇`);
+				cells.push(`<ins>**${val}**</ins> 🥇`);
+			} else if (rank === 1) {
+				cells.push(`***${val}*** 🥈`);
+			} else if (rank === 2) {
+				cells.push(`*${val}* 🥉`);
 			} else {
 				cells.push(`${val} #${rank + 1}`);
 			}
@@ -354,13 +413,13 @@ function printMarkdown(result: BenchResult): void {
 	});
 	log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 
-	// link definitions
+	// footnote definitions
 	log('');
-	for (const [key, url] of refs) {
-		log(`[${key}]: ${url}`);
+	for (const [key, pkg, { version: v, url }] of footnotes) {
+		log(`[^${key}]: ${pkg} [v${v}](${url} "NPM")`);
 	}
 }
 
 // dispatch — must be after all declarations to avoid TDZ
 if (fmt === 'overview') printOverview(result);
-if (fmt === 'markdown') printMarkdown(result);
+if (fmt === 'markdown' || fmt === 'md') await printMarkdown(result);

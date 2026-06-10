@@ -85,11 +85,14 @@ case "${FMT}" in
 		rt_plain=$rt_kb
 		gz_plain=$gz_kb
 		ts_plain=$ts_kb
-		h0=Package; h1=Runtime; h2=Gzip; h3=Types
-		w0=$(( ${#h0} > ${#pkg_plain} ? ${#h0} : ${#pkg_plain} ))
-		w1=$(( ${#h1} > ${#rt_plain} ? ${#h1} : ${#rt_plain} ))
-		w2=$(( ${#h2} > ${#gz_plain} ? ${#h2} : ${#gz_plain} ))
-		w3=$(( ${#h3} > ${#ts_plain} ? ${#h3} : ${#ts_plain} ))
+		h0=Package
+		h1=Runtime
+		h2=Gzip
+		h3=Types
+		w0=$((${#h0} > ${#pkg_plain} ? ${#h0} : ${#pkg_plain}))
+		w1=$((${#h1} > ${#rt_plain} ? ${#h1} : ${#rt_plain}))
+		w2=$((${#h2} > ${#gz_plain} ? ${#h2} : ${#gz_plain}))
+		w3=$((${#h3} > ${#ts_plain} ? ${#h3} : ${#ts_plain}))
 		# numeric cols get +2 breathing so right-align has visible effect and table has some air (widths still driven by real content)
 		w1=$((w1 + 2))
 		w2=$((w2 + 2))
@@ -106,7 +109,8 @@ case "${FMT}" in
 				styled=$plain
 			fi
 			vis=${#plain}
-			pad=$(( w - vis )); [[ $pad -lt 0 ]] && pad=0
+			pad=$((w - vis))
+			[[ $pad -lt 0 ]] && pad=0
 			if [[ $align == L ]]; then
 				printf '%s%*s' "$styled" "$pad" ''
 			else
@@ -116,11 +120,41 @@ case "${FMT}" in
 		dashes() { printf '%*s' "$1" '' | tr ' ' '-'; }
 
 		# header (plain, L for pkg col, R for the rest)
-		body=$(printf '  '; cell "$h0" '' "$w0" L; printf ' '; cell "$h1" '' "$w1" R; printf ' '; cell "$h2" '' "$w2" R; printf ' '; cell "$h3" '' "$w3" R); hdr=$body$'\n'
+		body=$(
+			printf '  '
+			cell "$h0" '' "$w0" L
+			printf ' '
+			cell "$h1" '' "$w1" R
+			printf ' '
+			cell "$h2" '' "$w2" R
+			printf ' '
+			cell "$h3" '' "$w3" R
+		)
+		hdr=$body$'\n'
 		# separator: exact dashes per computed width, same spacing
-		body=$(printf '  '; dashes "$w0"; printf ' '; dashes "$w1"; printf ' '; dashes "$w2"; printf ' '; dashes "$w3"); sep=$body$'\n'
+		body=$(
+			printf '  '
+			dashes "$w0"
+			printf ' '
+			dashes "$w1"
+			printf ' '
+			dashes "$w2"
+			printf ' '
+			dashes "$w3"
+		)
+		sep=$body$'\n'
 		# data row: only pkg col gets the link, others plain; widths from plains
-		body=$(printf '  '; cell "$pkg_plain" "$npm_url" "$w0" L; printf ' '; cell "$rt_plain" '' "$w1" R; printf ' '; cell "$gz_plain" '' "$w2" R; printf ' '; cell "$ts_plain" '' "$w3" R); row=$body$'\n'
+		body=$(
+			printf '  '
+			cell "$pkg_plain" "$npm_url" "$w0" L
+			printf ' '
+			cell "$rt_plain" '' "$w1" R
+			printf ' '
+			cell "$gz_plain" '' "$w2" R
+			printf ' '
+			cell "$ts_plain" '' "$w3" R
+		)
+		row=$body$'\n'
 
 		# footer re-uses links for ver/sha (natural spacing, not forced into cols)
 		as_ver_label=$(osc8 "${npm_url}" "${version}")

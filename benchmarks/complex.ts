@@ -1,6 +1,11 @@
 import { bench, do_not_optimize, run, summary } from 'mitata';
 
-import ansispeck from '#ansispeck-dist';
+import ansispeck from '#dist/ansispeck';
+import auto from '#dist/ansispeck/auto';
+import noop from '#dist/ansispeck/noop';
+import raw from '#dist/ansispeck/raw';
+import rope from '#dist/ansispeck/rope';
+import safe from '#dist/ansispeck/safe';
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
@@ -10,7 +15,7 @@ import picocolors from 'picocolors';
 
 const DEFAULT_COUNT = 1;
 
-export function register({ count = DEFAULT_COUNT } = {}): void {
+export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
 	let n = 0;
 	let sink = '';
 	summary(() => {
@@ -26,6 +31,87 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 							+ ' to use time limit with '
 							+ ansispeck.yellow(`${++n}`),
 					);
+			}
+			do_not_optimize(sink);
+		});
+
+		bench('ansispeck/auto', () => {
+			for (let i = 0; i < count; i++) {
+				sink = auto.red('.')
+					+ auto.yellow('.')
+					+ auto.green('.')
+					+ auto.bgRed(auto.black(' ERROR '))
+					+ auto.red(
+						' Add plugin '
+							+ auto.yellow('name')
+							+ ' to use time limit with '
+							+ auto.yellow(`${++n}`),
+					);
+			}
+			do_not_optimize(sink);
+		});
+
+		bench('ansispeck/raw', () => {
+			for (let i = 0; i < count; i++) {
+				sink = raw.red('.')
+					+ raw.yellow('.')
+					+ raw.green('.')
+					+ raw.bgRed(raw.black(' ERROR '))
+					+ raw.red(
+						' Add plugin '
+							+ raw.yellow('name')
+							+ ' to use time limit with '
+							+ raw.yellow(`${++n}`),
+					);
+			}
+			do_not_optimize(sink);
+		});
+
+		bench('ansispeck/noop', () => {
+			for (let i = 0; i < count; i++) {
+				sink = noop.red('.')
+					+ noop.yellow('.')
+					+ noop.green('.')
+					+ noop.bgRed(noop.black(' ERROR '))
+					+ noop.red(
+						' Add plugin '
+							+ noop.yellow('name')
+							+ ' to use time limit with '
+							+ noop.yellow(`${++n}`),
+					);
+			}
+			do_not_optimize(sink);
+		});
+
+		bench('ansispeck/safe', () => {
+			for (let i = 0; i < count; i++) {
+				sink = safe.red`.`
+					+ safe.yellow`.`
+					+ safe.green`.`
+					+ safe.bgRed`${safe.black` ERROR `}`
+					+ safe.red` Add plugin ${safe.yellow`name`} to use time limit with ${safe.yellow`${++n}`}`;
+			}
+			do_not_optimize(sink);
+		});
+
+		bench('ansispeck/rope', () => {
+			for (let i = 0; i < count; i++) {
+				sink = rope.render(
+					rope.concat(
+						rope.red('.'),
+						rope.yellow('.'),
+						rope.green('.'),
+						rope.bgRed(rope.black(' ERROR ')),
+						rope.red(
+							rope.concat(
+								' Add plugin ',
+								rope.yellow('name'),
+								' to use time limit with ',
+								rope.yellow(`${++n}`),
+							),
+						),
+					),
+				);
 			}
 			do_not_optimize(sink);
 		});
@@ -69,7 +155,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ kleur.green('.')
 					+ kleur.bgRed(kleur.black(' ERROR '))
 					+ kleur.red(
-						' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++n}`),
+						` Add plugin ${kleur.yellow('name')} to use time limit with ${kleur.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);
@@ -98,7 +184,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ chalk.green('.')
 					+ chalk.bgRed(chalk.black(' ERROR '))
 					+ chalk.red(
-						' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++n}`),
+						` Add plugin ${chalk.yellow('name')} to use time limit with ${chalk.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);
@@ -111,7 +197,7 @@ export function register({ count = DEFAULT_COUNT } = {}): void {
 					+ ansi.green('.')
 					+ ansi.bgRed(ansi.black(' ERROR '))
 					+ ansi.red(
-						' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++n}`),
+						` Add plugin ${ansi.yellow('name')} to use time limit with ${ansi.yellow(`${++n}`)}`,
 					);
 			}
 			do_not_optimize(sink);

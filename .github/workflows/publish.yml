@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+---
+name: Publish to npm
+run-name: Publish ${{ github.ref_name || 'manual' }}
+on: { push: { tags: ["v*"] }, workflow_dispatch: {} }
+permissions: { contents: read, id-token: write }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: { name: npm, url: "${{ steps.meta.outputs.npm_url }}" }
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - if: startsWith(github.ref, 'refs/tags/v')
+        run: '[[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]] || { echo "invalid tag: $GITHUB_REF_NAME"; exit 1; }'
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
+        with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
+      - uses: kjanat/runner@master
+      - run: runner install --frozen bd
+
+      # Stamp release version from git tag
+      - if: startsWith(github.ref, 'refs/tags/v')
+        run: bun pm version from-git --allow-same-version --no-git-tag-version
+
+      - run: run -s prepublishOnly
+
+      - id: meta
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { readFile } = await import('node:fs/promises')
+            const pkg = JSON.parse(await readFile('package.json', 'utf8'))
+            const name = String(pkg.name)
+            const version = String(pkg.version)
+            const npmTag = version.includes('-') ? 'next' : 'latest'
+            core.setOutput('name', name)
+            core.setOutput('version', version)
+            core.setOutput('npm_tag', npmTag)
+            core.setOutput('npm_url', `https://www.npmjs.com/package/${name}/v/${version}`)
+
+      - id: tarball
+        run: echo "TARBALL=$(run -s tar)" | tee -a "$GITHUB_ENV"
+
+      # bun publish lacks --provenance; use npm for signed provenance
+      - run: bun i -g npm@latest
+      - run: npm publish --provenance --access public --tag "${NPM_TAG}" "${TARBALL}"
+        env: { NPM_TAG: "${{ steps.meta.outputs.npm_tag }}" }

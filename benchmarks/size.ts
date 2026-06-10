@@ -1,45 +1,27 @@
 import { table, warn } from 'node:console';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 
-const root = dirname(import.meta.dirname);
-function measure(path: string): { raw: number; gzip: number } {
-	const code = readFileSync(resolve(root, path));
+const measure = async (url: string): Promise<{ raw: number; gzip: number }> => {
+	const code = await readFile(new URL(url));
 	return { raw: code.length, gzip: gzipSync(code).length };
-}
+};
 
-function isFirstParty(path: string): boolean {
-	return !path.startsWith('node_modules/');
-}
+const toKB = (bytes: number): string => `${(Math.round((bytes / 1024) * 100) / 100).toFixed(2)} KB`;
 
-function toKB(bytes: number): string {
-	return `${(Math.round((bytes / 1024) * 100) / 100).toFixed(2)} KB`;
-}
+const names = ['#dist/ansispeck', 'picocolors', 'colorette', 'kleur', 'kleur/colors', 'chalk', 'ansi-colors'];
 
-const libs: Array<[string, string]> = [
-	['ansispeck', 'dist/index.js'],
-	['picocolors', 'node_modules/picocolors/picocolors.js'],
-	['colorette', 'node_modules/colorette/index.js'],
-	['kleur', 'node_modules/kleur/index.mjs'],
-	['kleur/colors', 'node_modules/kleur/colors.mjs'],
-	['chalk', 'node_modules/chalk/source/index.js'],
-	['ansi-colors', 'node_modules/ansi-colors/index.js'],
-];
-
-const rows: Record<string, { raw: string; gzip: string }> = {};
-for (const [name, path] of libs) {
+const results = await Promise.all(names.map(async name => {
 	try {
-		const { raw, gzip } = measure(path);
-		rows[name] = { raw: toKB(raw), gzip: toKB(gzip) };
+		const { raw, gzip } = await measure(import.meta.resolve(name));
+		name = name.includes('ansispeck') ? 'ansispeck' : name;
+		return [name, { raw: toKB(raw), gzip: toKB(gzip) }] as const;
 	} catch (error) {
+		if (name.includes('ansispeck')) throw error;
 		const detail = error instanceof Error ? error.message : String(error);
-		warn(`[size] skipped ${name} (${path}): ${detail}`);
-		if (isFirstParty(path)) {
-			throw error;
-		}
-		rows[name] = { raw: 'N/A', gzip: 'N/A' };
+		warn(`[size] skipped ${name}: ${detail}`);
+		return [name, { raw: 'N/A', gzip: 'N/A' }] as const;
 	}
-}
+}));
 
-table(rows);
+table(Object.fromEntries(results));

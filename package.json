@@ -22,6 +22,14 @@
 		"#ansispeck-dist/*.d.ts": "./dist/*.d.ts",
 		"#ansispeck/*": "./src/*.ts",
 		"#bench/*": "./benchmarks/*.ts",
+		"#dist/ansispeck": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"#dist/ansispeck/*": {
+			"types": "./dist/*.d.ts",
+			"default": "./dist/*.js"
+		},
 		"#internal/*.ts": "./src/internal/*.ts",
 		"#pkg": "./package.json"
 	},
@@ -59,6 +67,7 @@
 	],
 	"scripts": {
 		"bd": "run build",
+		"bd:ci": "CI=1 run build",
 		"build": "tsdown",
 		"build:quiet": "tsdown -l error",
 		"bench": "run -s bench:bun bench:node",
@@ -90,6 +99,7 @@
 		"picocolors": "^1.1.1",
 		"publint": "^0.3.21",
 		"runner-run": "^0.12.2",
+		"rust-just": "^1.43.1",
 		"tsdown": "0.22.2",
 		"typescript": "^6.0.3"
 	},

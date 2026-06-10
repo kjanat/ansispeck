@@ -56,21 +56,26 @@ export type Wrap<T> = (open: string, close: string, replace?: string) => T;
  */
 export function fmt(open: string, close: string, replace: string = open): Formatter {
 	// Any close produced by composition is preceded by its own open (>= skip
-	// chars), so starting the scan there is safe — and lets indexOf bail
-	// without scanning when the input is shorter than the skip.
+	// chars), so starting the scan there is safe. `least` is the shortest
+	// input that could possibly contain a nested close — below it the scan
+	// (and its call overhead) is skipped entirely and the return is a pure
+	// O(1) concat, matching scan-free libraries on short inputs.
 	const skip = open.length < close.length ? open.length : close.length;
+	const least = skip + close.length;
 	return (input) => {
 		let s = '' + input;
-		let i = s.indexOf(close, skip);
-		if (~i) {
-			let result = '';
-			let cursor = 0;
-			do {
-				result += s.substring(cursor, i) + replace;
-				cursor = i + close.length;
-				i = s.indexOf(close, cursor);
-			} while (~i);
-			s = result + s.substring(cursor);
+		if (s.length >= least) {
+			let i = s.indexOf(close, skip);
+			if (~i) {
+				let result = '';
+				let cursor = 0;
+				do {
+					result += s.substring(cursor, i) + replace;
+					cursor = i + close.length;
+					i = s.indexOf(close, cursor);
+				} while (~i);
+				s = result + s.substring(cursor);
+			}
 		}
 		return open + s + close;
 	};
