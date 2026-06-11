@@ -4,10 +4,12 @@ import pkg from '#pkg' with { type: 'json' };
 import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { error, log } from 'node:console';
+import { readFileSync } from 'node:fs';
 import { exit } from 'node:process';
 import { parseArgs } from 'node:util';
 
 import { register as complex } from '#bench/complex';
+import { register as deferred } from '#bench/deferred';
 import { register as loading } from '#bench/loading';
 import { register as recursion } from '#bench/recursion';
 import { register as simple } from '#bench/simple';
@@ -25,9 +27,14 @@ declare module 'mitata' {
 	}
 }
 
-const SUITES = ['simple', 'complex', 'recursion', 'loading'] as const;
+const SUITES = ['simple', 'complex', 'recursion', 'deferred-build', 'loading'] as const;
 const LIB_ORDER = [
 	'ansispeck',
+	'ansispeck/auto',
+	'ansispeck/raw',
+	'ansispeck/safe',
+	'ansispeck/rope',
+	'ansispeck/noop',
 	'picocolors',
 	'colorette',
 	'kleur',
@@ -39,7 +46,7 @@ const LIB_ORDER = [
 const { values } = parseArgs({
 	options: {
 		format: { type: 'string', short: 'f', default: 'overview' },
-		filter: { type: 'string' },
+		filter: { type: 'string', short: 'F' },
 		help: { type: 'boolean', short: 'h', default: false },
 	},
 	strict: false,
@@ -50,12 +57,12 @@ if (values.help) {
 
 Options:
   -f, --format <fmt>   Output format (default: overview)
-                       overview   terminal table with rankings + CI95
-                       markdown   GitHub-flavored markdown table
-                       json       raw JSON
-                       quiet      suppress mitata output (used internally)
-                       mitata     default mitata output
-  --filter <regex>     Only run benchmarks matching <regex>
+                       overview     terminal table with rankings + CI95
+                       markdown|md  GitHub-flavored markdown table
+                       json         raw JSON
+                       quiet        suppress mitata output (used internally)
+                       mitata       default mitata output
+  -F, --filter <regex> Only run benchmarks matching <regex>
   -h, --help           Show this help`);
 	exit(0);
 }
@@ -63,16 +70,18 @@ Options:
 simple({ count: 1 });
 complex({ count: 1 });
 recursion({ count: 10_000 });
+deferred({ layers: 32, repeat: 32 });
 loading({ count: 1 });
 
-const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown'] as const;
+const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown', 'md'] as const;
 type Format = (typeof FORMATS)[number];
 
-const fmt = String(values.format);
-if (!FORMATS.includes(fmt as Format)) {
-	error(`Unknown format: ${fmt}\nValid: ${FORMATS.join(', ')}`);
+const rawFmt = String(values.format);
+if (!FORMATS.includes(rawFmt as Format)) {
+	error(`Unknown format: ${rawFmt}\nValid: ${FORMATS.join(', ')}`);
 	exit(1);
 }
+const fmt = rawFmt === 'md' ? 'markdown' : rawFmt;
 
 let filter: RegExp | undefined;
 if (typeof values.filter === 'string') {
@@ -84,7 +93,7 @@ if (typeof values.filter === 'string') {
 	}
 }
 const isCustom = fmt === 'overview' || fmt === 'markdown';
-const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown'>);
+const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown' | 'md'>);
 
 const result = await run({ format, filter });
 
@@ -154,7 +163,10 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 
 type BenchResult = Awaited<ReturnType<typeof run>>;
 const SELF_LIB = 'ansispeck';
-const BASELINE_LABEL = `${SELF_LIB}/#1`;
+const BASELINE_LABEL = `${SELF_LIB}/ext#1`;
+
+/** External = not ansispeck itself and not one of its `ansispeck/*` entrypoints. */
+const isExternal = (lib: string): boolean => lib !== SELF_LIB && !lib.startsWith(`${SELF_LIB}/`);
 
 interface Parsed {
 	context: BenchResult['context'];
@@ -231,15 +243,15 @@ function fmtTime(ns: number): string {
 function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
 	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
 	for (const [suite, ranking] of parsed.ranked) {
-		const first = ranking[0];
-		if (!first) continue;
-		if (first.lib === SELF_LIB) {
+		const self = ranking.find(r => r.lib === SELF_LIB);
+		if (!self) continue;
+		const fastestExternal = ranking.find(r => isExternal(r.lib));
+		if (!fastestExternal) continue;
+		if (self.stats.avg <= fastestExternal.stats.avg) {
 			ci95.set(suite, { label: '—', significant: true });
 			continue;
 		}
-		const femto = ranking.find(r => r.lib === SELF_LIB);
-		if (!femto) continue;
-		const { ratio, significant } = welchCI95(first.stats.samples, femto.stats.samples);
+		const { ratio, significant } = welchCI95(fastestExternal.stats.samples, self.stats.samples);
 		ci95.set(suite, { label: `${ratio.toFixed(2)}x`, significant });
 	}
 	return ci95;
@@ -283,25 +295,56 @@ function printOverview(result: BenchResult): void {
 	const ciCells = activeSuites.map(s => {
 		const entry = ci95.get(s);
 		if (!entry) return ''.padStart(fullW);
-		const text = entry.label === '—' ? '—' : entry.significant ? entry.label : ansispeck.dim(`${entry.label} ~`);
-		return text.padStart(fullW);
+		if (entry.label === '—' || entry.significant) return entry.label.padStart(fullW);
+		// pad before dimming — the ANSI bytes must not count toward the column width
+		return ansispeck.dim(`${entry.label} ~`.padStart(fullW));
 	});
 	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
 	log('');
-	log('  * = fastest, — = ansispeck is #1, ~ = not significant');
+	log('  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant');
 }
 
-const NPM_URLS: Record<string, string> = {
-	ansispeck: `https://npm.im/${pkg.name}`,
-	'ansi-colors': 'https://npm.im/ansi-colors',
-	'kleur/colors': 'https://npm.im/kleur',
-	chalk: 'https://npm.im/chalk',
-	colorette: 'https://npm.im/colorette',
-	kleur: 'https://npm.im/kleur',
-	picocolors: 'https://npm.im/picocolors',
+const EXPORT_NOTES: Record<string, string> = {
+	ansispeck: 'auto mode — picks raw or noop once at import; FORCE_COLOR/`--color` wins',
+	'ansispeck/auto': 'same behavior as the root export, via explicit subpath',
+	'ansispeck/raw': 'always emits ANSI codes — the fastest path',
+	'ansispeck/safe': 'template-tag API preserving style across interpolations',
+	'ansispeck/rope': 'chunk builder — O(1) compose + O(n) render',
+	'ansispeck/noop': 'control path — returns plain strings',
 };
+
+/** npm package name behind a bench alias (`kleur/colors` → `kleur`). */
+function packageNameOf(alias: string): string {
+	const segments = alias.split('/');
+	if (alias.startsWith('@')) return segments.slice(0, 2).join('/');
+	return segments[0] ?? alias;
+}
+
+function readVersionField(jsonText: string): string {
+	const parsed: unknown = JSON.parse(jsonText);
+	if (typeof parsed === 'object' && parsed !== null && 'version' in parsed && typeof parsed.version === 'string') {
+		return parsed.version;
+	}
+	throw new Error('package.json without a string "version" field');
+}
+
+const versionCache: Map<string, string> = new Map();
+
+/** Installed version: resolve the package, read its node_modules package.json (repo root for ansispeck). */
+function packageVersion(name: string): string {
+	const cached = versionCache.get(name);
+	if (cached !== undefined) return cached;
+	const resolved = import.meta.resolve(name);
+	const marker = `/node_modules/${name}/`;
+	const at = resolved.lastIndexOf(marker);
+	const version = at === -1
+		? pkg.version
+		: readVersionField(readFileSync(new URL(`${resolved.slice(0, at + marker.length)}package.json`), 'utf8'));
+	versionCache.set(name, version);
+	return version;
+}
 
 function printMarkdown(result: BenchResult): void {
 	const parsed = parse(result);
@@ -312,21 +355,33 @@ function printMarkdown(result: BenchResult): void {
 	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	log(`\n> ${cpuName ?? 'unknown'}\n`);
 
+	// ansispeck export notes
+	const noted = libs.filter(lib => EXPORT_NOTES[lib] !== undefined);
+	if (noted.length > 0) {
+		log('> ansispeck exports in this table:');
+		for (const lib of noted) {
+			const note = EXPORT_NOTES[lib];
+			if (note === undefined) continue;
+			log(`> - \`${lib}\`: ${note}`);
+		}
+		log('');
+	}
+
 	// header
 	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
 	log(`| ${hdr.join(' | ')} |`);
 	log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
 
-	// collect ref keys for link definitions
-	const refs: Array<[string, string]> = [];
+	// collect ref keys for footnote definitions
+	const refs: Map<string, string> = new Map();
 
 	for (const lib of libs) {
-		const refKey = lib.replace(/\//g, '-');
-		const url = NPM_URLS[lib];
-		if (url) refs.push([refKey, url]);
+		const pkgName = packageNameOf(lib);
+		const refKey = pkgName.replace(/\//g, '-');
+		refs.set(refKey, pkgName);
 
 		const cells: string[] = [];
-		cells.push(refKey === lib ? `[${lib}]` : `[${lib}][${refKey}]`);
+		cells.push(`${lib}[^${refKey}]`);
 
 		for (const suite of activeSuites) {
 			const entry = suites.get(suite)?.get(lib);
@@ -337,7 +392,11 @@ function printMarkdown(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			if (rank === 0) {
-				cells.push(`**${val}** 🥇`);
+				cells.push(`<ins>**${val}**</ins> 🥇`);
+			} else if (rank === 1) {
+				cells.push(`***${val}*** 🥈`);
+			} else if (rank === 2) {
+				cells.push(`*${val}* 🥉`);
 			} else {
 				cells.push(`${val} #${rank + 1}`);
 			}
@@ -349,15 +408,16 @@ function printMarkdown(result: BenchResult): void {
 	const ciCells = activeSuites.map(s => {
 		const entry = ci95.get(s);
 		if (!entry) return '';
-		if (entry.label === '—') return '**#1**';
+		if (entry.label === '—') return '—';
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
 	log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 
-	// link definitions
+	// footnote definitions
 	log('');
-	for (const [key, url] of refs) {
-		log(`[${key}]: ${url}`);
+	for (const [refKey, name] of refs) {
+		const v = packageVersion(name);
+		log(`[^${refKey}]: ${name} [v${v}](https://npm.im/package/${name}/v/${v} "NPM")`);
 	}
 }
 
