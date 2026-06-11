@@ -8,7 +8,7 @@ jobs:
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
     steps:
       - uses: actions/checkout@v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, persist-credentials: false }
       - name: Validate tag
         if: github.ref_type == 'tag'
         run: |
