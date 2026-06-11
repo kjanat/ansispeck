@@ -168,6 +168,15 @@ const BASELINE_LABEL = `${SELF_LIB}/ext#1`;
 /** External = not ansispeck itself and not one of its `ansispeck/*` entrypoints. */
 const isExternal = (lib: string): boolean => lib !== SELF_LIB && !lib.startsWith(`${SELF_LIB}/`);
 
+/**
+ * Rows whose behavior mismatches this run's color mode show their numbers but
+ * don't compete for rank: noop does no work in a colored run; raw ignores a
+ * no-color run. The root export's detection is the mode oracle.
+ */
+const RANK_EXCLUDED: ReadonlySet<string> = new Set(
+	ansispeck.isColorSupported ? [`${SELF_LIB}/noop`] : [`${SELF_LIB}/noop`, `${SELF_LIB}/raw`],
+);
+
 interface Parsed {
 	context: BenchResult['context'];
 	suites: Map<string, Map<string, LibStats>>;
@@ -227,6 +236,7 @@ function parse(result: BenchResult): Parsed {
 	for (const [suite, entries] of suites) {
 		const sorted = [...entries.entries()]
 			.map(([lib, stats]) => ({ lib, stats }))
+			.filter(({ lib }) => !RANK_EXCLUDED.has(lib))
 			.sort((a, b) => a.stats.avg - b.stats.avg);
 		ranked.set(suite, sorted);
 	}
@@ -285,7 +295,7 @@ function printOverview(result: BenchResult): void {
 			}
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
-			const tag = rank === 0 ? ' *' : `#${rank + 1}`;
+			const tag = rank === -1 ? '†' : rank === 0 ? ' *' : `#${rank + 1}`;
 			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
 		}
 		log(lib.padEnd(nameW) + '  ' + cells.join('  '));
@@ -303,7 +313,9 @@ function printOverview(result: BenchResult): void {
 	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
 	log('');
-	log('  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant');
+	const legend = '  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant';
+	const unranked = libs.some(lib => RANK_EXCLUDED.has(lib));
+	log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
 }
 
 const EXPORT_NOTES: Record<string, string> = {
@@ -367,6 +379,11 @@ function printMarkdown(result: BenchResult): void {
 		log('');
 	}
 
+	if (libs.some(lib => RANK_EXCLUDED.has(lib))) {
+		log('> † unranked — behavior does not match this color mode');
+		log('');
+	}
+
 	// header
 	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
 	log(`| ${hdr.join(' | ')} |`);
@@ -391,7 +408,9 @@ function printMarkdown(result: BenchResult): void {
 			}
 			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
-			if (rank === 0) {
+			if (RANK_EXCLUDED.has(lib)) {
+				cells.push(`${val} †`);
+			} else if (rank === 0) {
 				cells.push(`<ins>**${val}**</ins> 🥇`);
 			} else if (rank === 1) {
 				cells.push(`***${val}*** 🥈`);
