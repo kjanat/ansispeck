@@ -1,13 +1,14 @@
-name: Publish to npm
+name: Publish
 run-name: Publish ${{ github.ref_type == 'tag' && github.ref_name || 'manual' }}
 on: { push: { tags: [v*] }, workflow_dispatch: {} }
 permissions: { contents: read, id-token: write }
 jobs:
-  publish:
+  publish-npm:
+    name: npm
     runs-on: ubuntu-latest
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
       - name: Validate tag
         if: github.ref_type == 'tag'
@@ -16,12 +17,11 @@ jobs:
             echo "invalid tag: $GITHUB_REF_NAME" >&2
             exit 1
           fi
+      - uses: kjanat/runner@master
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v6
         with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
-      - run: bun install --frozen-lockfile
-      - name: Build dist
-        run: bun run build
+      - run: runner install -f build
       - name: Stamp version from tag
         if: github.ref_type == 'tag'
         run: bun pm version from-git --allow-same-version --no-git-tag-version
@@ -30,7 +30,6 @@ jobs:
       - name: Pack + publish
         id: publish
         uses: actions/github-script@v9
-        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
         with:
           script: |
             const { existsSync } = await import('node:fs');
@@ -45,13 +44,14 @@ jobs:
             await exec.getExecOutput('bunx', ['npm@latest', 'publish', '--provenance', '--access', 'public', '--tag', tag, tarball]);
 
   publish-jsr:
+    name: jsr
     runs-on: ubuntu-latest
-    environment: { name: jsr, url: "${{ steps.jsr.outputs.jsr_url }}" }
+    environment: { name: jsr, url: "${{ steps.publish.outputs.jsr_url }}" }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
       - name: Publish to JSR
-        id: jsr
+        id: publish
         uses: actions/github-script@v9
         with:
           script: |
