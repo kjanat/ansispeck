@@ -125,59 +125,57 @@ export function createRope(enabled: boolean = detectColorSupport()): Rope {
 
 const rope: Rope = createRope();
 
-export const {
-	bg256,
-	bgBlack,
-	bgBlackBright,
-	bgBlue,
-	bgBlueBright,
-	bgCyan,
-	bgCyanBright,
-	bgGreen,
-	bgGreenBright,
-	bgHex,
-	bgMagenta,
-	bgMagentaBright,
-	bgRed,
-	bgRedBright,
-	bgRgb,
-	bgWhite,
-	bgWhiteBright,
-	bgYellow,
-	bgYellowBright,
-	black,
-	blackBright,
-	blink,
-	blue,
-	blueBright,
-	bold,
-	cyan,
-	cyanBright,
-	dim,
-	doubleUnderline,
-	fg256,
-	gray,
-	green,
-	greenBright,
-	hex,
-	hidden,
-	inverse,
-	isColorSupported,
-	italic,
-	magenta,
-	magentaBright,
-	overline,
-	red,
-	redBright,
-	reset,
-	rgb,
-	strikethrough,
-	underline,
-	white,
-	whiteBright,
-	yellow,
-	yellowBright,
-} = rope;
+export const bg256 = rope.bg256;
+export const bgBlack = rope.bgBlack;
+export const bgBlackBright = rope.bgBlackBright;
+export const bgBlue = rope.bgBlue;
+export const bgBlueBright = rope.bgBlueBright;
+export const bgCyan = rope.bgCyan;
+export const bgCyanBright = rope.bgCyanBright;
+export const bgGreen = rope.bgGreen;
+export const bgGreenBright = rope.bgGreenBright;
+export const bgHex = rope.bgHex;
+export const bgMagenta = rope.bgMagenta;
+export const bgMagentaBright = rope.bgMagentaBright;
+export const bgRed = rope.bgRed;
+export const bgRedBright = rope.bgRedBright;
+export const bgRgb = rope.bgRgb;
+export const bgWhite = rope.bgWhite;
+export const bgWhiteBright = rope.bgWhiteBright;
+export const bgYellow = rope.bgYellow;
+export const bgYellowBright = rope.bgYellowBright;
+export const black = rope.black;
+export const blackBright = rope.blackBright;
+export const blink = rope.blink;
+export const blue = rope.blue;
+export const blueBright = rope.blueBright;
+export const bold = rope.bold;
+export const cyan = rope.cyan;
+export const cyanBright = rope.cyanBright;
+export const dim = rope.dim;
+export const doubleUnderline = rope.doubleUnderline;
+export const fg256 = rope.fg256;
+export const gray = rope.gray;
+export const green = rope.green;
+export const greenBright = rope.greenBright;
+export const hex = rope.hex;
+export const hidden = rope.hidden;
+export const inverse = rope.inverse;
+export const isColorSupported = rope.isColorSupported;
+export const italic = rope.italic;
+export const magenta = rope.magenta;
+export const magentaBright = rope.magentaBright;
+export const overline = rope.overline;
+export const red = rope.red;
+export const redBright = rope.redBright;
+export const reset = rope.reset;
+export const rgb = rope.rgb;
+export const strikethrough = rope.strikethrough;
+export const underline = rope.underline;
+export const white = rope.white;
+export const whiteBright = rope.whiteBright;
+export const yellow = rope.yellow;
+export const yellowBright = rope.yellowBright;
 
 export default rope;
 

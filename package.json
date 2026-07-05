@@ -1,7 +1,7 @@
 {
 	"name": "ansispeck",
 	"version": "0.1.0",
-	"description": "~2 KB (gzipped) terminal ANSI color formatting with explicit entrypoints.",
+	"description": "ANSI that slips in and gets to work.",
 	"keywords": [
 		"terminal",
 		"colors",
