@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-06
+
+### Fixed
+
+- Published type declarations were unresolvable: the `codeSplitting` group regex also captured the generated declaration modules, so entry `.d.ts` files imported an `internal-<hash>.js` chunk that had no `.d.ts` sibling — every exported type degraded to `any` (hard `TS7016` without `skipLibCheck`). Regex now anchors on `\.ts$` so only runtime modules are grouped and the shared declaration chunks are emitted
+
+## [0.1.1] - 2026-07-06
+
+### Added
+
+- JSDoc symbol documentation on every entrypoint's exported formatters and default exports (JSR symbol-doc coverage 6% → 86%)
+
+### Changed
+
+- Publish workflow: npm auth via OIDC trusted publishing (drops `NPM_TOKEN`), separate `npm`/`jsr` job names, `actions/checkout@v7`
+
+## [0.1.0] - 2026-07-05
+
 ### Added
 
 - `link(url, text?)` — OSC 8 terminal hyperlink formatter; accepts `string | URL`, `text` defaults to the URL, usable as a template tag
@@ -19,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ansispeck/rope` — chunk/rope API (`text`, `concat`, `render`, `createRope`) with O(1) styled composition and a stack-based renderer that re-opens enclosing styles structurally
 - `detectColorSupport()` export for on-demand detection
 - Derived type layer (`src/types.ts`): `FormatterName` built from template-literal types, `Palette`/`TemplatePalette`/`ChunkPalette`, `SafeColors`, `Rope`, branded `Chunk` nodes
+- JSR publishing: package also available as [`@kjanat/ansispeck`](https://jsr.io/@kjanat/ansispeck) on JSR
 - `scripts/compare-size.sh` — size reporting (`--table` with OSC 8 terminal hyperlinks, `--markdown` with link definitions)
 - Benchmark suite (simple, complex, recursion, loading) with overview formatter, per-column rankings, and Welch's t-test CI95
 - CI workflow for benchmarks and size comparison on PRs/pushes to master
@@ -37,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FORCE_COLOR`/`--color` now takes precedence over `NO_COLOR`/`--no-color` (explicit force beats explicit disable)
 - Runtime split into `src/internal/{ansi,detect,colors,template}`; every palette flavor is built from a single `mapPalette` code table
 - `Formattable` widened with `boolean | bigint`
+- Inline `replaceClose` into `fmt` — eliminates function call overhead, enables single return path optimization in V8/JSC
+- Benchmarks import from `dist/` (built output) instead of `src/` for accurate measurement
 - `scripts/compare-size.sh` now measures the default entry's full import chain (entry + shared chunks)
 - Size claim rebranded from "Sub-kilobyte (gzipped)" to "~1 KB (gzipped)", then to "~2 KB (gzipped)" with the entrypoint architecture
 - CI: extract bench steps into reusable composite action (`.github/actions/bench/`) with `runtime` and `color` inputs
@@ -48,11 +69,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish flow now strips dev-only `package.json` fields, author URL metadata, and declaration-file comments during `prepack` to reduce package size
 - License switched from MIT to Zero-Clause BSD (0BSD)
 
-### Performance
-
-- Inline `replaceClose` into `fmt` — eliminates function call overhead, enables single return path optimization in V8/JSC
-- Benchmarks import from `dist/` (built output) instead of `src/` for accurate measurement
-
 ### Fixed
 
 - Nested close-code scan now starts at `min(open, close)` length instead of `open.length` — fixes style leaks with long truecolor open codes while keeping the short-input fast path (`indexOf` bails without scanning when the input is shorter than the skip)
@@ -60,3 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark CLI now handles invalid `--filter` regex input without uncaught exceptions
 - Welch CI computation now guards too-small sample sets
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)` for cross-platform URL/path correctness
+
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/kjanat/ansispeck/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/kjanat/ansispeck/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/kjanat/ansispeck/releases/tag/v0.1.0

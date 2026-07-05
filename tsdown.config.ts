@@ -24,7 +24,7 @@ export default defineConfig({
 	onSuccess: 'run fmt package.json',
 	minify: true,
 	outputOptions: {
-		codeSplitting: { groups: [{ name: 'internal', test: /[\\/]src[\\/]internal[\\/](?:ansi|colors|detect)\./ }] },
+		codeSplitting: { groups: [{ name: 'internal', test: /[\\/]src[\\/]internal[\\/](?:ansi|colors|detect)\.ts$/ }] },
 	},
 	publint: true,
 	attw: { ignoreRules: ['cjs-resolves-to-esm', 'no-resolution'] },
