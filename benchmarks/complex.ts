@@ -26,10 +26,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ ansispeck.green('.')
 					+ ansispeck.bgRed(ansispeck.black(' ERROR '))
 					+ ansispeck.red(
-						' Add plugin '
-							+ ansispeck.yellow('name')
-							+ ' to use time limit with '
-							+ ansispeck.yellow(`${++n}`),
+						' Add plugin ' + ansispeck.yellow('name') + ' to use time limit with ' + ansispeck.yellow(`${++n}`),
 					);
 			}
 			do_not_optimize(sink);
@@ -41,9 +38,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ auto.yellow('.')
 					+ auto.green('.')
 					+ auto.bgRed(auto.black(' ERROR '))
-					+ auto.red(
-						' Add plugin ' + auto.yellow('name') + ' to use time limit with ' + auto.yellow(`${++n}`),
-					);
+					+ auto.red(' Add plugin ' + auto.yellow('name') + ' to use time limit with ' + auto.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});
@@ -54,9 +49,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ raw.yellow('.')
 					+ raw.green('.')
 					+ raw.bgRed(raw.black(' ERROR '))
-					+ raw.red(
-						' Add plugin ' + raw.yellow('name') + ' to use time limit with ' + raw.yellow(`${++n}`),
-					);
+					+ raw.red(' Add plugin ' + raw.yellow('name') + ' to use time limit with ' + raw.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});
@@ -74,18 +67,17 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 
 		bench('ansispeck/rope', () => {
 			for (let i = 0; i < count; i++) {
-				sink = rope.render(rope.concat(
-					rope.red('.'),
-					rope.yellow('.'),
-					rope.green('.'),
-					rope.bgRed(rope.black(' ERROR ')),
-					rope.red(rope.concat(
-						' Add plugin ',
-						rope.yellow('name'),
-						' to use time limit with ',
-						rope.yellow(`${++n}`),
-					)),
-				));
+				sink = rope.render(
+					rope.concat(
+						rope.red('.'),
+						rope.yellow('.'),
+						rope.green('.'),
+						rope.bgRed(rope.black(' ERROR ')),
+						rope.red(
+							rope.concat(' Add plugin ', rope.yellow('name'), ' to use time limit with ', rope.yellow(`${++n}`)),
+						),
+					),
+				);
 			}
 			do_not_optimize(sink);
 		});
@@ -96,9 +88,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ noop.yellow('.')
 					+ noop.green('.')
 					+ noop.bgRed(noop.black(' ERROR '))
-					+ noop.red(
-						' Add plugin ' + noop.yellow('name') + ' to use time limit with ' + noop.yellow(`${++n}`),
-					);
+					+ noop.red(' Add plugin ' + noop.yellow('name') + ' to use time limit with ' + noop.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});
@@ -110,10 +100,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ picocolors.green('.')
 					+ picocolors.bgRed(picocolors.black(' ERROR '))
 					+ picocolors.red(
-						' Add plugin '
-							+ picocolors.yellow('name')
-							+ ' to use time limit with '
-							+ picocolors.yellow(`${++n}`),
+						' Add plugin ' + picocolors.yellow('name') + ' to use time limit with ' + picocolors.yellow(`${++n}`),
 					);
 			}
 			do_not_optimize(sink);
@@ -126,10 +113,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ colorette.green('.')
 					+ colorette.bgRed(colorette.black(' ERROR '))
 					+ colorette.red(
-						' Add plugin '
-							+ colorette.yellow('name')
-							+ ' to use time limit with '
-							+ colorette.yellow(`${++n}`),
+						' Add plugin ' + colorette.yellow('name') + ' to use time limit with ' + colorette.yellow(`${++n}`),
 					);
 			}
 			do_not_optimize(sink);
@@ -141,9 +125,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ kleur.yellow('.')
 					+ kleur.green('.')
 					+ kleur.bgRed(kleur.black(' ERROR '))
-					+ kleur.red(
-						' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++n}`),
-					);
+					+ kleur.red(' Add plugin ' + kleur.yellow('name') + ' to use time limit with ' + kleur.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});
@@ -155,10 +137,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ kleurColors.green('.')
 					+ kleurColors.bgRed(kleurColors.black(' ERROR '))
 					+ kleurColors.red(
-						' Add plugin '
-							+ kleurColors.yellow('name')
-							+ ' to use time limit with '
-							+ kleurColors.yellow(`${++n}`),
+						' Add plugin ' + kleurColors.yellow('name') + ' to use time limit with ' + kleurColors.yellow(`${++n}`),
 					);
 			}
 			do_not_optimize(sink);
@@ -170,9 +149,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ chalk.yellow('.')
 					+ chalk.green('.')
 					+ chalk.bgRed(chalk.black(' ERROR '))
-					+ chalk.red(
-						' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++n}`),
-					);
+					+ chalk.red(' Add plugin ' + chalk.yellow('name') + ' to use time limit with ' + chalk.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});
@@ -183,9 +160,7 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 					+ ansi.yellow('.')
 					+ ansi.green('.')
 					+ ansi.bgRed(ansi.black(' ERROR '))
-					+ ansi.red(
-						' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++n}`),
-					);
+					+ ansi.red(' Add plugin ' + ansi.yellow('name') + ' to use time limit with ' + ansi.yellow(`${++n}`));
 			}
 			do_not_optimize(sink);
 		});

@@ -73,22 +73,8 @@ const safeStages: readonly StringStage[] = [
 	(input) => safe.underline`${input}`,
 	(input) => safe.green`${input}`,
 ];
-const ropeStages: readonly ChunkStage[] = [
-	rope.red,
-	rope.bold,
-	rope.bgBlue,
-	rope.yellow,
-	rope.underline,
-	rope.green,
-];
-const noopStages: readonly StringStage[] = [
-	noop.red,
-	noop.bold,
-	noop.bgBlue,
-	noop.yellow,
-	noop.underline,
-	noop.green,
-];
+const ropeStages: readonly ChunkStage[] = [rope.red, rope.bold, rope.bgBlue, rope.yellow, rope.underline, rope.green];
+const noopStages: readonly StringStage[] = [noop.red, noop.bold, noop.bgBlue, noop.yellow, noop.underline, noop.green];
 const picocolorsStages: readonly StringStage[] = [
 	picocolors.red,
 	picocolors.bold,
@@ -131,9 +117,10 @@ const chalkStages: readonly StringStage[] = [
 ];
 const ansiStages: readonly StringStage[] = [ansi.red, ansi.bold, ansi.bgBlue, ansi.yellow, ansi.underline, ansi.green];
 
-export function register(
-	{ layers = DEFAULT_LAYERS, repeat = DEFAULT_REPEAT }: { layers?: number; repeat?: number } = {},
-): void {
+export function register({
+	layers = DEFAULT_LAYERS,
+	repeat = DEFAULT_REPEAT,
+}: { layers?: number; repeat?: number } = {}): void {
 	let sink = '';
 	let chunkSink: Chunk = rope.text('');
 	summary(() => {

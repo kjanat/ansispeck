@@ -125,58 +125,110 @@ export function createRope(enabled: boolean = detectColorSupport()): Rope {
 
 const rope: Rope = createRope();
 
+/** Set the background with a 256-color palette index. */
 export const bg256 = rope.bg256;
+/** Set the background black. */
 export const bgBlack = rope.bgBlack;
+/** Set the background bright black. */
 export const bgBlackBright = rope.bgBlackBright;
+/** Set the background blue. */
 export const bgBlue = rope.bgBlue;
+/** Set the background bright blue. */
 export const bgBlueBright = rope.bgBlueBright;
+/** Set the background cyan. */
 export const bgCyan = rope.bgCyan;
+/** Set the background bright cyan. */
 export const bgCyanBright = rope.bgCyanBright;
+/** Set the background green. */
 export const bgGreen = rope.bgGreen;
+/** Set the background bright green. */
 export const bgGreenBright = rope.bgGreenBright;
+/** Set the background from a `#rrggbb` hex string. */
 export const bgHex = rope.bgHex;
+/** Set the background magenta. */
 export const bgMagenta = rope.bgMagenta;
+/** Set the background bright magenta. */
 export const bgMagentaBright = rope.bgMagentaBright;
+/** Set the background red. */
 export const bgRed = rope.bgRed;
+/** Set the background bright red. */
 export const bgRedBright = rope.bgRedBright;
+/** Set the background with a 24-bit RGB triple. */
 export const bgRgb = rope.bgRgb;
+/** Set the background white. */
 export const bgWhite = rope.bgWhite;
+/** Set the background bright white. */
 export const bgWhiteBright = rope.bgWhiteBright;
+/** Set the background yellow. */
 export const bgYellow = rope.bgYellow;
+/** Set the background bright yellow. */
 export const bgYellowBright = rope.bgYellowBright;
+/** Color the foreground black. */
 export const black = rope.black;
+/** Color the foreground bright black. */
 export const blackBright = rope.blackBright;
+/** Apply blink. */
 export const blink = rope.blink;
+/** Color the foreground blue. */
 export const blue = rope.blue;
+/** Color the foreground bright blue. */
 export const blueBright = rope.blueBright;
+/** Apply bold intensity. */
 export const bold = rope.bold;
+/** Color the foreground cyan. */
 export const cyan = rope.cyan;
+/** Color the foreground bright cyan. */
 export const cyanBright = rope.cyanBright;
+/** Apply dim (faint) intensity. */
 export const dim = rope.dim;
+/** Apply a double underline. */
 export const doubleUnderline = rope.doubleUnderline;
+/** Color the foreground with a 256-color palette index. */
 export const fg256 = rope.fg256;
+/** Color the foreground gray. */
 export const gray = rope.gray;
+/** Color the foreground green. */
 export const green = rope.green;
+/** Color the foreground bright green. */
 export const greenBright = rope.greenBright;
+/** Color the foreground from a `#rrggbb` hex string. */
 export const hex = rope.hex;
+/** Conceal (hide) the text. */
 export const hidden = rope.hidden;
+/** Swap foreground and background. */
 export const inverse = rope.inverse;
+/** Whether ANSI output is enabled for this instance. */
 export const isColorSupported = rope.isColorSupported;
+/** Apply italic style. */
 export const italic = rope.italic;
+/** Color the foreground magenta. */
 export const magenta = rope.magenta;
+/** Color the foreground bright magenta. */
 export const magentaBright = rope.magentaBright;
+/** Apply an overline. */
 export const overline = rope.overline;
+/** Color the foreground red. */
 export const red = rope.red;
+/** Color the foreground bright red. */
 export const redBright = rope.redBright;
+/** Reset all styles and colors. */
 export const reset = rope.reset;
+/** Color the foreground with a 24-bit RGB triple. */
 export const rgb = rope.rgb;
+/** Apply strikethrough. */
 export const strikethrough = rope.strikethrough;
+/** Apply a single underline. */
 export const underline = rope.underline;
+/** Color the foreground white. */
 export const white = rope.white;
+/** Color the foreground bright white. */
 export const whiteBright = rope.whiteBright;
+/** Color the foreground yellow. */
 export const yellow = rope.yellow;
+/** Color the foreground bright yellow. */
 export const yellowBright = rope.yellowBright;
 
+/** Rope builder set — O(1) styled composition, O(n) render. */
 export default rope;
 
 export type {

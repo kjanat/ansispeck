@@ -127,23 +127,19 @@ describe('link', () => {
 	const d = createColors(false);
 
 	test('wraps text in OSC 8 hyperlink', () => {
-		expect(c.link('https://example.com', 'docs'))
-			.toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
+		expect(c.link('https://example.com', 'docs')).toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
 	});
 
 	test('text defaults to url', () => {
-		expect(c.link('https://example.com'))
-			.toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
+		expect(c.link('https://example.com')).toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
 	});
 
 	test('accepts URL instance', () => {
-		expect(c.link(new URL('https://example.com'), 'docs'))
-			.toBe('\x1b]8;;https://example.com/\x1b\\docs\x1b]8;;\x1b\\');
+		expect(c.link(new URL('https://example.com'), 'docs')).toBe('\x1b]8;;https://example.com/\x1b\\docs\x1b]8;;\x1b\\');
 	});
 
 	test('coerces non-string text', () => {
-		expect(c.link('https://example.com', 42))
-			.toBe('\x1b]8;;https://example.com\x1b\\42\x1b]8;;\x1b\\');
+		expect(c.link('https://example.com', 42)).toBe('\x1b]8;;https://example.com\x1b\\42\x1b]8;;\x1b\\');
 	});
 
 	test('disabled returns plain text', () => {
@@ -153,13 +149,13 @@ describe('link', () => {
 
 	test('template tag', () => {
 		const id = 42;
-		expect(c.link`https://example.com/issues/${id}`)
-			.toBe('\x1b]8;;https://example.com/issues/42\x1b\\https://example.com/issues/42\x1b]8;;\x1b\\');
+		expect(c.link`https://example.com/issues/${id}`).toBe(
+			'\x1b]8;;https://example.com/issues/42\x1b\\https://example.com/issues/42\x1b]8;;\x1b\\',
+		);
 	});
 
 	test('template tag without interpolation', () => {
-		expect(c.link`https://example.com`)
-			.toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
+		expect(c.link`https://example.com`).toBe('\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\');
 	});
 
 	test('template tag disabled returns url', () => {
@@ -177,8 +173,7 @@ describe('extended modifiers', () => {
 	});
 
 	test('underline nests inside doubleUnderline (shared close 24)', () => {
-		expect(c.doubleUnderline(c.underline('in') + 'out'))
-			.toBe('\x1b[21m\x1b[4min\x1b[21mout\x1b[24m');
+		expect(c.doubleUnderline(c.underline('in') + 'out')).toBe('\x1b[21m\x1b[4min\x1b[21mout\x1b[24m');
 	});
 });
 
@@ -210,8 +205,9 @@ describe('256-color and truecolor', () => {
 	});
 
 	test('nested named color close is replaced (long open)', () => {
-		expect(c.rgb(255, 136, 0)(c.red('in') + 'out'))
-			.toBe('\x1b[38;2;255;136;0m\x1b[31min\x1b[38;2;255;136;0mout\x1b[39m');
+		expect(c.rgb(255, 136, 0)(c.red('in') + 'out')).toBe(
+			'\x1b[38;2;255;136;0m\x1b[31min\x1b[38;2;255;136;0mout\x1b[39m',
+		);
 	});
 
 	test('disabled returns identity', () => {

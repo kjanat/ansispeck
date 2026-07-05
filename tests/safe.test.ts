@@ -40,8 +40,7 @@ describe('safe template tags', () => {
 	});
 
 	test('link works on the safe palette', () => {
-		expect(s.link('https://example.com', 'docs'))
-			.toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
+		expect(s.link('https://example.com', 'docs')).toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
 	});
 
 	test('default export reflects detection', () => {

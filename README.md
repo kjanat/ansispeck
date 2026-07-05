@@ -139,7 +139,7 @@ console.log(c.link`https://example.com/issues/${42}`); // template tag, text = u
 
 ## Color detection
 
-Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.
+Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.\
 Explicit force (`FORCE_COLOR`/`--color`) beats explicit disable (`NO_COLOR`/`--no-color`),
 which beats platform heuristics.
 

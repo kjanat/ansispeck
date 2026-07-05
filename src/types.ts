@@ -33,16 +33,7 @@ export type StyleName =
 	| 'underline';
 
 /** Base 8 ANSI foreground color names (plus gray). */
-type BaseColorName =
-	| 'black'
-	| 'blue'
-	| 'cyan'
-	| 'gray'
-	| 'green'
-	| 'magenta'
-	| 'red'
-	| 'white'
-	| 'yellow';
+type BaseColorName = 'black' | 'blue' | 'cyan' | 'gray' | 'green' | 'magenta' | 'red' | 'white' | 'yellow';
 
 /** Only these get `Bright`/`bg` variants (so `gray` won't). */
 type VariantBaseColorName = Exclude<BaseColorName, 'gray'>;

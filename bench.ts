@@ -213,7 +213,7 @@ function parse(result: BenchResult): Parsed {
 	}
 
 	const libs: string[] = [];
-	const firstSuite = SUITES.find(suite => suites.has(suite));
+	const firstSuite = SUITES.find((suite) => suites.has(suite));
 	if (firstSuite !== undefined) {
 		const firstSuiteEntries = suites.get(firstSuite);
 		if (firstSuiteEntries !== undefined) {
@@ -253,9 +253,9 @@ function fmtTime(ns: number): string {
 function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
 	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
 	for (const [suite, ranking] of parsed.ranked) {
-		const self = ranking.find(r => r.lib === SELF_LIB);
+		const self = ranking.find((r) => r.lib === SELF_LIB);
 		if (!self) continue;
-		const fastestExternal = ranking.find(r => isExternal(r.lib));
+		const fastestExternal = ranking.find((r) => isExternal(r.lib));
 		if (!fastestExternal) continue;
 		if (self.stats.avg <= fastestExternal.stats.avg) {
 			ci95.set(suite, { label: '—', significant: true });
@@ -272,16 +272,20 @@ function printOverview(result: BenchResult): void {
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
-	const nameW = Math.max(4, BASELINE_LABEL.length, ...libs.map(l => l.length));
-	const colW = Math.max(...activeSuites.map(s => s.length), 10);
+	const nameW = Math.max(4, BASELINE_LABEL.length, ...libs.map((l) => l.length));
+	const colW = Math.max(...activeSuites.map((s) => s.length), 10);
 	const tagW = 3;
 	const fullW = colW + 1 + tagW;
 
-	const { runtime, version, cpu: { name: cpuName } } = context;
+	const {
+		runtime,
+		version,
+		cpu: { name: cpuName },
+	} = context;
 	log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	log(''.padStart(nameW) + '  ' + activeSuites.map(s => s.padStart(fullW)).join('  '));
+	log(''.padStart(nameW) + '  ' + activeSuites.map((s) => s.padStart(fullW)).join('  '));
 	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 
 	// rows
@@ -293,7 +297,7 @@ function printOverview(result: BenchResult): void {
 				cells.push('—'.padStart(fullW));
 				continue;
 			}
-			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
+			const rank = ranked.get(suite)?.findIndex((r) => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === -1 ? '†' : rank === 0 ? ' *' : `#${rank + 1}`;
 			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
@@ -302,7 +306,7 @@ function printOverview(result: BenchResult): void {
 	}
 
 	// CI95 footer row
-	const ciCells = activeSuites.map(s => {
+	const ciCells = activeSuites.map((s) => {
 		const entry = ci95.get(s);
 		if (!entry) return ''.padStart(fullW);
 		if (entry.label === '—' || entry.significant) return entry.label.padStart(fullW);
@@ -314,7 +318,7 @@ function printOverview(result: BenchResult): void {
 
 	log('');
 	const legend = '  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant';
-	const unranked = libs.some(lib => RANK_EXCLUDED.has(lib));
+	const unranked = libs.some((lib) => RANK_EXCLUDED.has(lib));
 	log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
 }
 
@@ -363,12 +367,16 @@ function printMarkdown(result: BenchResult): void {
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
-	const { runtime, version, cpu: { name: cpuName } } = context;
+	const {
+		runtime,
+		version,
+		cpu: { name: cpuName },
+	} = context;
 	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	log(`\n> ${cpuName ?? 'unknown'}\n`);
 
 	// ansispeck export notes
-	const noted = libs.filter(lib => EXPORT_NOTES[lib] !== undefined);
+	const noted = libs.filter((lib) => EXPORT_NOTES[lib] !== undefined);
 	if (noted.length > 0) {
 		log('> ansispeck exports in this table:');
 		for (const lib of noted) {
@@ -379,15 +387,15 @@ function printMarkdown(result: BenchResult): void {
 		log('');
 	}
 
-	if (libs.some(lib => RANK_EXCLUDED.has(lib))) {
+	if (libs.some((lib) => RANK_EXCLUDED.has(lib))) {
 		log('> † unranked — behavior does not match this color mode');
 		log('');
 	}
 
 	// header
-	const hdr = ['Library', ...activeSuites.map(s => s.charAt(0).toUpperCase() + s.slice(1))];
+	const hdr = ['Library', ...activeSuites.map((s) => s.charAt(0).toUpperCase() + s.slice(1))];
 	log(`| ${hdr.join(' | ')} |`);
-	log(`| ${hdr.map((_, i) => i === 0 ? '---' : '---:').join(' | ')} |`);
+	log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
 
 	// collect ref keys for footnote definitions
 	const refs: Map<string, string> = new Map();
@@ -406,7 +414,7 @@ function printMarkdown(result: BenchResult): void {
 				cells.push('—');
 				continue;
 			}
-			const rank = ranked.get(suite)?.findIndex(r => r.lib === lib) ?? -1;
+			const rank = ranked.get(suite)?.findIndex((r) => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			if (RANK_EXCLUDED.has(lib)) {
 				cells.push(`${val} †`);
@@ -424,7 +432,7 @@ function printMarkdown(result: BenchResult): void {
 	}
 
 	// CI95 footer
-	const ciCells = activeSuites.map(s => {
+	const ciCells = activeSuites.map((s) => {
 		const entry = ci95.get(s);
 		if (!entry) return '';
 		if (entry.label === '—') return '—';
