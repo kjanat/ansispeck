@@ -1,0 +1,22 @@
+{
+	"name": "@kjanat/ansispeck",
+	"version": "0.1.0",
+	"exports": {
+		".": "./src/index.ts",
+		"./auto": "./src/auto.ts",
+		"./noop": "./src/noop.ts",
+		"./raw": "./src/raw.ts",
+		"./rope": "./src/rope.ts",
+		"./safe": "./src/safe.ts"
+	},
+	"publish": {
+		"include": [
+			"src",
+			"README.md",
+			"LICENSE"
+		],
+		"exclude": [
+			"src/AGENTS.md"
+		]
+	}
+}

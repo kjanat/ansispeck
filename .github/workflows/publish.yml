@@ -30,6 +30,7 @@ jobs:
       - name: Pack + publish
         id: publish
         uses: actions/github-script@v9
+        env: { NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}" }
         with:
           script: |
             const { existsSync } = await import('node:fs');
@@ -42,3 +43,26 @@ jobs:
             const tarball = stdout.trim();
             if (!tarball || !existsSync(tarball)) { core.setFailed(`bun run tar produced no tarball (got ${JSON.stringify(tarball)})`); return }
             await exec.getExecOutput('bunx', ['npm@latest', 'publish', '--provenance', '--access', 'public', '--tag', tag, tarball]);
+
+  publish-jsr:
+    runs-on: ubuntu-latest
+    environment: { name: jsr, url: "${{ steps.jsr.outputs.jsr_url }}" }
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0, persist-credentials: false }
+      - name: Publish to JSR
+        id: jsr
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { readFileSync, writeFileSync } = await import('node:fs');
+            const path = "${{ github.workspace }}/jsr.json";
+            const jsr = JSON.parse(readFileSync(path, "utf8"));
+            if (context.ref.startsWith('refs/tags/v')) {
+              jsr.version = context.ref.slice('refs/tags/v'.length);
+              writeFileSync(path, `${JSON.stringify(jsr, null, "\t")}\n`);
+            }
+            core.setOutput('name', jsr.name);
+            core.setOutput('version', jsr.version);
+            core.setOutput('jsr_url', `https://jsr.io/${jsr.name}@${jsr.version}`);
+            await exec.getExecOutput('npx', ['--yes', 'jsr', 'publish', '--allow-dirty']);

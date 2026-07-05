@@ -1,5 +1,13 @@
 # ansispeck
 
+[![NPM](https://img.shields.io/npm/v/ansispeck?logo=npm&labelColor=CB3837&color=black)][npm]
+[![JSR](https://img.shields.io/jsr/v/@kjanat/ansispeck?logoColor=083344&logo=jsr&logoSize=auto&label=&labelColor=f7df1e&color=black)][jsr]
+[![Socket](https://badge.socket.dev/npm/package/ansispeck)][socket]
+
+[npm]: https://npm.im/ansispeck
+[jsr]: https://jsr.io/@kjanat/ansispeck
+[socket]: https://socket.dev/npm/package/ansispeck
+
 ~2 KB (gzipped) terminal ANSI color formatting with explicit entrypoints.
 
 ## Size
