@@ -9,7 +9,15 @@ export type Formattable = string | number | boolean | bigint | null | undefined;
 /** Wraps input in ANSI escape codes. */
 export type Formatter = (input: Formattable) => string;
 
-/** Wraps text in an OSC 8 terminal hyperlink. Text defaults to the URL. */
+/**
+ * Wraps text in an OSC 8 terminal hyperlink. Text defaults to the URL.
+ *
+ * Emission is gated by hyperlink support ({@link Colors.isHyperlinkSupported}),
+ * which is independent of color. When unsupported, the text is returned
+ * plain — so an omitted label degrades to the destination URL.
+ *
+ * @see https://no-hyperlinks.org/
+ */
 export interface LinkFormatter {
 	(url: string | URL, text?: Formattable | URL): string;
 	(strings: TemplateStringsArray, ...values: readonly unknown[]): string;
@@ -62,15 +70,19 @@ export interface Factories<T> {
 	readonly rgb: (r: number, g: number, b: number) => T;
 }
 
-/** All available color/style formatters plus color-support flag. */
+/** All available color/style formatters plus support flags. */
 export interface Colors extends Palette, Factories<Formatter> {
 	readonly isColorSupported: boolean;
+	/** Whether {@link link} emits OSC 8 sequences. Independent of color. */
+	readonly isHyperlinkSupported: boolean;
 	readonly link: LinkFormatter;
 }
 
 /** Template-tag color set (`ansispeck/safe`). */
 export interface SafeColors extends TemplatePalette, Factories<TemplateFormatter> {
 	readonly isColorSupported: boolean;
+	/** Whether {@link link} emits OSC 8 sequences. Independent of color. */
+	readonly isHyperlinkSupported: boolean;
 	readonly link: LinkFormatter;
 }
 

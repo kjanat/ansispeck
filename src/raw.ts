@@ -82,6 +82,8 @@ export const hidden = raw.hidden;
 export const inverse = raw.inverse;
 /** Whether ANSI output is enabled for this instance. */
 export const isColorSupported = raw.isColorSupported;
+/** Whether OSC 8 hyperlinks are emitted for this instance. */
+export const isHyperlinkSupported = raw.isHyperlinkSupported;
 /** Apply italic style. */
 export const italic = raw.italic;
 /** Wrap text in an OSC 8 terminal hyperlink. */

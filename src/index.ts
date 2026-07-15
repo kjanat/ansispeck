@@ -7,12 +7,12 @@
 
 import { strip } from '#internal/ansi';
 import { createColors } from '#internal/colors';
-import { detectColorSupport } from '#internal/detect';
+import { detectColorSupport, detectHyperlinkSupport } from '#internal/detect';
 import type { Colors } from '#types';
 
-const colors: Colors = createColors(detectColorSupport());
+const colors: Colors = createColors(detectColorSupport(), detectHyperlinkSupport());
 
-export { createColors, detectColorSupport, strip };
+export { createColors, detectColorSupport, detectHyperlinkSupport, strip };
 
 /** Set the background with a 256-color palette index. */
 export const bg256 = colors.bg256;
@@ -88,6 +88,8 @@ export const hidden = colors.hidden;
 export const inverse = colors.inverse;
 /** Whether ANSI output is enabled for this instance. */
 export const isColorSupported = colors.isColorSupported;
+/** Whether OSC 8 hyperlinks are emitted for this instance. */
+export const isHyperlinkSupported = colors.isHyperlinkSupported;
 /** Apply italic style. */
 export const italic = colors.italic;
 /** Wrap text in an OSC 8 terminal hyperlink. */

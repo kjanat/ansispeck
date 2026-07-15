@@ -1,15 +1,15 @@
 # Benchmarks
 
-Measured with [mitata](https://github.com/evanwashere/mitata) in CI
-(GitHub Actions `ubuntu-latest`, AMD EPYC 7763), one run per color mode ×
-runtime, at the pinned commit below. The bench CI workflow regenerates these
-tables on every push to master.
+Measured with [mitata](https://github.com/evanwashere/mitata) in CI (GitHub
+Actions `ubuntu-latest`, AMD EPYC 7763), one run per color mode × runtime, at
+the pinned commit below. The bench CI workflow regenerates these tables on every
+push to master.
 
 Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are unranked — their
-behavior does not match the table's color mode (`noop` does no work in a
-colored run; `raw` ignores a no-color run). The `ansispeck/ext#1` footer
-compares ansispeck's auto entrypoint against the fastest **external** library
-(Welch's t-test CI95; `~` = not significant, `—` = ansispeck is faster).
+behavior does not match the table's color mode (`noop` does no work in a colored
+run; `raw` ignores a no-color run). The `ansispeck/ext#1` footer compares
+ansispeck's auto entrypoint against the fastest **external** library (Welch's
+t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 
 ## Suites
 
@@ -36,14 +36,19 @@ compares ansispeck's auto entrypoint against the fastest **external** library
 
 > AMD EPYC 7763 64-Core Processor
 
+<!-- -->
+
 > ansispeck exports in this table:
 >
-> - `ansispeck`: auto mode — picks raw or noop once at import; FORCE_COLOR/`--color` wins
+> - `ansispeck`: auto mode — picks raw or noop once at import;
+>   FORCE_COLOR/`--color` wins
 > - `ansispeck/auto`: same behavior as the root export, via explicit subpath
 > - `ansispeck/raw`: always emits ANSI codes — the fastest path
 > - `ansispeck/safe`: template-tag API preserving style across interpolations
 > - `ansispeck/rope`: chunk builder — O(1) compose + O(n) render
 > - `ansispeck/noop`: control path — returns plain strings
+
+<!-- -->
 
 > † unranked — behavior does not match this color mode
 
@@ -65,19 +70,24 @@ compares ansispeck's auto entrypoint against the fastest **external** library
 
 [^ansispeck]: ansispeck [v0.1.0](https://npm.im/package/ansispeck/v/0.1.0 "NPM")
 
-[^picocolors]: picocolors [v1.1.1](https://npm.im/package/picocolors/v/1.1.1 "NPM")
+[^picocolors]: picocolors
+    [v1.1.1](https://npm.im/package/picocolors/v/1.1.1 "NPM")
 
-[^colorette]: colorette [v2.0.20](https://npm.im/package/colorette/v/2.0.20 "NPM")
+[^colorette]: colorette
+    [v2.0.20](https://npm.im/package/colorette/v/2.0.20 "NPM")
 
 [^kleur]: kleur [v4.1.5](https://npm.im/package/kleur/v/4.1.5 "NPM")
 
 [^chalk]: chalk [v5.6.2](https://npm.im/package/chalk/v/5.6.2 "NPM")
 
-[^ansi-colors]: ansi-colors [v4.1.3](https://npm.im/package/ansi-colors/v/4.1.3 "NPM")
+[^ansi-colors]: ansi-colors
+    [v4.1.3](https://npm.im/package/ansi-colors/v/4.1.3 "NPM")
 
 ### node 26.3.0
 
 > AMD EPYC 7763 64-Core Processor
+
+<!-- -->
 
 > † unranked — behavior does not match this color mode
 
@@ -103,6 +113,8 @@ compares ansispeck's auto entrypoint against the fastest **external** library
 
 > AMD EPYC 7763 64-Core Processor
 
+<!-- -->
+
 > † unranked — behavior does not match this color mode
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                   Loading |
@@ -124,6 +136,8 @@ compares ansispeck's auto entrypoint against the fastest **external** library
 ### node 26.3.0
 
 > AMD EPYC 7763 64-Core Processor
+
+<!-- -->
 
 > † unranked — behavior does not match this color mode
 

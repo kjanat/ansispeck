@@ -163,6 +163,29 @@ describe('link', () => {
 	});
 });
 
+describe('hyperlinks decoupled from color', () => {
+	test('color on, hyperlinks off: colored text, plain link', () => {
+		const c = createColors(true, false);
+		expect(c.isColorSupported).toBe(true);
+		expect(c.isHyperlinkSupported).toBe(false);
+		expect(c.red('x')).toBe('\x1b[31mx\x1b[39m');
+		expect(c.link('https://example.com', 'docs')).toBe('docs');
+	});
+
+	test('color off, hyperlinks on: plain text, OSC 8 link', () => {
+		const c = createColors(false, true);
+		expect(c.isColorSupported).toBe(false);
+		expect(c.isHyperlinkSupported).toBe(true);
+		expect(c.red('x')).toBe('x');
+		expect(c.link('https://example.com', 'docs')).toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
+	});
+
+	test('single toggle drives both', () => {
+		expect(createColors(true).isHyperlinkSupported).toBe(true);
+		expect(createColors(false).isHyperlinkSupported).toBe(false);
+	});
+});
+
 describe('extended modifiers', () => {
 	const c = createColors(true);
 

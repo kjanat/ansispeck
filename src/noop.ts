@@ -82,6 +82,8 @@ export const hidden = noop.hidden;
 export const inverse = noop.inverse;
 /** Whether ANSI output is enabled for this instance. */
 export const isColorSupported = noop.isColorSupported;
+/** Whether OSC 8 hyperlinks are emitted for this instance. */
+export const isHyperlinkSupported = noop.isHyperlinkSupported;
 /** Apply italic style. */
 export const italic = noop.italic;
 /** Wrap text in an OSC 8 terminal hyperlink. */

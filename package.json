@@ -1,6 +1,6 @@
 {
 	"name": "ansispeck",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"description": "ANSI that slips in and gets to work.",
 	"keywords": [
 		"terminal",
@@ -8,7 +8,10 @@
 		"ansi",
 		"formatting",
 		"cli",
-		"console"
+		"console",
+		"hyperlinks",
+		"osc8",
+		"no-hyperlinks"
 	],
 	"repository": "kjanat/ansispeck",
 	"license": "0BSD",
@@ -96,6 +99,7 @@
 		"publint": "^0.3.21",
 		"runner-run": "^0.12.2",
 		"rust-just": "^1.46.0",
+		"sort-package-json": "^4.0.0",
 		"tsdown": "0.22.2",
 		"typescript": "^6.0.3"
 	},

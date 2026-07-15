@@ -128,20 +128,26 @@ console.log(c.link(pathToFileURL("README.md"), "readme")); // file:// out of the
 console.log(c.link`https://example.com/issues/${42}`); // template tag, text = url
 ```
 
+Hyperlink emission is gated independently of color (see [Detection](#detection)): with links off, `link` returns its text plain, so an omitted label degrades to the destination URL.
+
 ### Other exports
 
-- `createColors(enabled?: boolean)` — create a color set with explicit toggle
-- `createSafeColors(enabled?)` (from `ansispeck/safe`) — template-tag color set
+- `createColors(enabled?, hyperlinksEnabled?)` — create a color set; `hyperlinksEnabled` defaults to `enabled`
+- `createSafeColors(enabled?, hyperlinksEnabled?)` (from `ansispeck/safe`) — template-tag color set
 - `createRope(enabled?)` (from `ansispeck/rope`) — rope color set
-- `isColorSupported` — auto-detected boolean
-- `detectColorSupport()` — run detection on demand
+- `isColorSupported` / `isHyperlinkSupported` — auto-detected booleans
+- `detectColorSupport()` / `detectHyperlinkSupport()` — run detection on demand
 - `strip(input)` — remove all ANSI SGR and OSC sequences
 
-## Color detection
+## Detection
 
-Respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.\
+**Color** respects `NO_COLOR`, `FORCE_COLOR`, `--no-color`, `--color`, `CI`, and TTY status.\
 Explicit force (`FORCE_COLOR`/`--color`) beats explicit disable (`NO_COLOR`/`--no-color`),
 which beats platform heuristics.
+
+**Hyperlinks** are detected separately — OSC 8 support is orthogonal to SGR color — per the
+[no-hyperlinks](https://no-hyperlinks.org/) convention: `NO_HYPERLINKS` / `--no-hyperlinks` beats
+`FORCE_HYPERLINKS` / `--hyperlinks`, which beats TTY status. Non-interactive streams get no links.
 
 ## License
 

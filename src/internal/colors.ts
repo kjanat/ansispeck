@@ -22,14 +22,27 @@ import type { Colors, Formatter } from '#types';
 
 const noop: Formatter = text;
 
-/** Create a color set with explicit enabled/disabled toggle. */
-export function createColors(enabled: boolean = detectColorSupport()): Colors {
+/**
+ * Create a color set with explicit enable toggles.
+ *
+ * Hyperlink emission is independent of color and defaults to the color
+ * toggle, so `createColors(true)`/`createColors(false)` stay all-on/all-off.
+ * Pass `hyperlinksEnabled` separately to decouple them — the auto entrypoints
+ * do this with {@link detectHyperlinkSupport}.
+ *
+ * @see https://no-hyperlinks.org/
+ */
+export function createColors(
+	enabled: boolean = detectColorSupport(),
+	hyperlinksEnabled: boolean = enabled,
+): Colors {
 	const f: Wrap<Formatter> = enabled ? fmt : (): Formatter => noop;
 	return {
 		...mapPalette(f),
 		isColorSupported: enabled,
+		isHyperlinkSupported: hyperlinksEnabled,
 
-		link: mkLink(enabled ? linkOpen : (_url, body) => body),
+		link: mkLink(hyperlinksEnabled ? linkOpen : (_url, body) => body),
 
 		fg256: (n) => f(fg256Open(n), FG_CLOSE),
 		bg256: (n) => f(bg256Open(n), BG_CLOSE),

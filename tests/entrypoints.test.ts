@@ -1,4 +1,4 @@
-import index, { isColorSupported } from '#ansispeck';
+import index, { isColorSupported, isHyperlinkSupported } from '#ansispeck';
 import noop from '#ansispeck/noop';
 import raw from '#ansispeck/raw';
 import { describe, expect, test } from 'bun:test';
@@ -7,6 +7,19 @@ describe('entrypoints', () => {
 	test('raw always emits codes', () => {
 		expect(raw.isColorSupported).toBe(true);
 		expect(raw.red('x')).toBe('\x1b[31mx\x1b[39m');
+	});
+
+	test('raw always emits hyperlinks', () => {
+		expect(raw.isHyperlinkSupported).toBe(true);
+		expect(raw.link('https://example.com', 'docs')).toBe('\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\');
+	});
+
+	test('noop never emits hyperlinks', () => {
+		expect(noop.isHyperlinkSupported).toBe(false);
+	});
+
+	test('index hyperlink support matches detection', () => {
+		expect(index.isHyperlinkSupported).toBe(isHyperlinkSupported);
 	});
 
 	test('raw keeps nesting-safe close replacement', () => {

@@ -16,18 +16,29 @@ import {
 	rgbOpen,
 } from '#internal/ansi';
 import { BG_CLOSE, FG_CLOSE } from '#internal/ansi';
-import { detectColorSupport } from '#internal/detect';
+import { detectColorSupport, detectHyperlinkSupport } from '#internal/detect';
 import { makeTemplateFormatter } from '#internal/template';
 import type { SafeColors, TemplateFormatter } from '#types';
 
-/** Create a template-tag color set with explicit enabled/disabled toggle. */
-export function createSafeColors(enabled: boolean = detectColorSupport()): SafeColors {
+/**
+ * Create a template-tag color set with explicit enable toggles.
+ *
+ * Hyperlink emission defaults to the color toggle; pass `hyperlinksEnabled`
+ * to decouple them.
+ *
+ * @see https://no-hyperlinks.org/
+ */
+export function createSafeColors(
+	enabled: boolean = detectColorSupport(),
+	hyperlinksEnabled: boolean = enabled,
+): SafeColors {
 	const t: Wrap<TemplateFormatter> = (open, close) => makeTemplateFormatter(enabled ? open : '', enabled ? close : '');
 	return {
 		...mapPalette(t),
 		isColorSupported: enabled,
+		isHyperlinkSupported: hyperlinksEnabled,
 
-		link: mkLink(enabled ? linkOpen : (_url, body) => body),
+		link: mkLink(hyperlinksEnabled ? linkOpen : (_url, body) => body),
 
 		fg256: (n) => t(fg256Open(n), FG_CLOSE),
 		bg256: (n) => t(bg256Open(n), BG_CLOSE),
@@ -38,7 +49,7 @@ export function createSafeColors(enabled: boolean = detectColorSupport()): SafeC
 	};
 }
 
-const safe: SafeColors = createSafeColors();
+const safe: SafeColors = createSafeColors(detectColorSupport(), detectHyperlinkSupport());
 
 /** Set the background with a 256-color palette index. */
 export const bg256 = safe.bg256;
@@ -114,6 +125,8 @@ export const hidden = safe.hidden;
 export const inverse = safe.inverse;
 /** Whether ANSI output is enabled for this instance. */
 export const isColorSupported = safe.isColorSupported;
+/** Whether OSC 8 hyperlinks are emitted for this instance. */
+export const isHyperlinkSupported = safe.isHyperlinkSupported;
 /** Apply italic style. */
 export const italic = safe.italic;
 /** Wrap text in an OSC 8 terminal hyperlink. */
