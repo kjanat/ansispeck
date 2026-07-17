@@ -90,7 +90,7 @@ function join(strings: TemplateStringsArray, values: readonly unknown[]): string
 
 /** Build a LinkFormatter handling both call styles: (url, text?) and template tag. */
 export function mkLink(wrap: (url: string, text: string) => string): LinkFormatter {
-	return (first: string | URL | TemplateStringsArray, ...rest: readonly unknown[]): string => {
+	return (first: string | InstanceType<typeof URL> | TemplateStringsArray, ...rest: readonly unknown[]): string => {
 		if (typeof first === 'object' && 'raw' in first) {
 			const url = join(first, rest);
 			return wrap(url, url);

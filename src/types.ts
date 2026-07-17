@@ -19,7 +19,7 @@ export type Formatter = (input: Formattable) => string;
  * @see https://no-hyperlinks.org/
  */
 export interface LinkFormatter {
-	(url: string | URL, text?: Formattable | URL): string;
+	(url: string | InstanceType<typeof URL>, text?: Formattable | InstanceType<typeof URL>): string;
 	(strings: TemplateStringsArray, ...values: readonly unknown[]): string;
 }
 
