@@ -20,4 +20,4 @@ runs:
     - id: run
       shell: bash
       env: { RUNTIME: "${{ inputs.runtime }}", COLOR: "${{ inputs.color }}" }
-      run: "${{ github.action_path }}/run.sh"
+      run: bash "${GITHUB_ACTION_PATH}/run.sh"

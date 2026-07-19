@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - { uses: actions/setup-node@v7, with: { node-version-file: .node-version } }
+      - uses: denoland/setup-deno@v2
       - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-node@v6
-        with: { node-version-file: .node-version }
       - uses: kjanat/runner@master
       - run: runner install --frozen bd
 
@@ -28,6 +28,14 @@ jobs:
       - name: Bun bench (NO_COLOR=1)
         uses: ./.github/actions/bench
         with: { runtime: bun, color: none }
+
+      - name: Deno bench (FORCE_COLOR=1)
+        uses: ./.github/actions/bench
+        with: { runtime: deno, color: force }
+
+      - name: Deno bench (NO_COLOR=1)
+        uses: ./.github/actions/bench
+        with: { runtime: deno, color: none }
 
       - name: Size
         run: |
@@ -55,11 +63,15 @@ jobs:
 
           #$BUN_BENCH_COLOR
 
+          #$DENO_BENCH_COLOR
+
           #$NODE_BENCH_COLOR
 
           ## Benchmarks (NO_COLOR=1)
 
           #$BUN_BENCH_NOCOLOR
+
+          #$DENO_BENCH_NOCOLOR
 
           #$NODE_BENCH_NOCOLOR
           EOF
