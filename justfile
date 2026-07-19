@@ -40,15 +40,15 @@ tar:
 build:
 	run build
 
-# run bench.ts under bun (FORMAT: overview|json|quiet|mitata|markdown|md)
+# run bench.ts under bun (FORMAT: overview|json|mitata|markdown|md)
 [group('benchmarks')]
-[arg('FORMAT', pattern = 'overview|json|quiet|mitata|markdown|md')]
+[arg('FORMAT', pattern = 'overview|json|mitata|markdown|md')]
 bench-bun FORMAT = 'overview': build
 	{{ BENCH_BUN }} -f {{ FORMAT }}
 
-# run bench.ts under node (FORMAT: overview|json|quiet|mitata|markdown|md)
+# run bench.ts under node (FORMAT: overview|json|mitata|markdown|md)
 [group('benchmarks')]
-[arg('FORMAT', pattern = 'overview|json|quiet|mitata|markdown|md')]
+[arg('FORMAT', pattern = 'overview|json|mitata|markdown|md')]
 bench-node FORMAT = 'overview': build
 	{{ BENCH_NODE }} -f {{ FORMAT }}
 
@@ -62,13 +62,13 @@ alias bench-node-auto := bench-node
 
 # bench-bun with FORCE_COLOR=1
 [group('benchmarks')]
-[arg('FORMAT', pattern = 'overview|json|quiet|mitata|markdown|md')]
+[arg('FORMAT', pattern = 'overview|json|mitata|markdown|md')]
 bench-bun-forced FORMAT = 'overview' $FORCE_COLOR = '1': build
 	{{ BENCH_BUN }} -f {{ FORMAT }}
 
 # bench-node with FORCE_COLOR=1
 [group('benchmarks')]
-[arg('FORMAT', pattern = 'overview|json|quiet|mitata|markdown|md')]
+[arg('FORMAT', pattern = 'overview|json|mitata|markdown|md')]
 bench-node-forced FORMAT = 'overview' $FORCE_COLOR = '1': build
 	{{ BENCH_NODE }} -f {{ FORMAT }}
 

@@ -63,6 +63,6 @@ dist entrypoints, never `src/*`.
   (bun/node × FORCE_COLOR/NO_COLOR matrix, run inline).
 - `--filter` can starve `welchCI95` (<2 samples throws) or empty the first suite
   — `parse()` then falls back to enumerating `trial.alias`.
-- `quiet` format is the substrate for `overview`/`markdown`; `json`/`mitata`
-  pass straight through.
+- `--quiet` is the substrate for `overview`/`markdown`; `json`/`mitata` pass
+  straight through.
 - `internal/wasm-rust/` is an experiment, not wired into `SUITES`.

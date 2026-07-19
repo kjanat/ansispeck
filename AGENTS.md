@@ -74,7 +74,8 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
   — watch.
 - `bun test`, `run lint`, `run typecheck` (tsgo), `run fmt` (dprint).
 - `run bench` (= bench:bun then bench:node);
-  `bun --bun bench.ts -f markdown|md|overview|json|quiet|mitata`.
+  `bun --bun bench.ts -f markdown|md|overview|json|mitata` (`-q`/`--quiet`
+  suppresses output).
 - just: `bench-bun`/`bench-node`/`bench` (+ `-forced` variants,
   `bench-md-auto`/`bench-md-forced`) run `bun --bun bench.ts` / `node bench.ts`
   directly (NOT the `bench:*` npm scripts) so they control the color env; `test`

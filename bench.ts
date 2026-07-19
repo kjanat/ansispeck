@@ -2,12 +2,12 @@
 // deno-lint-ignore-file no-sloppy-imports
 /// <reference types="bun" />
 
-import { execSync } from 'node:child_process';
-import { error, log } from 'node:console';
+import { execFileSync, execSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { exit } from 'node:process';
+import { sep } from 'node:path';
 import { URL } from 'node:url';
-import { parseArgs } from 'node:util';
+import type { Out } from 'dreamcli';
+import { cli, command, flag } from 'dreamcli';
 import { run } from 'mitata';
 import { register as complex } from '#bench/complex';
 import { register as deferred } from '#bench/deferred';
@@ -15,11 +15,6 @@ import { register as loading } from '#bench/loading';
 import { register as recursion } from '#bench/recursion';
 import { register as simple } from '#bench/simple';
 import pkg from '#pkg' with { type: 'json' };
-
-if (import.meta.main) process.stderr.write(import.meta.file + '\n' + 'running' + '\n');
-
-execSync('run -q build', { stdio: 'ignore' });
-const { default: ansispeck } = await import('#ansispeck-dist');
 
 declare module 'mitata' {
 	interface ctx {
@@ -47,59 +42,9 @@ const LIB_ORDER = [
 	'ansi-colors',
 ] as const;
 
-const { values } = parseArgs({
-	options: {
-		format: { type: 'string', short: 'f', default: 'overview' },
-		filter: { type: 'string', short: 'F' },
-		help: { type: 'boolean', short: 'h', default: false },
-	},
-	strict: false,
-});
-
-if (values.help) {
-	log(`Usage: bench.ts [options]
-
-Options:
-  -f, --format <fmt>   Output format (default: overview)
-                       overview     terminal table with rankings + CI95
-                       markdown|md  GitHub-flavored markdown table
-                       json         raw JSON
-                       quiet        suppress mitata output (used internally)
-                       mitata       default mitata output
-  -F, --filter <regex> Only run benchmarks matching <regex>
-  -h, --help           Show this help`);
-	exit(0);
-}
-
-simple({ count: 1 });
-complex({ count: 1 });
-recursion({ count: 10_000 });
-deferred({ layers: 32, repeat: 32 });
-loading({ count: 1 });
-
-const FORMATS = ['overview', 'json', 'quiet', 'mitata', 'markdown', 'md'] as const;
+const FORMATS = ['overview', 'json', 'mitata', 'markdown', 'md'] as const;
 type Format = (typeof FORMATS)[number];
-
-const rawFmt = String(values.format);
-if (!FORMATS.includes(rawFmt as Format)) {
-	error(`Unknown format: ${rawFmt}\nValid: ${FORMATS.join(', ')}`);
-	exit(1);
-}
-const fmt = rawFmt === 'md' ? 'markdown' : rawFmt;
-
-let filter: RegExp | undefined;
-if (typeof values.filter === 'string') {
-	try {
-		filter = new RegExp(values.filter);
-	} catch {
-		error(`Invalid regex: ${values.filter}`);
-		exit(1);
-	}
-}
-const isCustom = fmt === 'overview' || fmt === 'markdown';
-const format = isCustom ? 'quiet' : (fmt as Exclude<Format, 'overview' | 'markdown' | 'md'>);
-
-const result = await run({ format, filter });
+type RunFormat = Format | 'quiet';
 
 interface LibStats {
 	avg: number;
@@ -177,9 +122,11 @@ const isExternal = (lib: string): boolean => lib !== SELF_LIB && !lib.startsWith
  * don't compete for rank: noop does no work in a colored run; raw ignores a
  * no-color run. The root export's detection is the mode oracle.
  */
-const RANK_EXCLUDED: ReadonlySet<string> = new Set(
-	ansispeck.isColorSupported ? [`${SELF_LIB}/noop`] : [`${SELF_LIB}/noop`, `${SELF_LIB}/raw`],
-);
+function rankExcluded(isColorSupported: boolean): ReadonlySet<string> {
+	return new Set(
+		isColorSupported ? [`${SELF_LIB}/noop`] : [`${SELF_LIB}/noop`, `${SELF_LIB}/raw`],
+	);
+}
 
 interface Parsed {
 	activeSuites: string[];
@@ -189,7 +136,7 @@ interface Parsed {
 	suites: Map<string, Map<string, LibStats>>;
 }
 
-function parse(result: BenchResult): Parsed {
+function parse(result: BenchResult, excluded: ReadonlySet<string>): Parsed {
 	const { context, benchmarks } = result;
 	const suiteByGroup: Map<number, (typeof SUITES)[number]> = new Map();
 	let nextSuite = 0;
@@ -240,7 +187,7 @@ function parse(result: BenchResult): Parsed {
 	for (const [suite, entries] of suites) {
 		const sorted = [...entries.entries()]
 			.map(([lib, stats]) => ({ lib, stats }))
-			.filter(({ lib }) => !RANK_EXCLUDED.has(lib))
+			.filter(({ lib }) => !excluded.has(lib))
 			.sort((a, b) => a.stats.avg - b.stats.avg);
 		ranked.set(suite, sorted);
 	}
@@ -271,8 +218,8 @@ function computeCI95(parsed: Parsed): Map<string, { label: string; significant: 
 	return ci95;
 }
 
-function printOverview(result: BenchResult): void {
-	const parsed = parse(result);
+function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: Out): void {
+	const parsed = parse(result, excluded);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
@@ -286,11 +233,11 @@ function printOverview(result: BenchResult): void {
 		version,
 		cpu: { name: cpuName },
 	} = context;
-	log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
+	out.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	log(''.padStart(nameW) + '  ' + activeSuites.map((s) => s.padStart(fullW)).join('  '));
-	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	out.log(''.padStart(nameW) + '  ' + activeSuites.map((s) => s.padStart(fullW)).join('  '));
+	out.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 
 	// rows
 	for (const lib of libs) {
@@ -304,9 +251,9 @@ function printOverview(result: BenchResult): void {
 			const rank = ranked.get(suite)?.findIndex((r) => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === -1 ? '†' : rank === 0 ? ' *' : `#${rank + 1}`;
-			cells.push(`${val.padStart(colW)} ${ansispeck.dim(tag.padStart(tagW))}`);
+			cells.push(`${val.padStart(colW)} ${out.color.dim(tag.padStart(tagW))}`);
 		}
-		log(lib.padEnd(nameW) + '  ' + cells.join('  '));
+		out.log(lib.padEnd(nameW) + '  ' + cells.join('  '));
 	}
 
 	// CI95 footer row
@@ -315,15 +262,15 @@ function printOverview(result: BenchResult): void {
 		if (!entry) return ''.padStart(fullW);
 		if (entry.label === '—' || entry.significant) return entry.label.padStart(fullW);
 		// pad before dimming — the ANSI bytes must not count toward the column width
-		return ansispeck.dim(`${entry.label} ~`.padStart(fullW));
+		return out.color.dim(`${entry.label} ~`.padStart(fullW));
 	});
-	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
+	out.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	out.log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
-	log('');
+	out.log('');
 	const legend = '  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant';
-	const unranked = libs.some((lib) => RANK_EXCLUDED.has(lib));
-	log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
+	const unranked = libs.some((lib) => excluded.has(lib));
+	out.log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
 }
 
 const EXPORT_NOTES: Record<string, string> = {
@@ -366,8 +313,8 @@ function packageVersion(name: string): string {
 	return version;
 }
 
-function printMarkdown(result: BenchResult): void {
-	const parsed = parse(result);
+function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, out: Out): void {
+	const parsed = parse(result, excluded);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
@@ -376,30 +323,30 @@ function printMarkdown(result: BenchResult): void {
 		version,
 		cpu: { name: cpuName },
 	} = context;
-	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
-	log(`\n> ${cpuName ?? 'unknown'}\n`);
+	out.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
+	out.log(`\n> ${cpuName ?? 'unknown'}\n`);
 
 	// ansispeck export notes
 	const noted = libs.filter((lib) => EXPORT_NOTES[lib] !== undefined);
 	if (noted.length > 0) {
-		log('> ansispeck exports in this table:');
+		out.log('> ansispeck exports in this table:');
 		for (const lib of noted) {
 			const note = EXPORT_NOTES[lib];
 			if (note === undefined) continue;
-			log(`> - \`${lib}\`: ${note}`);
+			out.log(`> - \`${lib}\`: ${note}`);
 		}
-		log('');
+		out.log('');
 	}
 
-	if (libs.some((lib) => RANK_EXCLUDED.has(lib))) {
-		log('> † unranked — behavior does not match this color mode');
-		log('');
+	if (libs.some((lib) => excluded.has(lib))) {
+		out.log('> † unranked — behavior does not match this color mode');
+		out.log('');
 	}
 
 	// header
 	const hdr = ['Library', ...activeSuites.map((s) => s.charAt(0).toUpperCase() + s.slice(1))];
-	log(`| ${hdr.join(' | ')} |`);
-	log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
+	out.log(`| ${hdr.join(' | ')} |`);
+	out.log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
 
 	// collect ref keys for footnote definitions
 	const refs: Map<string, string> = new Map();
@@ -420,7 +367,7 @@ function printMarkdown(result: BenchResult): void {
 			}
 			const rank = ranked.get(suite)?.findIndex((r) => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
-			if (RANK_EXCLUDED.has(lib)) {
+			if (excluded.has(lib)) {
 				cells.push(`${val} †`);
 			} else if (rank === 0) {
 				cells.push(`<ins>**${val}**</ins> 🥇`);
@@ -432,7 +379,7 @@ function printMarkdown(result: BenchResult): void {
 				cells.push(`${val} #${rank + 1}`);
 			}
 		}
-		log(`| ${cells.join(' | ')} |`);
+		out.log(`| ${cells.join(' | ')} |`);
 	}
 
 	// CI95 footer
@@ -442,16 +389,72 @@ function printMarkdown(result: BenchResult): void {
 		if (entry.label === '—') return '—';
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
-	log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
+	out.log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 
 	// footnote definitions
-	log('');
+	out.log('');
 	for (const [refKey, name] of refs) {
 		const v = packageVersion(name);
-		log(`[^${refKey}]: ${name} [v${v}](https://npm.im/package/${name}/v/${v} "NPM")`);
+		out.log(`[^${refKey}]: ${name} [v${v}](https://npm.im/package/${name}/v/${v} "NPM")`);
 	}
 }
 
-// dispatch — must be after all declarations to avoid TDZ
-if (fmt === 'overview') printOverview(result);
-if (fmt === 'markdown') printMarkdown(result);
+function parseFilter(raw: unknown): RegExp {
+	if (typeof raw !== 'string') throw new Error('Expected a regular expression string');
+	return new RegExp(raw);
+}
+
+function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
+	switch (format) {
+		case 'json':
+			return 'json';
+		case 'mitata':
+			return 'mitata';
+		default:
+			return 'quiet';
+	}
+}
+
+async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, out: Out): Promise<void> {
+	execSync('run -q build', { stdio: 'ignore' });
+	const { default: ansispeck } = await import('#ansispeck-dist');
+	const excluded = rankExcluded(ansispeck.isColorSupported);
+
+	simple({ count: 1 });
+	complex({ count: 1 });
+	recursion({ count: 10_000 });
+	deferred({ layers: 32, repeat: 32 });
+	loading({ count: 1 });
+
+	const result = await run({ format: mitataFormat(format), filter });
+	if (format === 'overview') printOverview(result, excluded, out);
+	if (format === 'markdown' || format === 'md') printMarkdown(result, excluded, out);
+}
+
+const benchmark = command('bench')
+	.description('Benchmark ansispeck against terminal color libraries')
+	.flag(
+		'format',
+		flag.enum(FORMATS).default('overview').alias('f').describe('Output format'),
+	)
+	.flag(
+		'filter',
+		flag.custom(parseFilter).alias('F').describe('Only run benchmarks matching this regular expression'),
+	)
+	.flag('quiet', flag.boolean().alias('q').describe('Suppress benchmark output'))
+	.action(async ({ flags, out }) => {
+		const format: RunFormat = flags.quiet ? 'quiet' : out.jsonMode ? 'json' : flags.format;
+		await runBenchmarks(format, flags.filter, out);
+	});
+
+const dirty = spawnSync('git', ['diff', '--exit-code', '--quiet', 'HEAD'], { stdio: 'ignore' }).status != 0;
+let v = String(spawnSync('git', ['describe', '--tags', '--abbrev=0']).stdout).trim();
+v = `${v.replace(/^v/, '')}${dirty ? '-dirty' : ''}`;
+
+if (import.meta.main) {
+	void cli(import.meta.filename.split(sep).at(-1)!).version(v)
+		.manifest({ files: ['package.json', 'jsr.json'] }).links()
+		.description('Run the ansispeck benchmark matrix')
+		.default(benchmark)
+		.run();
+}
