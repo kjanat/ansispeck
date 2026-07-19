@@ -68,6 +68,27 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 - No version bump commits — `bun pm version from-git` stamps the tag version at
   publish time.
 
+## RELEASE SAFETY
+
+- Releases are tag-only. Publish only from an explicitly requested, signed
+  version tag matching `v*.*.*`; never publish from a branch.
+- Never add or use `workflow_dispatch` or another manual publication path.
+- Never create a temporary release branch or use a branch to recover a failed
+  release.
+- Never modify GitHub environment deployment policies, protection rules,
+  rulesets, permissions, secrets, or repository settings unless the user
+  explicitly requests the exact remote setting change.
+- Never weaken, bypass, or temporarily relax a release safeguard.
+- Never bypass a repository rule or required pull request while preparing or
+  publishing a release. If a remote operation reports a bypassed rule violation,
+  stop immediately and report it.
+- After creating or pushing a release tag, monitor every publication job through
+  completion and verify the resulting registry state.
+- If any publication job fails, investigate its logs and relevant read-only
+  state, determine the root cause, and report the findings. Do not retry,
+  dispatch, retag, change remote settings, or attempt another recovery path
+  without explicit user instructions for that exact action.
+
 ## COMMANDS
 
 - `run build` / `run build:quiet` — tsdown build (quiet = `-l error`); `run dev`
