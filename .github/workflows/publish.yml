@@ -1,20 +1,35 @@
 name: Publish
-run-name: Publish ${{ github.ref_type == 'tag' && github.ref_name || 'manual' }}
-on: { push: { tags: [v*] }, workflow_dispatch: {} }
+run-name: Publish ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
+on:
+  push: { tags: [v*] }
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish
+        required: true
+        type: string
+      registry:
+        description: Registry target
+        required: true
+        default: all
+        type: choice
+        options: [all, npm, jsr]
 permissions: { contents: read, id-token: write }
 jobs:
   publish-npm:
+    if: github.event_name != 'workflow_dispatch' || inputs.registry == 'all' || inputs.registry == 'npm'
     name: npm
     runs-on: ubuntu-latest
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
-      - name: Validate tag
-        if: github.ref_type == 'tag'
+      - name: Validate version
+        env:
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
         run: |
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-            echo "invalid tag: $GITHUB_REF_NAME" >&2
+          if [[ ! "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "invalid version: $VERSION" >&2
             exit 1
           fi
       - uses: kjanat/runner@master
@@ -22,9 +37,10 @@ jobs:
       - uses: actions/setup-node@v6
         with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
       - run: runner install -f build
-      - name: Stamp version from tag
-        if: github.ref_type == 'tag'
-        run: bun pm version from-git --allow-same-version --no-git-tag-version
+      - name: Stamp version
+        env:
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.version }}
+        run: bun pm version "${VERSION#v}" --allow-same-version --no-git-tag-version
       - name: Tests + typecheck
         run: bun run prepublishOnly
       - name: Pack + publish
@@ -44,6 +60,7 @@ jobs:
             await exec.getExecOutput('bunx', ['npm@latest', 'publish', '--provenance', '--access', 'public', '--tag', tag, tarball]);
 
   publish-jsr:
+    if: github.event_name != 'workflow_dispatch' || inputs.registry == 'all' || inputs.registry == 'jsr'
     name: jsr
     runs-on: ubuntu-latest
     environment: { name: jsr, url: "${{ steps.publish.outputs.jsr_url }}" }
@@ -53,13 +70,18 @@ jobs:
       - name: Publish to JSR
         id: publish
         uses: actions/github-script@v9
+        env:
+          VERSION: ${{ inputs.version }}
         with:
           script: |
             const { readFileSync, writeFileSync } = await import('node:fs');
             const path = "${{ github.workspace }}/jsr.json";
             const jsr = JSON.parse(readFileSync(path, "utf8"));
-            if (context.ref.startsWith('refs/tags/v')) {
-              jsr.version = context.ref.slice('refs/tags/v'.length);
+            const version = context.ref.startsWith('refs/tags/v')
+              ? context.ref.slice('refs/tags/v'.length)
+              : process.env.VERSION;
+            if (version) {
+              jsr.version = version;
               writeFileSync(path, `${JSON.stringify(jsr, null, "\t")}\n`);
             }
             core.setOutput('name', jsr.name);

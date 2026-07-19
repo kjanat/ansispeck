@@ -91,7 +91,7 @@
 		"lint": "biome check src/",
 		"prepare": "bun ./importmapify.config.ts",
 		"prepublishOnly": "run -p test typecheck",
-		"tar": "run -q build:quiet && bun ./scripts/pack.ts",
+		"tar": "bun ./scripts/pack.ts",
 		"test": "bun test",
 		"typecheck": "bunx @typescript/native --noEmit"
 	},
