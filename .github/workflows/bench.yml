@@ -19,6 +19,7 @@ jobs:
       - uses: denoland/setup-deno@v2
       - uses: oven-sh/setup-bun@v2
       - uses: kjanat/runner@master
+      - uses: kjanat/install-dprint@v1
       - run: runner install --frozen bd
 
       - name: Bun bench (FORCE_COLOR=1)

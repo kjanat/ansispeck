@@ -39,6 +39,9 @@ case "${RUNTIME}" in
 esac
 
 output="$("$@")"
+if formatted="$(printf '%s\n' "${output}" | dprint fmt --stdin md)"; then
+	output="${formatted}"
+fi
 
 emit() {
 	local key="$1" target="$2"
