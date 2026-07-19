@@ -1,0 +1,4 @@
+#:schema https://kjanat.github.io/runner/schemas/runner.toml.schema.json
+
+[github]
+group_output = false
