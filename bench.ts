@@ -299,6 +299,8 @@ function readVersionField(jsonText: string): string {
 }
 
 const versionCache: Map<string, string> = new Map();
+const releaseVersion = String(spawnSync('git', ['describe', '--tags', '--abbrev=0']).stdout).trim().replace(/^v/, '')
+	|| pkg.version;
 
 /** Installed version: resolve the package, read its node_modules package.json (repo root for ansispeck). */
 function packageVersion(name: string): string {
@@ -307,7 +309,9 @@ function packageVersion(name: string): string {
 	const resolved = import.meta.resolve(name);
 	const marker = `/node_modules/${name}/`;
 	const at = resolved.lastIndexOf(marker);
-	const version = at === -1
+	const version = name === SELF_LIB
+		? releaseVersion
+		: at === -1
 		? pkg.version
 		: readVersionField(readFileSync(new URL(`${resolved.slice(0, at + marker.length)}package.json`), 'utf8'));
 	versionCache.set(name, version);
@@ -448,8 +452,7 @@ const benchmark = command('bench')
 	});
 
 const dirty = spawnSync('git', ['diff', '--exit-code', '--quiet', 'HEAD'], { stdio: 'ignore' }).status != 0;
-let v = String(spawnSync('git', ['describe', '--tags', '--abbrev=0']).stdout).trim();
-v = `${v.replace(/^v/, '')}${dirty ? '-dirty' : ''}`;
+const v = `${releaseVersion}${dirty ? '-dirty' : ''}`;
 
 if (import.meta.main) {
 	void cli(import.meta.filename.split(sep).at(-1)!).version(v)
