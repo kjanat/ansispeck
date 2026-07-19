@@ -1,9 +1,14 @@
 /**
- * @module ansispeck/internal/colors
  * Plain-formatter color set factory shared by `auto`, `raw`, and `noop`.
+ *
+ * @module ansispeck/internal/colors
  */
-import type { Wrap } from '#internal/ansi';
+
+import type { Colors, Formatter } from '../types.ts';
+import type { Wrap } from './ansi.ts';
 import {
+	BG_CLOSE,
+	FG_CLOSE,
 	bg256Open,
 	bgHexOpen,
 	bgRgbOpen,
@@ -15,10 +20,8 @@ import {
 	mkLink,
 	rgbOpen,
 	text,
-} from '#internal/ansi';
-import { BG_CLOSE, FG_CLOSE } from '#internal/ansi';
-import { detectColorSupport } from '#internal/detect';
-import type { Colors, Formatter } from '#types';
+} from './ansi.ts';
+import { detectColorSupport } from './detect.ts';
 
 const noop: Formatter = text;
 
@@ -28,7 +31,7 @@ const noop: Formatter = text;
  * Hyperlink emission is independent of color and defaults to the color
  * toggle, so `createColors(true)`/`createColors(false)` stay all-on/all-off.
  * Pass `hyperlinksEnabled` separately to decouple them — the auto entrypoints
- * do this with {@link detectHyperlinkSupport}.
+ * do this with {@link [internal/detect.ts].detectHyperlinkSupport | detectHyperlinkSupport}.
  *
  * @see https://no-hyperlinks.org/
  */

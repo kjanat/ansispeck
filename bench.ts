@@ -1,21 +1,25 @@
-import type { Colors } from '#ansispeck';
-import pkg from '#pkg' with { type: 'json' };
+#!/usr/bin/env bun
+// deno-lint-ignore-file no-sloppy-imports
+/// <reference types="bun" />
 
-import { run } from 'mitata';
 import { execSync } from 'node:child_process';
 import { error, log } from 'node:console';
 import { readFileSync } from 'node:fs';
 import { exit } from 'node:process';
+import { URL } from 'node:url';
 import { parseArgs } from 'node:util';
-
+import { run } from 'mitata';
 import { register as complex } from '#bench/complex';
 import { register as deferred } from '#bench/deferred';
 import { register as loading } from '#bench/loading';
 import { register as recursion } from '#bench/recursion';
 import { register as simple } from '#bench/simple';
+import pkg from '#pkg' with { type: 'json' };
 
-execSync('run build', { stdio: 'ignore' });
-const { default: ansispeck }: { default: Colors } = await import('#ansispeck-dist');
+if (import.meta.main) process.stderr.write(import.meta.file + '\n' + 'running' + '\n');
+
+execSync('run -q build', { stdio: 'ignore' });
+const { default: ansispeck } = await import('#ansispeck-dist');
 
 declare module 'mitata' {
 	interface ctx {
@@ -178,11 +182,11 @@ const RANK_EXCLUDED: ReadonlySet<string> = new Set(
 );
 
 interface Parsed {
-	context: BenchResult['context'];
-	suites: Map<string, Map<string, LibStats>>;
-	libs: string[];
 	activeSuites: string[];
+	context: BenchResult['context'];
+	libs: string[];
 	ranked: Map<string, Array<{ lib: string; stats: LibStats }>>;
+	suites: Map<string, Map<string, LibStats>>;
 }
 
 function parse(result: BenchResult): Parsed {

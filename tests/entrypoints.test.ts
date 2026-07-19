@@ -1,7 +1,7 @@
+import { describe, expect, test } from 'bun:test';
 import index, { isColorSupported, isHyperlinkSupported } from '#ansispeck';
 import noop from '#ansispeck/noop';
 import raw from '#ansispeck/raw';
-import { describe, expect, test } from 'bun:test';
 
 describe('entrypoints', () => {
 	test('raw always emits codes', () => {

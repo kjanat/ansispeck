@@ -1,5 +1,5 @@
-import safe, { createSafeColors } from '#ansispeck/safe';
 import { describe, expect, test } from 'bun:test';
+import safe, { createSafeColors } from '#ansispeck/safe';
 
 describe('safe template tags', () => {
 	const s = createSafeColors(true);

@@ -1,8 +1,10 @@
 /**
- * @module ansispeck/auto
  * Default entrypoint: color support auto-detected from environment.
+ *
  * Alias of the package root.
+ *
+ * @module ansispeck/auto
  */
 
-export * from '#ansispeck';
-export { default } from '#ansispeck';
+export * from './internal/default.ts';
+export { default } from './internal/default.ts';

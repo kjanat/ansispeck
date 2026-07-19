@@ -1,121 +1,122 @@
 /**
- * @module ansispeck/raw
  * Always-colored entrypoint: emits ANSI codes regardless of environment.
+ *
+ * @module ansispeck/raw
  */
 
-import { createColors } from '#internal/colors';
-import type { Colors } from '#types';
+import { createColors } from './internal/colors.ts';
+import type { Colors, Formatter, LinkFormatter } from './types.ts';
 
+/** Always-on color set. Emits ANSI regardless of environment. */
 const raw: Colors = createColors(true);
 
 /** Set the background with a 256-color palette index. */
-export const bg256 = raw.bg256;
+export const bg256: (n: number) => Formatter = raw.bg256;
 /** Set the background black. */
-export const bgBlack = raw.bgBlack;
+export const bgBlack: Formatter = raw.bgBlack;
 /** Set the background bright black. */
-export const bgBlackBright = raw.bgBlackBright;
+export const bgBlackBright: Formatter = raw.bgBlackBright;
 /** Set the background blue. */
-export const bgBlue = raw.bgBlue;
+export const bgBlue: Formatter = raw.bgBlue;
 /** Set the background bright blue. */
-export const bgBlueBright = raw.bgBlueBright;
+export const bgBlueBright: Formatter = raw.bgBlueBright;
 /** Set the background cyan. */
-export const bgCyan = raw.bgCyan;
+export const bgCyan: Formatter = raw.bgCyan;
 /** Set the background bright cyan. */
-export const bgCyanBright = raw.bgCyanBright;
+export const bgCyanBright: Formatter = raw.bgCyanBright;
 /** Set the background green. */
-export const bgGreen = raw.bgGreen;
+export const bgGreen: Formatter = raw.bgGreen;
 /** Set the background bright green. */
-export const bgGreenBright = raw.bgGreenBright;
+export const bgGreenBright: Formatter = raw.bgGreenBright;
 /** Set the background from a `#rrggbb` hex string. */
-export const bgHex = raw.bgHex;
+export const bgHex: (color: string) => Formatter = raw.bgHex;
 /** Set the background magenta. */
-export const bgMagenta = raw.bgMagenta;
+export const bgMagenta: Formatter = raw.bgMagenta;
 /** Set the background bright magenta. */
-export const bgMagentaBright = raw.bgMagentaBright;
+export const bgMagentaBright: Formatter = raw.bgMagentaBright;
 /** Set the background red. */
-export const bgRed = raw.bgRed;
+export const bgRed: Formatter = raw.bgRed;
 /** Set the background bright red. */
-export const bgRedBright = raw.bgRedBright;
+export const bgRedBright: Formatter = raw.bgRedBright;
 /** Set the background with a 24-bit RGB triple. */
-export const bgRgb = raw.bgRgb;
+export const bgRgb: (r: number, g: number, b: number) => Formatter = raw.bgRgb;
 /** Set the background white. */
-export const bgWhite = raw.bgWhite;
+export const bgWhite: Formatter = raw.bgWhite;
 /** Set the background bright white. */
-export const bgWhiteBright = raw.bgWhiteBright;
+export const bgWhiteBright: Formatter = raw.bgWhiteBright;
 /** Set the background yellow. */
-export const bgYellow = raw.bgYellow;
+export const bgYellow: Formatter = raw.bgYellow;
 /** Set the background bright yellow. */
-export const bgYellowBright = raw.bgYellowBright;
+export const bgYellowBright: Formatter = raw.bgYellowBright;
 /** Color the foreground black. */
-export const black = raw.black;
+export const black: Formatter = raw.black;
 /** Color the foreground bright black. */
-export const blackBright = raw.blackBright;
+export const blackBright: Formatter = raw.blackBright;
 /** Apply blink. */
-export const blink = raw.blink;
+export const blink: Formatter = raw.blink;
 /** Color the foreground blue. */
-export const blue = raw.blue;
+export const blue: Formatter = raw.blue;
 /** Color the foreground bright blue. */
-export const blueBright = raw.blueBright;
+export const blueBright: Formatter = raw.blueBright;
 /** Apply bold intensity. */
-export const bold = raw.bold;
+export const bold: Formatter = raw.bold;
 /** Color the foreground cyan. */
-export const cyan = raw.cyan;
+export const cyan: Formatter = raw.cyan;
 /** Color the foreground bright cyan. */
-export const cyanBright = raw.cyanBright;
+export const cyanBright: Formatter = raw.cyanBright;
 /** Apply dim (faint) intensity. */
-export const dim = raw.dim;
+export const dim: Formatter = raw.dim;
 /** Apply a double underline. */
-export const doubleUnderline = raw.doubleUnderline;
+export const doubleUnderline: Formatter = raw.doubleUnderline;
 /** Color the foreground with a 256-color palette index. */
-export const fg256 = raw.fg256;
+export const fg256: (n: number) => Formatter = raw.fg256;
 /** Color the foreground gray. */
-export const gray = raw.gray;
+export const gray: Formatter = raw.gray;
 /** Color the foreground green. */
-export const green = raw.green;
+export const green: Formatter = raw.green;
 /** Color the foreground bright green. */
-export const greenBright = raw.greenBright;
+export const greenBright: Formatter = raw.greenBright;
 /** Color the foreground from a `#rrggbb` hex string. */
-export const hex = raw.hex;
+export const hex: (color: string) => Formatter = raw.hex;
 /** Conceal (hide) the text. */
-export const hidden = raw.hidden;
+export const hidden: Formatter = raw.hidden;
 /** Swap foreground and background. */
-export const inverse = raw.inverse;
+export const inverse: Formatter = raw.inverse;
 /** Whether ANSI output is enabled for this instance. */
-export const isColorSupported = raw.isColorSupported;
+export const isColorSupported: boolean = raw.isColorSupported;
 /** Whether OSC 8 hyperlinks are emitted for this instance. */
-export const isHyperlinkSupported = raw.isHyperlinkSupported;
+export const isHyperlinkSupported: boolean = raw.isHyperlinkSupported;
 /** Apply italic style. */
-export const italic = raw.italic;
+export const italic: Formatter = raw.italic;
 /** Wrap text in an OSC 8 terminal hyperlink. */
-export const link = raw.link;
+export const link: LinkFormatter = raw.link;
 /** Color the foreground magenta. */
-export const magenta = raw.magenta;
+export const magenta: Formatter = raw.magenta;
 /** Color the foreground bright magenta. */
-export const magentaBright = raw.magentaBright;
+export const magentaBright: Formatter = raw.magentaBright;
 /** Apply an overline. */
-export const overline = raw.overline;
+export const overline: Formatter = raw.overline;
 /** Color the foreground red. */
-export const red = raw.red;
+export const red: Formatter = raw.red;
 /** Color the foreground bright red. */
-export const redBright = raw.redBright;
+export const redBright: Formatter = raw.redBright;
 /** Reset all styles and colors. */
-export const reset = raw.reset;
+export const reset: Formatter = raw.reset;
 /** Color the foreground with a 24-bit RGB triple. */
-export const rgb = raw.rgb;
+export const rgb: (r: number, g: number, b: number) => Formatter = raw.rgb;
 /** Apply strikethrough. */
-export const strikethrough = raw.strikethrough;
+export const strikethrough: Formatter = raw.strikethrough;
 /** Apply a single underline. */
-export const underline = raw.underline;
+export const underline: Formatter = raw.underline;
 /** Color the foreground white. */
-export const white = raw.white;
+export const white: Formatter = raw.white;
 /** Color the foreground bright white. */
-export const whiteBright = raw.whiteBright;
+export const whiteBright: Formatter = raw.whiteBright;
 /** Color the foreground yellow. */
-export const yellow = raw.yellow;
+export const yellow: Formatter = raw.yellow;
 /** Color the foreground bright yellow. */
-export const yellowBright = raw.yellowBright;
+export const yellowBright: Formatter = raw.yellowBright;
 
-/** Always-on color set — emits ANSI regardless of environment. */
 export default raw;
 
 export type { Colors, Formattable, Formatter, FormatterName, LinkFormatter, Palette, StyleName } from '#types';

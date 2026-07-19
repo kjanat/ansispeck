@@ -1,15 +1,19 @@
 /**
- * @module ansispeck/internal/ansi
  * Single source of truth for ANSI codes and formatter factories.
+ *
+ * @module ansispeck/internal/ansi
  */
 
-import type { Formattable, Formatter, FormatterName, LinkFormatter } from '#types';
+import type { Formattable, Formatter, FormatterName, LinkFormatter } from '../types.ts';
 
 // Shared ANSI fragments — hoisted to avoid repeating in every formatter call
+/** Escape character that starts ANSI control sequences. */
 export const ESC = '\x1b';
 const E = `${ESC}[`;
-export const FG_CLOSE = `${E}39m`;
-export const BG_CLOSE = `${E}49m`;
+/** ANSI sequence that resets the foreground color. */
+export const FG_CLOSE: '\u001B[39m' = `${E}39m`;
+/** ANSI sequence that resets the background color. */
+export const BG_CLOSE: '\u001B[49m' = `${E}49m`;
 const ME = `${E}22m`; // modifier end (bold/dim share this close code)
 const OSC8 = `${ESC}]8;;`;
 const ST = `${ESC}\\`; // string terminator
@@ -21,10 +25,12 @@ export function c(n: number): string {
 
 /** 256-color palette open codes. */
 export const fg256Open = (n: number): string => `${E}38;5;${n}m`;
+/** Build a 256-color background open code. */
 export const bg256Open = (n: number): string => `${E}48;5;${n}m`;
 
 /** Truecolor open codes. */
 export const rgbOpen = (r: number, g: number, b: number): string => `${E}38;2;${r};${g};${b}m`;
+/** Build a truecolor background open code. */
 export const bgRgbOpen = (r: number, g: number, b: number): string => `${E}48;2;${r};${g};${b}m`;
 
 /** Parse '#rgb' or '#rrggbb' into an 'r;g;b' SGR fragment. */
@@ -34,7 +40,9 @@ function hx(color: string): string {
 	const n = parseInt(h, 16);
 	return `${(n >> 16) & 255};${(n >> 8) & 255};${n & 255}`;
 }
+/** Build a truecolor foreground open code from a hex color. */
 export const hexOpen = (color: string): string => `${E}38;2;${hx(color)}m`;
+/** Build a truecolor background open code from a hex color. */
 export const bgHexOpen = (color: string): string => `${E}48;2;${hx(color)}m`;
 
 /** Matches SGR codes and OSC sequences (BEL- or ST-terminated). */

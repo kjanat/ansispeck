@@ -4,22 +4,20 @@
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
 	"formatter": [
-		// Fallback to the dprint CLI in case the lsp fucks up, which it does sometimes for some reason...
 		{ "external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] } },
 		{ "language_server": { "name": "dprint" } }
 	],
 	"prettier": { "allowed": false },
 	"languages": {
 		"TypeScript": {
-			"language_servers": ["vtsls", "biome", "..."],
-			"formatter": [{
-				"language_server": { "name": "biome" }
-			}, {
-				"external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] }
-			}],
+			"language_servers": ["typescript-ls", "biome", "deno", "..."],
+			"formatter": [
+				{ "language_server": { "name": "biome" } },
+				{ "external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] } }
+			],
 			"code_actions_on_format": {
 				"source.fixAll.biome": true,
-				"source.organizeImports.biome": false,
+				"source.organizeImports.biome": true,
 				"source.useSortedInterfaceMembers.biome": true
 			}
 		}
@@ -27,8 +25,33 @@
 	"lsp": {
 		"biome": {
 			"settings": {
-				"config_path": "./biome.json",
-				"require_config_file": true
+				"config_path": "./biome.jsonc",
+				"require_config_file": true,
+				"assist": {
+					"enabled": true,
+					"actions": {
+						"source": {
+							"preset": "recommended",
+							"organizeImports": {
+								"options": {
+									"groups": [":NODE:", ":BUN:", ":PACKAGE:", ":ALIAS:", ":PATH:"],
+									"identifierOrder": "lexicographic",
+									"sortBareImports": false,
+								},
+								"level": "on"
+							},
+							"useSortedInterfaceMembers": "on"
+						}
+					}
+				}
+			}
+		},
+		"deno": {
+			"settings": {
+				"deno": {
+					"enable": true,
+					"importMap": "./import_map.json"
+				}
 			}
 		}
 	}

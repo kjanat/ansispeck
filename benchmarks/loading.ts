@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-sloppy-imports
 import { bench, group, run } from 'mitata';
 
 const DEFAULT_COUNT = 1;
@@ -8,22 +9,22 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 	}
 	group(() => {
 		bench('ansispeck', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/index.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/index');
 		});
 		bench('ansispeck/auto', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/auto.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/auto');
 		});
 		bench('ansispeck/raw', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/raw.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/raw');
 		});
 		bench('ansispeck/safe', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/safe.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/safe');
 		});
 		bench('ansispeck/rope', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/rope.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/rope');
 		});
 		bench('ansispeck/noop', async () => {
-			for (let i = 0; i < count; i++) await import('../dist/noop.js');
+			for (let i = 0; i < count; i++) await import('#ansispeck-dist/noop');
 		});
 		bench('picocolors', async () => {
 			for (let i = 0; i < count; i++) await import('picocolors');

@@ -22,10 +22,15 @@
 		// Stricter flags
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": false,
+		"noPropertyAccessFromIndexSignature": true,
+
+		// idk why
+		"isolatedDeclarations": true,
+		"composite": true,
 
 		// Types
-		"types": ["bun"]
+		"types": ["node", "bun"]
 	},
-	"exclude": ["dist"]
+	"include": ["./src/**/*.ts", "./tests/**/*.ts", "./benchmarks/**/*.ts", "./*.ts"],
+	"exclude": ["./dist"]
 }

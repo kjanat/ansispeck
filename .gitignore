@@ -157,3 +157,4 @@ dist
 .nfs*
 
 # End of https://gitignore.kjanat.com/api/node,linux
+/.denodocs/

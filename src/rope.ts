@@ -1,16 +1,36 @@
 /**
- * @module ansispeck/rope
  * Chunk/rope entrypoint: O(1) styled composition, O(n) render.
  * The renderer re-opens enclosing styles structurally, so nested
  * styles sharing a close code never leak — no string scanning.
+ *
+ * @module ansispeck/rope
  */
 
-import type { Wrap } from '#internal/ansi';
-import { bg256Open, bgHexOpen, bgRgbOpen, c, fg256Open, hexOpen, mapPalette, rgbOpen } from '#internal/ansi';
-import { BG_CLOSE, FG_CLOSE } from '#internal/ansi';
-import { detectColorSupport } from '#internal/detect';
-import type { Chunk, Chunkable, ChunkFormatter, ConcatChunk, Formattable, Rope, StyledChunk, TextChunk } from '#types';
-import { CHUNK_BRAND } from '#types';
+import type { Wrap } from './internal/ansi.ts';
+import {
+	BG_CLOSE,
+	FG_CLOSE,
+	bg256Open,
+	bgHexOpen,
+	bgRgbOpen,
+	c,
+	fg256Open,
+	hexOpen,
+	mapPalette,
+	rgbOpen,
+} from './internal/ansi.ts';
+import { detectColorSupport } from './internal/detect.ts';
+import type {
+	Chunk,
+	ChunkFormatter,
+	Chunkable,
+	ConcatChunk,
+	Formattable,
+	Rope,
+	StyledChunk,
+	TextChunk,
+} from './types.ts';
+import { CHUNK_BRAND } from './types.ts';
 
 const RESET = c(0);
 
@@ -123,121 +143,124 @@ export function createRope(enabled: boolean = detectColorSupport()): Rope {
 	};
 }
 
+/** Rope builder set — O(1) styled composition, O(n) render. */
 const rope: Rope = createRope();
 
 /** Set the background with a 256-color palette index. */
-export const bg256 = rope.bg256;
+export const bg256: (n: number) => ChunkFormatter = rope.bg256;
 /** Set the background black. */
-export const bgBlack = rope.bgBlack;
+export const bgBlack: ChunkFormatter = rope.bgBlack;
 /** Set the background bright black. */
-export const bgBlackBright = rope.bgBlackBright;
+export const bgBlackBright: ChunkFormatter = rope.bgBlackBright;
 /** Set the background blue. */
-export const bgBlue = rope.bgBlue;
+export const bgBlue: ChunkFormatter = rope.bgBlue;
 /** Set the background bright blue. */
-export const bgBlueBright = rope.bgBlueBright;
+export const bgBlueBright: ChunkFormatter = rope.bgBlueBright;
 /** Set the background cyan. */
-export const bgCyan = rope.bgCyan;
+export const bgCyan: ChunkFormatter = rope.bgCyan;
 /** Set the background bright cyan. */
-export const bgCyanBright = rope.bgCyanBright;
+export const bgCyanBright: ChunkFormatter = rope.bgCyanBright;
 /** Set the background green. */
-export const bgGreen = rope.bgGreen;
+export const bgGreen: ChunkFormatter = rope.bgGreen;
 /** Set the background bright green. */
-export const bgGreenBright = rope.bgGreenBright;
+export const bgGreenBright: ChunkFormatter = rope.bgGreenBright;
 /** Set the background from a `#rrggbb` hex string. */
-export const bgHex = rope.bgHex;
+export const bgHex: (color: string) => ChunkFormatter = rope.bgHex;
 /** Set the background magenta. */
-export const bgMagenta = rope.bgMagenta;
+export const bgMagenta: ChunkFormatter = rope.bgMagenta;
 /** Set the background bright magenta. */
-export const bgMagentaBright = rope.bgMagentaBright;
+export const bgMagentaBright: ChunkFormatter = rope.bgMagentaBright;
 /** Set the background red. */
-export const bgRed = rope.bgRed;
+export const bgRed: ChunkFormatter = rope.bgRed;
 /** Set the background bright red. */
-export const bgRedBright = rope.bgRedBright;
+export const bgRedBright: ChunkFormatter = rope.bgRedBright;
 /** Set the background with a 24-bit RGB triple. */
-export const bgRgb = rope.bgRgb;
+export const bgRgb: (r: number, g: number, b: number) => ChunkFormatter = rope.bgRgb;
 /** Set the background white. */
-export const bgWhite = rope.bgWhite;
+export const bgWhite: ChunkFormatter = rope.bgWhite;
 /** Set the background bright white. */
-export const bgWhiteBright = rope.bgWhiteBright;
+export const bgWhiteBright: ChunkFormatter = rope.bgWhiteBright;
 /** Set the background yellow. */
-export const bgYellow = rope.bgYellow;
+export const bgYellow: ChunkFormatter = rope.bgYellow;
 /** Set the background bright yellow. */
-export const bgYellowBright = rope.bgYellowBright;
+export const bgYellowBright: ChunkFormatter = rope.bgYellowBright;
 /** Color the foreground black. */
-export const black = rope.black;
+export const black: ChunkFormatter = rope.black;
 /** Color the foreground bright black. */
-export const blackBright = rope.blackBright;
+export const blackBright: ChunkFormatter = rope.blackBright;
 /** Apply blink. */
-export const blink = rope.blink;
+export const blink: ChunkFormatter = rope.blink;
 /** Color the foreground blue. */
-export const blue = rope.blue;
+export const blue: ChunkFormatter = rope.blue;
 /** Color the foreground bright blue. */
-export const blueBright = rope.blueBright;
+export const blueBright: ChunkFormatter = rope.blueBright;
 /** Apply bold intensity. */
-export const bold = rope.bold;
+export const bold: ChunkFormatter = rope.bold;
 /** Color the foreground cyan. */
-export const cyan = rope.cyan;
+export const cyan: ChunkFormatter = rope.cyan;
 /** Color the foreground bright cyan. */
-export const cyanBright = rope.cyanBright;
+export const cyanBright: ChunkFormatter = rope.cyanBright;
 /** Apply dim (faint) intensity. */
-export const dim = rope.dim;
+export const dim: ChunkFormatter = rope.dim;
 /** Apply a double underline. */
-export const doubleUnderline = rope.doubleUnderline;
+export const doubleUnderline: ChunkFormatter = rope.doubleUnderline;
 /** Color the foreground with a 256-color palette index. */
-export const fg256 = rope.fg256;
+export const fg256: (n: number) => ChunkFormatter = rope.fg256;
 /** Color the foreground gray. */
-export const gray = rope.gray;
+export const gray: ChunkFormatter = rope.gray;
 /** Color the foreground green. */
-export const green = rope.green;
+export const green: ChunkFormatter = rope.green;
 /** Color the foreground bright green. */
-export const greenBright = rope.greenBright;
+export const greenBright: ChunkFormatter = rope.greenBright;
 /** Color the foreground from a `#rrggbb` hex string. */
-export const hex = rope.hex;
+export const hex: (color: string) => ChunkFormatter = rope.hex;
 /** Conceal (hide) the text. */
-export const hidden = rope.hidden;
+export const hidden: ChunkFormatter = rope.hidden;
 /** Swap foreground and background. */
-export const inverse = rope.inverse;
+export const inverse: ChunkFormatter = rope.inverse;
 /** Whether ANSI output is enabled for this instance. */
-export const isColorSupported = rope.isColorSupported;
+export const isColorSupported: boolean = rope.isColorSupported;
 /** Apply italic style. */
-export const italic = rope.italic;
+export const italic: ChunkFormatter = rope.italic;
 /** Color the foreground magenta. */
-export const magenta = rope.magenta;
+export const magenta: ChunkFormatter = rope.magenta;
 /** Color the foreground bright magenta. */
-export const magentaBright = rope.magentaBright;
+export const magentaBright: ChunkFormatter = rope.magentaBright;
 /** Apply an overline. */
-export const overline = rope.overline;
+export const overline: ChunkFormatter = rope.overline;
 /** Color the foreground red. */
-export const red = rope.red;
+export const red: ChunkFormatter = rope.red;
 /** Color the foreground bright red. */
-export const redBright = rope.redBright;
+export const redBright: ChunkFormatter = rope.redBright;
 /** Reset all styles and colors. */
-export const reset = rope.reset;
+export const reset: ChunkFormatter = rope.reset;
 /** Color the foreground with a 24-bit RGB triple. */
-export const rgb = rope.rgb;
+export const rgb: (r: number, g: number, b: number) => ChunkFormatter = rope.rgb;
 /** Apply strikethrough. */
-export const strikethrough = rope.strikethrough;
+export const strikethrough: ChunkFormatter = rope.strikethrough;
 /** Apply a single underline. */
-export const underline = rope.underline;
+export const underline: ChunkFormatter = rope.underline;
 /** Color the foreground white. */
-export const white = rope.white;
+export const white: ChunkFormatter = rope.white;
 /** Color the foreground bright white. */
-export const whiteBright = rope.whiteBright;
+export const whiteBright: ChunkFormatter = rope.whiteBright;
 /** Color the foreground yellow. */
-export const yellow = rope.yellow;
+export const yellow: ChunkFormatter = rope.yellow;
 /** Color the foreground bright yellow. */
-export const yellowBright = rope.yellowBright;
+export const yellowBright: ChunkFormatter = rope.yellowBright;
 
-/** Rope builder set — O(1) styled composition, O(n) render. */
 export default rope;
-
 export type {
 	Chunk,
-	Chunkable,
 	ChunkFormatter,
 	ChunkPalette,
+	Chunkable,
+	ConcatChunk,
 	Formattable,
 	FormatterName,
 	Rope,
 	StyleName,
+	StyledChunk,
+	TextChunk,
 } from '#types';
+export { CHUNK_BRAND };

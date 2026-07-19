@@ -1,0 +1,59 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true,
+		"defaultBranch": "master"
+	},
+	"files": {
+		"includes": ["**", "!!**/dist", "!!.denodoc"]
+	},
+	"formatter": {
+		"enabled": false
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": {
+				"useLiteralKeys": "off"
+			},
+			"correctness": {
+				"preset": "recommended"
+			},
+			"performance": {
+				"preset": "recommended"
+			},
+			"style": {
+				"preset": "recommended",
+				"useTemplate": "off"
+			}
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"preset": "recommended",
+				"organizeImports": {
+					"options": {
+						"groups": [":NODE:", ":BUN:", ":PACKAGE:", ":ALIAS:", ":PATH:"],
+						"identifierOrder": "lexicographic",
+						"sortBareImports": false,
+					},
+					"level": "on"
+				},
+				"useSortedInterfaceMembers": "on"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.jsonc"],
+			"json": {
+				"parser": { "allowComments": true, "allowTrailingCommas": true }
+			}
+		}
+	]
+}

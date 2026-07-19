@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { file, fileURLToPath, write } from 'bun';
 
 const PACKAGE_JSON_PATH = fileURLToPath(import.meta.resolve('#pkg'));
@@ -12,16 +13,16 @@ if (!isObjectRecord(parsedPackageJson)) {
 	throw new Error('package.json must be a JSON object');
 }
 
-delete parsedPackageJson.scripts;
-delete parsedPackageJson.devDependencies;
-delete parsedPackageJson.packageManager;
-delete parsedPackageJson.volta;
+delete parsedPackageJson['scripts'];
+delete parsedPackageJson['devDependencies'];
+delete parsedPackageJson['packageManager'];
+delete parsedPackageJson['volta'];
 
-const author = parsedPackageJson.author;
+const author = parsedPackageJson['author'];
 if (typeof author === 'string') {
-	parsedPackageJson.author = author.replace(/\s*\(https?:\/\/[^)]+\)\s*$/u, '').trim();
+	parsedPackageJson['author'] = author.replace(/\s*\(https?:\/\/[^)]+\)\s*$/u, '').trim();
 } else if (isObjectRecord(author)) {
-	delete author.url;
+	delete author['url'];
 }
 
 await write(PACKAGE_JSON_PATH, `${JSON.stringify(parsedPackageJson)}\n`);

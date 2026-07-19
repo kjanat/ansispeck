@@ -12,8 +12,11 @@
 	"publish": {
 		"include": [
 			"src",
+			"CHANGELOG.md",
 			"README.md",
-			"LICENSE"
+			"LICENSE",
+			"package.json",
+			"jsr.json"
 		],
 		"exclude": [
 			"src/AGENTS.md"

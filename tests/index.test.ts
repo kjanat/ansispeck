@@ -1,5 +1,5 @@
-import colors, { type Colors, createColors, isColorSupported, strip } from '#ansispeck';
 import { describe, expect, test } from 'bun:test';
+import colors, { type Colors, createColors, isColorSupported, strip } from '#ansispeck';
 
 describe('createColors', () => {
 	const enabled = createColors(true);

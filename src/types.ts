@@ -1,6 +1,7 @@
 /**
- * @module ansispeck/types
  * Shared public types for all entrypoints.
+ *
+ * @module ansispeck/types
  */
 
 /** Input accepted by all formatters. */
@@ -41,10 +42,10 @@ export type StyleName =
 	| 'underline';
 
 /** Base 8 ANSI foreground color names (plus gray). */
-type BaseColorName = 'black' | 'blue' | 'cyan' | 'gray' | 'green' | 'magenta' | 'red' | 'white' | 'yellow';
+export type BaseColorName = 'black' | 'blue' | 'cyan' | 'gray' | 'green' | 'magenta' | 'red' | 'white' | 'yellow';
 
 /** Only these get `Bright`/`bg` variants (so `gray` won't). */
-type VariantBaseColorName = Exclude<BaseColorName, 'gray'>;
+export type VariantBaseColorName = Exclude<BaseColorName, 'gray'>;
 
 /** Union of all valid formatter keys. */
 export type FormatterName =
@@ -62,27 +63,37 @@ export interface TemplatePalette extends Readonly<Record<FormatterName, Template
 
 /** 256-color and truecolor formatter factories, generic over formatter flavor. */
 export interface Factories<T> {
+	/** Set the background with a 256-color palette index. */
 	readonly bg256: (n: number) => T;
+	/** Set the background from a `#rgb` or `#rrggbb` hex string. */
 	readonly bgHex: (color: string) => T;
+	/** Set the background with a 24-bit RGB triple. */
 	readonly bgRgb: (r: number, g: number, b: number) => T;
+	/** Color the foreground with a 256-color palette index. */
 	readonly fg256: (n: number) => T;
+	/** Color the foreground from a `#rgb` or `#rrggbb` hex string. */
 	readonly hex: (color: string) => T;
+	/** Color the foreground with a 24-bit RGB triple. */
 	readonly rgb: (r: number, g: number, b: number) => T;
 }
 
 /** All available color/style formatters plus support flags. */
 export interface Colors extends Palette, Factories<Formatter> {
+	/** Whether ANSI output is enabled. */
 	readonly isColorSupported: boolean;
 	/** Whether {@link link} emits OSC 8 sequences. Independent of color. */
 	readonly isHyperlinkSupported: boolean;
+	/** Wrap text in an OSC 8 terminal hyperlink. */
 	readonly link: LinkFormatter;
 }
 
 /** Template-tag color set (`ansispeck/safe`). */
 export interface SafeColors extends TemplatePalette, Factories<TemplateFormatter> {
+	/** Whether ANSI output is enabled. */
 	readonly isColorSupported: boolean;
 	/** Whether {@link link} emits OSC 8 sequences. Independent of color. */
 	readonly isHyperlinkSupported: boolean;
+	/** Wrap text in an OSC 8 terminal hyperlink. */
 	readonly link: LinkFormatter;
 }
 
@@ -91,25 +102,37 @@ export const CHUNK_BRAND: unique symbol = Symbol('ansispeck.chunk');
 
 /** Rope text leaf. */
 export interface TextChunk {
+	/** Discriminant for a text leaf. */
 	readonly kind: 'text';
+	/** String value stored by the leaf. */
 	readonly value: string;
+	/** Identifies this value as an ansispeck chunk. */
 	readonly [CHUNK_BRAND]: true;
 }
 
 /** Rope concat node (O(1) composition). */
 export interface ConcatChunk {
+	/** Discriminant for a concatenation node. */
 	readonly kind: 'concat';
+	/** Left child. */
 	readonly left: Chunk;
+	/** Right child. */
 	readonly right: Chunk;
+	/** Identifies this value as an ansispeck chunk. */
 	readonly [CHUNK_BRAND]: true;
 }
 
 /** Rope style wrapper node. */
 export interface StyledChunk {
+	/** ANSI sequence that closes the style. */
 	readonly close: string;
+	/** Chunk wrapped by the style. */
 	readonly inner: Chunk;
+	/** Discriminant for a style node. */
 	readonly kind: 'style';
+	/** ANSI sequence that opens the style. */
 	readonly open: string;
+	/** Identifies this value as an ansispeck chunk. */
 	readonly [CHUNK_BRAND]: true;
 }
 
@@ -127,8 +150,12 @@ export interface ChunkPalette extends Readonly<Record<FormatterName, ChunkFormat
 
 /** Rope API for O(1) composition + O(n) final render. */
 export interface Rope extends ChunkPalette, Factories<ChunkFormatter> {
+	/** Concatenate chunks and values into one chunk. */
 	readonly concat: (...inputs: readonly Chunkable[]) => Chunk;
+	/** Whether ANSI output is enabled. */
 	readonly isColorSupported: boolean;
+	/** Render a chunk tree or plain value to a string. */
 	readonly render: (input: Chunkable) => string;
+	/** Create a text leaf chunk. */
 	readonly text: (input: Formattable) => Chunk;
 }

@@ -1,6 +1,7 @@
 /**
- * @module ansispeck/internal/detect
  * Color-support detection with explicit precedence.
+ *
+ * @module ansispeck/internal/detect
  */
 
 const processRef = globalThis.process;
@@ -17,11 +18,11 @@ const env: Record<string, string | undefined> = processRef?.env ?? {};
  * @see https://no-color.org/
  */
 export const detectColorSupport = (): boolean => {
-	if (env.FORCE_COLOR || argv.includes('--color')) return true;
-	if (env.NO_COLOR || argv.includes('--no-color')) return false;
+	if (env['FORCE_COLOR'] || argv.includes('--color')) return true;
+	if (env['NO_COLOR'] || argv.includes('--no-color')) return false;
 	if (processRef?.platform === 'win32') return true;
-	if (env.CI) return true;
-	if (processRef?.stdout?.isTTY && env.TERM !== 'dumb') return true;
+	if (env['CI']) return true;
+	if (processRef?.stdout?.isTTY && env['TERM'] !== 'dumb') return true;
 	return false;
 };
 
@@ -37,8 +38,8 @@ export const detectColorSupport = (): boolean => {
  * @see https://no-hyperlinks.org/
  */
 export const detectHyperlinkSupport = (): boolean => {
-	if (env.NO_HYPERLINKS || argv.includes('--no-hyperlinks')) return false;
-	if (env.FORCE_HYPERLINKS || argv.includes('--hyperlinks')) return true;
-	if (processRef?.stdout?.isTTY && env.TERM !== 'dumb') return true;
+	if (env['NO_HYPERLINKS'] || argv.includes('--no-hyperlinks')) return false;
+	if (env['FORCE_HYPERLINKS'] || argv.includes('--hyperlinks')) return true;
+	if (processRef?.stdout?.isTTY && env['TERM'] !== 'dumb') return true;
 	return false;
 };

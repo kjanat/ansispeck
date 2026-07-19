@@ -1,5 +1,5 @@
-import rope, { concat, createRope, render, text } from '#ansispeck/rope';
 import { describe, expect, test } from 'bun:test';
+import rope, { concat, createRope, render, text } from '#ansispeck/rope';
 
 describe('rope', () => {
 	const r = createRope(true);

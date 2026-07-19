@@ -2,7 +2,7 @@
 
 ## STRUCTURE
 
-```
+```text
 index.ts      root entrypoint: createColors(detectColorSupport()), named + default exports, re-exports types
 auto.ts       alias of root (`export * from '#ansispeck'`) — behavior-identical to the root
 raw.ts        createColors(true): always emits ANSI codes regardless of environment
