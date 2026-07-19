@@ -8,6 +8,33 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-07-20
+
+### Added
+
+- Exported `BaseColorName` and `VariantBaseColorName` so the public
+  `FormatterName` declaration no longer references private types
+- Deno benchmark coverage alongside Bun and Node
+
+### Changed
+
+- npm packages are assembled in a disposable staging directory instead of
+  rewriting the tracked `package.json` during `prepack`
+- Loading benchmarks install exact local package tarballs and measure imports in
+  fresh runtime processes
+- Benchmark CLI uses DreamCLI with explicit format, filter, compact, and quiet
+  flags; CI summaries deduplicate metadata and format generated Markdown
+- JSR publishing includes package metadata, changelog, README, and license
+
+### Fixed
+
+- URL parameters now use the runtime constructor's instance type, avoiding the
+  global/Node `URL` declaration collision under Deno and JSR checks
+- Root and auto entrypoints use declaration-safe shared facades so generated
+  names remain stable across tsdown, Deno, Bun, Node, and native TypeScript
+- Generated benchmark links derive ansispeck's npm version from the latest Git
+  tag instead of the in-tree `0.0.0` release sentinel
+
 ## [0.2.0] - 2026-07-15
 
 ### Added
@@ -135,7 +162,8 @@ and this project adheres to
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)`
   for cross-platform URL/path correctness
 
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/kjanat/ansispeck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kjanat/ansispeck/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/kjanat/ansispeck/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/kjanat/ansispeck/compare/v0.1.0...v0.1.1
