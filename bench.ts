@@ -2,7 +2,7 @@
 // deno-lint-ignore-file no-sloppy-imports
 /// <reference types="bun" />
 
-import { execFileSync, execSync, spawnSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { sep } from 'node:path';
 import { URL } from 'node:url';
@@ -11,6 +11,7 @@ import { cli, command, flag } from 'dreamcli';
 import { run } from 'mitata';
 import { register as complex } from '#bench/complex';
 import { register as deferred } from '#bench/deferred';
+import { BENCH_LIBRARIES } from '#bench/libraries';
 import { register as loading } from '#bench/loading';
 import { register as recursion } from '#bench/recursion';
 import { register as simple } from '#bench/simple';
@@ -27,20 +28,14 @@ declare module 'mitata' {
 }
 
 const SUITES = ['simple', 'complex', 'recursion', 'deferred-build', 'loading'] as const;
-const LIB_ORDER = [
-	'ansispeck',
-	'ansispeck/auto',
-	'ansispeck/raw',
-	'ansispeck/safe',
-	'ansispeck/rope',
-	'ansispeck/noop',
-	'picocolors',
-	'colorette',
-	'kleur',
-	'kleur/colors',
-	'chalk',
-	'ansi-colors',
-] as const;
+const SUITE_LABELS: Readonly<Record<string, string>> = {
+	simple: 'simple',
+	complex: 'complex',
+	recursion: 'recursion',
+	'deferred-build': 'deferred-build',
+	loading: 'cold load',
+};
+const LIB_ORDER = BENCH_LIBRARIES.map(({ alias }) => alias);
 
 const FORMATS = ['overview', 'json', 'mitata', 'markdown', 'md'] as const;
 type Format = (typeof FORMATS)[number];
@@ -201,6 +196,10 @@ function fmtTime(ns: number): string {
 	return `${(ns / 1_000_000).toFixed(2)} ms`;
 }
 
+function suiteLabel(suite: string): string {
+	return SUITE_LABELS[suite] ?? suite;
+}
+
 function computeCI95(parsed: Parsed): Map<string, { label: string; significant: boolean }> {
 	const ci95: Map<string, { label: string; significant: boolean }> = new Map();
 	for (const [suite, ranking] of parsed.ranked) {
@@ -224,7 +223,7 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 	const ci95 = computeCI95(parsed);
 
 	const nameW = Math.max(4, BASELINE_LABEL.length, ...libs.map((l) => l.length));
-	const colW = Math.max(...activeSuites.map((s) => s.length), 10);
+	const colW = Math.max(...activeSuites.map((s) => suiteLabel(s).length), 10);
 	const tagW = 3;
 	const fullW = colW + 1 + tagW;
 
@@ -236,7 +235,7 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 	out.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	out.log(''.padStart(nameW) + '  ' + activeSuites.map((s) => s.padStart(fullW)).join('  '));
+	out.log(''.padStart(nameW) + '  ' + activeSuites.map((s) => suiteLabel(s).padStart(fullW)).join('  '));
 	out.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 
 	// rows
@@ -276,7 +275,7 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 const EXPORT_NOTES: Record<string, string> = {
 	ansispeck: 'auto mode — picks raw or noop once at import; FORCE_COLOR/`--color` wins',
 	'ansispeck/auto': 'same behavior as the root export, via explicit subpath',
-	'ansispeck/raw': 'always emits ANSI codes — the fastest path',
+	'ansispeck/raw': 'always emits ANSI codes',
 	'ansispeck/safe': 'template-tag API preserving style across interpolations',
 	'ansispeck/rope': 'chunk builder — O(1) compose + O(n) render',
 	'ansispeck/noop': 'control path — returns plain strings',
@@ -284,6 +283,8 @@ const EXPORT_NOTES: Record<string, string> = {
 
 /** npm package name behind a bench alias (`kleur/colors` → `kleur`). */
 function packageNameOf(alias: string): string {
+	const configured = BENCH_LIBRARIES.find((library) => library.alias === alias);
+	if (configured !== undefined) return configured.packageName;
 	const segments = alias.split('/');
 	if (alias.startsWith('@')) return segments.slice(0, 2).join('/');
 	return segments[0] ?? alias;
@@ -313,7 +314,7 @@ function packageVersion(name: string): string {
 	return version;
 }
 
-function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, out: Out): void {
+function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compact: boolean, out: Out): void {
 	const parsed = parse(result, excluded);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
@@ -328,7 +329,7 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, out: 
 
 	// ansispeck export notes
 	const noted = libs.filter((lib) => EXPORT_NOTES[lib] !== undefined);
-	if (noted.length > 0) {
+	if (!compact && noted.length > 0) {
 		out.log('> ansispeck exports in this table:');
 		for (const lib of noted) {
 			const note = EXPORT_NOTES[lib];
@@ -336,28 +337,32 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, out: 
 			out.log(`> - \`${lib}\`: ${note}`);
 		}
 		out.log('');
+		out.log('> Cold load starts an isolated runtime process using packages installed from local tarballs.');
+		out.log('');
 	}
 
-	if (libs.some((lib) => excluded.has(lib))) {
+	if (!compact && libs.some((lib) => excluded.has(lib))) {
 		out.log('> † unranked — behavior does not match this color mode');
 		out.log('');
 	}
 
 	// header
-	const hdr = ['Library', ...activeSuites.map((s) => s.charAt(0).toUpperCase() + s.slice(1))];
+	const hdr = [
+		'Library',
+		...activeSuites.map((s) => {
+			const label = suiteLabel(s);
+			return label.charAt(0).toUpperCase() + label.slice(1);
+		}),
+	];
 	out.log(`| ${hdr.join(' | ')} |`);
 	out.log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
 
-	// collect ref keys for footnote definitions
-	const refs: Map<string, string> = new Map();
-
 	for (const lib of libs) {
 		const pkgName = packageNameOf(lib);
-		const refKey = pkgName.replace(/\//g, '-');
-		refs.set(refKey, pkgName);
+		const v = packageVersion(pkgName);
 
 		const cells: string[] = [];
-		cells.push(`${lib}[^${refKey}]`);
+		cells.push(`[${lib}](https://npm.im/package/${pkgName}/v/${v} "${pkgName} v${v}")`);
 
 		for (const suite of activeSuites) {
 			const entry = suites.get(suite)?.get(lib);
@@ -390,13 +395,6 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, out: 
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
 	out.log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
-
-	// footnote definitions
-	out.log('');
-	for (const [refKey, name] of refs) {
-		const v = packageVersion(name);
-		out.log(`[^${refKey}]: ${name} [v${v}](https://npm.im/package/${name}/v/${v} "NPM")`);
-	}
 }
 
 function parseFilter(raw: unknown): RegExp {
@@ -415,8 +413,9 @@ function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
 	}
 }
 
-async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, out: Out): Promise<void> {
+async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, compact: boolean, out: Out): Promise<void> {
 	execSync('run -q build', { stdio: 'ignore' });
+	execSync('bun --bun scripts/prepare-loading-fixture.ts', { stdio: 'ignore' });
 	const { default: ansispeck } = await import('#ansispeck-dist');
 	const excluded = rankExcluded(ansispeck.isColorSupported);
 
@@ -428,7 +427,7 @@ async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, out:
 
 	const result = await run({ format: mitataFormat(format), filter });
 	if (format === 'overview') printOverview(result, excluded, out);
-	if (format === 'markdown' || format === 'md') printMarkdown(result, excluded, out);
+	if (format === 'markdown' || format === 'md') printMarkdown(result, excluded, compact, out);
 }
 
 const benchmark = command('bench')
@@ -441,10 +440,11 @@ const benchmark = command('bench')
 		'filter',
 		flag.custom(parseFilter).alias('F').describe('Only run benchmarks matching this regular expression'),
 	)
+	.flag('compact', flag.boolean().describe('Omit reusable notes from Markdown output'))
 	.flag('quiet', flag.boolean().alias('q').describe('Suppress benchmark output'))
 	.action(async ({ flags, out }) => {
 		const format: RunFormat = flags.quiet ? 'quiet' : out.jsonMode ? 'json' : flags.format;
-		await runBenchmarks(format, flags.filter, out);
+		await runBenchmarks(format, flags.filter, flags.compact, out);
 	});
 
 const dirty = spawnSync('git', ['diff', '--exit-code', '--quiet', 'HEAD'], { stdio: 'ignore' }).status != 0;

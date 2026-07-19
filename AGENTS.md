@@ -16,7 +16,7 @@ src/            entrypoints: index (root), auto, raw, noop, safe, rope + types.t
 src/internal/   ansi.ts (codes + fmt factory), colors.ts, detect.ts, template.ts
 benchmarks/     mitata suites (simple, complex, recursion, deferred, loading) + size.ts + internal/ (wasm-rust)
 tests/          bun test suites (detect, entrypoints, index, rope, safe)
-scripts/        prepack.ts (strip package.json/dts for publish), compare-size.sh (CI size report)
+scripts/        pack.ts (stage stripped npm package), compare-size.sh (CI size report)
 .github/        workflows/ (bench.yml, publish.yml), actions/bench/ (composite bench runner)
 bench.ts        benchmark orchestrator: CLI, ranking, CI95, overview/markdown printers
 justfile        dev + benchmark recipes (bench/test run commands directly; others shell out to npm scripts)
@@ -24,13 +24,13 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 
 ## WHERE TO LOOK
 
-| Task                     | Location                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| Add/change a formatter   | `src/internal/ansi.ts` (`mapPalette`) + `src/types.ts`                          |
-| Color detection behavior | `src/internal/detect.ts`                                                        |
-| Entrypoint wiring        | `package.json` `exports` + `tsdown.config.ts` `entry`                           |
-| Benchmark suites         | `benchmarks/*.ts`, orchestrated by `bench.ts`                                   |
-| Publish lifecycle        | `package.json` scripts + `scripts/prepack.ts` + `.github/workflows/publish.yml` |
+| Task                     | Location                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| Add/change a formatter   | `src/internal/ansi.ts` (`mapPalette`) + `src/types.ts`                       |
+| Color detection behavior | `src/internal/detect.ts`                                                     |
+| Entrypoint wiring        | `package.json` `exports` + `tsdown.config.ts` `entry`                        |
+| Benchmark suites         | `benchmarks/*.ts`, orchestrated by `bench.ts`                                |
+| Publish lifecycle        | `package.json` scripts + `scripts/pack.ts` + `.github/workflows/publish.yml` |
 
 ## CODE MAP
 
@@ -88,9 +88,10 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
   the justfile. Justfile bench/test recipes duplicate the command strings —
   changing `bench:bun`/`bench:node` in package.json does NOT change
   `just bench-*`.
-- `prepack` = quiet build + `scripts/prepack.ts` (strips scripts/devDeps/volta
-  from package.json, strips dts comments); `postpack` restores package.json via
-  git. `bun pm pack` triggers the whole chain.
+- `tar` = quiet build + `scripts/pack.ts`, which copies publishable files into
+  `.cache/npm-package`, strips publication-only manifest fields and declaration
+  comments there, then packs that staging directory. It never edits tracked
+  package files.
 - `scripts/compare-size.sh` measures the full dist import chain (entry + chunks)
   and is the CI-facing size path; `benchmarks/size.ts` is run directly for
   per-library file sizes.

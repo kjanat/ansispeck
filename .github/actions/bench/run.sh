@@ -38,6 +38,15 @@ case "${RUNTIME}" in
 		;;
 esac
 
+case "${COMPACT}" in
+	true) set -- "$@" --compact ;;
+	false) ;;
+	*)
+		echo "Unknown compact mode: ${COMPACT} (expected 'true' or 'false')" >&2
+		exit 1
+		;;
+esac
+
 output="$("$@")"
 if formatted="$(printf '%s\n' "${output}" | dprint fmt --stdin md)"; then
 	output="${formatted}"

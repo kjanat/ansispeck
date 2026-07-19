@@ -1,49 +1,37 @@
 // deno-lint-ignore-file no-sloppy-imports
+import { spawnSync } from 'node:child_process';
+import { basename, join } from 'node:path';
+import { execPath } from 'node:process';
+import { fileURLToPath, URL } from 'node:url';
 import { bench, group, run } from 'mitata';
+import { BENCH_LIBRARIES } from './libraries.ts';
 
 const DEFAULT_COUNT = 1;
+const FIXTURE = fileURLToPath(new URL('../.cache/bench-loading/', import.meta.url));
+const LOADER = join(FIXTURE, 'load.mjs');
+const IS_DENO = basename(execPath).startsWith('deno');
+
+function load(specifier: string): void {
+	const args = IS_DENO
+		? ['run', '-A', '--node-modules-dir=manual', LOADER, specifier]
+		: [LOADER, specifier];
+	const result = spawnSync(execPath, args, { cwd: FIXTURE, stdio: 'ignore' });
+	if (result.error !== undefined) throw result.error;
+	if (result.status !== 0) {
+		throw new Error(`Failed to load ${specifier} in an isolated ${basename(execPath)} process`);
+	}
+}
 
 export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): void {
 	if (count !== 1) {
-		throw new Error('loading benchmark requires count=1 to measure cold load cost');
+		throw new Error('loading benchmark requires count=1 to measure one cold process load');
 	}
 	group(() => {
-		bench('ansispeck', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/index');
-		});
-		bench('ansispeck/auto', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/auto');
-		});
-		bench('ansispeck/raw', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/raw');
-		});
-		bench('ansispeck/safe', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/safe');
-		});
-		bench('ansispeck/rope', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/rope');
-		});
-		bench('ansispeck/noop', async () => {
-			for (let i = 0; i < count; i++) await import('#ansispeck-dist/noop');
-		});
-		bench('picocolors', async () => {
-			for (let i = 0; i < count; i++) await import('picocolors');
-		});
-		bench('colorette', async () => {
-			for (let i = 0; i < count; i++) await import('colorette');
-		});
-		bench('kleur', async () => {
-			for (let i = 0; i < count; i++) await import('kleur');
-		});
-		bench('kleur/colors', async () => {
-			for (let i = 0; i < count; i++) await import('kleur/colors');
-		});
-		bench('chalk', async () => {
-			for (let i = 0; i < count; i++) await import('chalk');
-		});
-		bench('ansi-colors', async () => {
-			for (let i = 0; i < count; i++) await import('ansi-colors');
-		});
+		for (const { alias, specifier } of BENCH_LIBRARIES) {
+			bench(alias, () => {
+				for (let i = 0; i < count; i++) load(specifier);
+			});
+		}
 	});
 }
 

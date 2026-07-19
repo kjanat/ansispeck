@@ -19,7 +19,7 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 | **complex**        | 10 nested/chained style calls — real-world formatting                   |
 | **recursion**      | `blue(red(input).repeat(10_000))` — large string with nested escapes    |
 | **deferred-build** | 32-layer wrap pipeline × 32-repeat input — repeated wrap + flatten cost |
-| **loading**        | `await import(...)` — module parse + init time                          |
+| **loading**        | Fresh runtime process importing an isolated local-tarball package       |
 
 ## Size
 
@@ -43,7 +43,7 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 > - `ansispeck`: auto mode — picks raw or noop once at import;
 >   FORCE_COLOR/`--color` wins
 > - `ansispeck/auto`: same behavior as the root export, via explicit subpath
-> - `ansispeck/raw`: always emits ANSI codes — the fastest path
+> - `ansispeck/raw`: always emits ANSI codes
 > - `ansispeck/safe`: template-tag API preserving style across interpolations
 > - `ansispeck/rope`: chunk builder — O(1) compose + O(n) render
 > - `ansispeck/noop`: control path — returns plain strings
@@ -51,8 +51,11 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 <!-- -->
 
 > † unranked — behavior does not match this color mode
+>
+> Cold load starts an isolated runtime process using packages installed from
+> local tarballs.
 
-| Library                    |                      Simple |                     Complex |                   Recursion |              Deferred-build |                   Loading |
+| Library                    |                      Simple |                     Complex |                   Recursion |              Deferred-build |                 Cold load |
 | -------------------------- | --------------------------: | --------------------------: | --------------------------: | --------------------------: | ------------------------: |
 | ansispeck[^ansispeck]      |          ***117.67 ns*** 🥈 |                900.10 ns #6 |                494.71 µs #8 |                 27.86 µs #5 |                3.94 µs #5 |
 | ansispeck/auto[^ansispeck] |                122.33 ns #4 |                924.52 ns #8 |                487.06 µs #6 |                 27.69 µs #4 |                3.93 µs #4 |
@@ -91,7 +94,7 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 
 > † unranked — behavior does not match this color mode
 
-| Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                   Loading |
+| Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                 Cold load |
 | -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | ------------------------: |
 | ansispeck[^ansispeck]      |                72.96 ns #6 |                355.76 ns #5 |                508.09 µs #8 |                 16.40 µs #7 |                4.90 µs #9 |
 | ansispeck/auto[^ansispeck] |                74.49 ns #7 |                350.02 ns #4 |                454.08 µs #7 |               *16.13 µs* 🥉 |              *4.61 µs* 🥉 |
@@ -117,7 +120,7 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 
 > † unranked — behavior does not match this color mode
 
-| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                   Loading |
+| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                 Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | ------------------------: |
 | ansispeck[^ansispeck]      | <ins>**41.80 ns**</ins> 🥇 | <ins>**51.14 ns**</ins> 🥇 |          ***208.12 ns*** 🥈 |          ***176.34 ns*** 🥈 |                3.95 µs #4 |
 | ansispeck/auto[^ansispeck] |          ***44.60 ns*** 🥈 |          ***51.70 ns*** 🥈 |                213.39 ns #6 | <ins>**167.80 ns**</ins> 🥇 |              *3.88 µs* 🥉 |
@@ -141,7 +144,7 @@ t-test CI95; `~` = not significant, `—` = ansispeck is faster).
 
 > † unranked — behavior does not match this color mode
 
-| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                   Loading |
+| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                 Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | ------------------------: |
 | ansispeck[^ansispeck]      |              *34.62 ns* 🥉 | <ins>**38.04 ns**</ins> 🥇 |                117.93 ns #7 |              *251.65 ns* 🥉 |                4.97 µs #8 |
 | ansispeck/auto[^ansispeck] | <ins>**34.12 ns**</ins> 🥇 |          ***38.28 ns*** 🥈 |              *111.93 ns* 🥉 |          ***250.95 ns*** 🥈 |              *4.69 µs* 🥉 |

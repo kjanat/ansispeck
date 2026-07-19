@@ -17,15 +17,17 @@ dist entrypoints, never `src/*`.
 | `complex.ts`   | `summary()` | chained realistic composition (dots + bgRed/black ERROR + nested yellows)  |
 | `recursion.ts` | `summary()` | large repeated strings (`.repeat(10_000)`) with per-row Counter entropy    |
 | `deferred.ts`  | `summary()` | 32-layer staged wrapping; rope row sinks the UNRENDERED chunk (by design)  |
-| `loading.ts`   | `group()`   | dynamic-import cold cost; `register` throws unless `count === 1`           |
+| `loading.ts`   | `group()`   | isolated process importing local-tarball install; requires `count === 1`   |
+| `libraries.ts` | —           | canonical alias/package/specifier manifest shared by runner and fixture    |
 | `size.ts`      | —           | raw+gzip per-library file size via explicit path table; run directly       |
 | `../bench.ts`  | —           | aggregation, LIB_ORDER ranking, Welch CI95 footer, overview/markdown print |
 
 ## CONVENTIONS
 
-- Imports: `#ansispeck-dist` (root) and `#ansispeck-dist/*` (subpaths) — EXCEPT
-  `loading.ts`, which uses relative `'../dist/<entry>.js'` dynamic imports so
-  alias resolution doesn't distort cold-load cost.
+- Formatting suites import `#ansispeck-dist` (root) and `#ansispeck-dist/*`
+  (subpaths). `loading.ts` launches the active runtime against
+  `.cache/bench-loading`, whose dependencies are exact local package tarballs
+  prepared by `scripts/prepare-loading-fixture.ts`.
 - Row aliases: externals use exact npm names (`kleur/colors` included); internal
   rows use the subpath alias (`ansispeck`, `ansispeck/auto`, `ansispeck/raw`,
   `ansispeck/safe`, `ansispeck/rope`, `ansispeck/noop`).

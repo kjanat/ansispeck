@@ -24,6 +24,7 @@
 		"#auto": "./src/auto.ts",
 		"#bench/complex": "./benchmarks/complex.ts",
 		"#bench/deferred": "./benchmarks/deferred.ts",
+		"#bench/libraries": "./benchmarks/libraries.ts",
 		"#bench/loading": "./benchmarks/loading.ts",
 		"#bench/recursion": "./benchmarks/recursion.ts",
 		"#bench/simple": "./benchmarks/simple.ts",

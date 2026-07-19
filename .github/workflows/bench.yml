@@ -24,7 +24,7 @@ jobs:
 
       - name: Bun bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
-        with: { runtime: bun, color: force }
+        with: { runtime: bun, color: force, compact: false }
 
       - name: Bun bench (NO_COLOR=1)
         uses: ./.github/actions/bench

@@ -3,11 +3,15 @@ description: Runs a benchmark for the given runtime and captures output to GITHU
 
 inputs:
   runtime:
-    description: Runtime to benchmark (bun or node)
+    description: Runtime to benchmark (bun, deno, or node)
     required: true
   color:
     description: "Color mode: 'force' sets FORCE_COLOR=1, 'none' sets NO_COLOR=1"
     required: true
+  compact:
+    description: Omit reusable notes from Markdown output
+    required: false
+    default: "true"
 
 outputs:
   result:
@@ -19,5 +23,5 @@ runs:
   steps:
     - id: run
       shell: bash
-      env: { RUNTIME: "${{ inputs.runtime }}", COLOR: "${{ inputs.color }}" }
+      env: { RUNTIME: "${{ inputs.runtime }}", COLOR: "${{ inputs.color }}", COMPACT: "${{ inputs.compact }}" }
       run: bash "${GITHUB_ACTION_PATH}/run.sh"

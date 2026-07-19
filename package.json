@@ -89,12 +89,9 @@
 		"dev": "run build --watch",
 		"fmt": "dprint fmt",
 		"lint": "biome check src/",
-		"prepack": "run -s build:quiet prepack:script",
-		"postpack": "git restore package.json >/dev/null",
-		"prepack:script": "bun ./scripts/prepack.ts",
 		"prepare": "bun ./importmapify.config.ts",
 		"prepublishOnly": "run -p test typecheck",
-		"tar": "bun pm pack --quiet | awk 'NF{line=$0} END{print line}'",
+		"tar": "run -q build:quiet && bun ./scripts/pack.ts",
 		"test": "bun test",
 		"typecheck": "bunx @typescript/native --noEmit"
 	},
