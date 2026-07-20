@@ -56,8 +56,11 @@ for (const entry of files) {
 
 delete parsedPackageJson['scripts'];
 delete parsedPackageJson['devDependencies'];
+delete parsedPackageJson['imports'];
+delete parsedPackageJson['overrides'];
 delete parsedPackageJson['packageManager'];
 delete parsedPackageJson['volta'];
+delete parsedPackageJson['workspaces'];
 
 const author = parsedPackageJson['author'];
 if (typeof author === 'string') {

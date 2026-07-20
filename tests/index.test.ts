@@ -198,6 +198,10 @@ describe('extended modifiers', () => {
 	test('underline nests inside doubleUnderline (shared close 24)', () => {
 		expect(c.doubleUnderline(c.underline('in') + 'out')).toBe('\x1b[21m\x1b[4min\x1b[21mout\x1b[24m');
 	});
+
+	test('empty underline nests inside doubleUnderline', () => {
+		expect(c.doubleUnderline(c.underline('') + 'out')).toBe('\x1b[21m\x1b[4m\x1b[21mout\x1b[24m');
+	});
 });
 
 describe('256-color and truecolor', () => {
@@ -249,6 +253,10 @@ describe('strip', () => {
 
 	test('removes truecolor codes', () => {
 		expect(strip(c.rgb(255, 136, 0)('warn'))).toBe('warn');
+	});
+
+	test('removes colon-parameter SGR codes', () => {
+		expect(strip('\x1b[38:2::255:136:0mwarn\x1b[39m')).toBe('warn');
 	});
 
 	test('removes OSC 8 links, keeps text', () => {

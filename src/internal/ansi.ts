@@ -46,7 +46,7 @@ export const hexOpen = (color: string): string => `${E}38;2;${hx(color)}m`;
 export const bgHexOpen = (color: string): string => `${E}48;2;${hx(color)}m`;
 
 /** Matches SGR codes and OSC sequences (BEL- or ST-terminated). */
-const ANSI = new RegExp(`${ESC}\\[[\\d;]*m|${ESC}\\][\\s\\S]*?(?:\\x07|${ESC}\\\\)`, 'g');
+const ANSI = new RegExp(`${ESC}\\[[0-?]*[ -/]*m|${ESC}\\][\\s\\S]*?(?:\\x07|${ESC}\\\\)`, 'g');
 
 /** Remove all ANSI SGR and OSC escape sequences from input. */
 export function strip(input: Formattable): string {
@@ -57,23 +57,26 @@ export function strip(input: Formattable): string {
 export const text = (input: Formattable): string => '' + input;
 
 /** Per-formatter wrap factory: receives open/close/replace codes, returns the flavor's formatter. */
-export type Wrap<T> = (open: string, close: string, replace?: string) => T;
+export type Wrap<T> = (open: string, close: string, replace?: string, scanFrom?: number) => T;
 
 /**
  * Wraps input in ANSI open/close codes, replacing nested close codes to prevent style leaks.
  */
-export function fmt(open: string, close: string, replace: string = open): Formatter {
-	// Any close produced by composition is preceded by its own open (>= skip chars),
-	// so starting the scan at `skip` is safe.
-	// A nested close also needs `close.length` chars after that offset — inputs shorter
-	// than `least` provably contain none, so they skip the scan call entirely
-	// and return via pure O(1) concat.
-	const skip = open.length < close.length ? open.length : close.length;
-	const least = skip + close.length;
+export function fmt(
+	open: string,
+	close: string,
+	replace: string = open,
+	scanFrom: number = open.length < close.length ? open.length : close.length,
+): Formatter {
+	// A generated close is preceded by its own open (>= scanFrom chars). mapPalette
+	// lowers scanFrom when another formatter sharing this close has a shorter open.
+	// The close also needs `close.length` chars after that offset, so shorter inputs
+	// skip the scan call entirely and return via pure O(1) concat.
+	const least = scanFrom + close.length;
 	return (input) => {
 		let s = '' + input;
 		if (s.length >= least) {
-			let i = s.indexOf(close, skip);
+			let i = s.indexOf(close, scanFrom);
 			if (~i) {
 				let result = '';
 				let cursor = 0;
@@ -114,17 +117,19 @@ export const linkOpen = (url: string, body: string): string => OSC8 + url + ST +
 /** Build a complete palette by applying `wrap` to every formatter's SGR codes. */
 export function mapPalette<T>(wrap: Wrap<T>): Readonly<Record<FormatterName, T>> {
 	const R = c(0);
+	const U = c(4);
+	const UE = c(24);
 	return {
 		reset: wrap(R, R),
 		bold: wrap(c(1), ME, ME + c(1)),
 		dim: wrap(c(2), ME, ME + c(2)),
 		italic: wrap(c(3), c(23)),
-		underline: wrap(c(4), c(24)),
+		underline: wrap(U, UE),
 		blink: wrap(c(5), c(25)),
 		inverse: wrap(c(7), c(27)),
 		hidden: wrap(c(8), c(28)),
 		strikethrough: wrap(c(9), c(29)),
-		doubleUnderline: wrap(c(21), c(24)),
+		doubleUnderline: wrap(c(21), UE, undefined, U.length),
 		overline: wrap(c(53), c(55)),
 
 		black: wrap(c(30), FG_CLOSE),

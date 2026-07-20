@@ -14,6 +14,10 @@ for arg in "$@"; do
 			printf 'unknown flag: %s\n' "${arg}" >&2
 			exit 1
 			;;
+		*)
+			printf 'unknown argument: %s\n' "${arg}" >&2
+			exit 1
+			;;
 	esac
 done
 

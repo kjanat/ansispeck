@@ -54,4 +54,4 @@ if (specifier === undefined) throw new Error('missing package specifier');
 await import(specifier);`,
 );
 
-await Bun.$`npm install --ignore-scripts --no-audit --no-found --package-lock=false`.cwd(FIXTURE).quiet();
+await Bun.$`npm install --ignore-scripts --no-audit --no-fund --package-lock=false`.cwd(FIXTURE).quiet();

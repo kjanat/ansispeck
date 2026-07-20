@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { defineConfig, writeImportMap } from 'importmapify';
+import { defineConfig } from 'importmapify';
 import lockfile from './bun.lock' with { type: 'jsonc' };
 
 function lockSpec(name: string): string {
@@ -7,8 +7,6 @@ function lockSpec(name: string): string {
 	if (entry === undefined) throw new Error(`bun.lock is missing package "${name}"`);
 	return entry[0];
 }
-if (import.meta.main) await Bun.$`bun bd`;
-
 const importMapCfg: import('importmapify').WriteImportMapOptions = defineConfig({
 	root: import.meta.dir,
 	extensions: ['ts', 'js'],
@@ -19,7 +17,7 @@ const importMapCfg: import('importmapify').WriteImportMapOptions = defineConfig(
 	},
 });
 
-const output = writeImportMap(importMapCfg);
-Bun.stderr.write(`Wrote ${output}`);
+// The build completion hook writes the map after dist is current.
+if (import.meta.main) await Bun.$`bun bd`;
 
 export { importMapCfg };

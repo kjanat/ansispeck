@@ -2,9 +2,9 @@
 // deno-lint-ignore-file no-sloppy-imports
 /// <reference types="bun" />
 
-import { execSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { sep } from 'node:path';
+import { basename } from 'node:path';
 import { URL } from 'node:url';
 import type { Out } from 'dreamcli';
 import { cli, command, flag } from 'dreamcli';
@@ -299,8 +299,21 @@ function readVersionField(jsonText: string): string {
 }
 
 const versionCache: Map<string, string> = new Map();
-const releaseVersion = String(spawnSync('git', ['describe', '--tags', '--abbrev=0']).stdout).trim().replace(/^v/, '')
-	|| pkg.version;
+
+interface GitResult {
+	readonly status: number | null;
+	readonly output: string | undefined;
+}
+
+function git(args: string[]): GitResult {
+	const result = spawnSync('git', args, { encoding: 'utf8' });
+	const output = result.stdout?.trim();
+	return { status: result.status, output: output || undefined };
+}
+
+const described = git(['describe', '--tags', '--abbrev=0']);
+const describedVersion = described.status === 0 ? described.output?.replace(/^v/, '') : undefined;
+const releaseVersion = describedVersion || pkg.version;
 
 /** Installed version: resolve the package, read its node_modules package.json (repo root for ansispeck). */
 function packageVersion(name: string): string {
@@ -330,6 +343,14 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 	} = context;
 	out.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	out.log(`\n> ${cpuName ?? 'unknown'}\n`);
+
+	if (!compact) {
+		out.log('> Measured with mitata. Rankings are per column: 🥇, 🥈, 🥉, then `#N`.');
+		out.log(
+			`> \`${BASELINE_LABEL}\` compares ansispeck with the fastest external library using Welch's t-test CI95; \`~\` means not significant and \`—\` means ansispeck is faster.`,
+		);
+		out.log('');
+	}
 
 	// ansispeck export notes
 	const noted = libs.filter((lib) => EXPORT_NOTES[lib] !== undefined);
@@ -418,8 +439,8 @@ function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
 }
 
 async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, compact: boolean, out: Out): Promise<void> {
-	execSync('run -q build', { stdio: 'ignore' });
-	execSync('bun --bun scripts/prepare-loading-fixture.ts', { stdio: 'ignore' });
+	execFileSync('run', ['-q', 'build'], { stdio: 'ignore' });
+	execFileSync('bun', ['--bun', 'scripts/prepare-loading-fixture.ts'], { stdio: 'ignore' });
 	const { default: ansispeck } = await import('#ansispeck-dist');
 	const excluded = rankExcluded(ansispeck.isColorSupported);
 
@@ -429,7 +450,10 @@ async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, comp
 	deferred({ layers: 32, repeat: 32 });
 	loading({ count: 1 });
 
-	const result = await run({ format: mitataFormat(format), filter });
+	const result = await run({ format: mitataFormat(format), filter, throw: true });
+	if (result.benchmarks.length === 0) {
+		throw new Error(`No benchmarks matched${filter === undefined ? '' : ` filter ${filter}`}`);
+	}
 	if (format === 'overview') printOverview(result, excluded, out);
 	if (format === 'markdown' || format === 'md') printMarkdown(result, excluded, compact, out);
 }
@@ -451,11 +475,11 @@ const benchmark = command('bench')
 		await runBenchmarks(format, flags.filter, flags.compact, out);
 	});
 
-const dirty = spawnSync('git', ['diff', '--exit-code', '--quiet', 'HEAD'], { stdio: 'ignore' }).status != 0;
+const dirty = git(['diff', '--exit-code', '--quiet', 'HEAD']).status === 1;
 const v = `${releaseVersion}${dirty ? '-dirty' : ''}`;
 
 if (import.meta.main) {
-	void cli(import.meta.filename.split(sep).at(-1)!).version(v)
+	void cli(basename(import.meta.filename)).version(v)
 		.manifest({ files: ['package.json', 'jsr.json'] }).links()
 		.description('Run the ansispeck benchmark matrix')
 		.default(benchmark)
