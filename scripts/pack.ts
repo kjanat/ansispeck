@@ -7,8 +7,6 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 const ROOT = dirname(import.meta.dir);
 const STAGING = join(ROOT, '.cache', 'npm-package');
 
-await Bun.$`run -q build:quiet`.quiet();
-
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
