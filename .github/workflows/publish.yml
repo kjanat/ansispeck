@@ -90,6 +90,12 @@ jobs:
             if (pkg.version !== "${{ needs.validate.outputs.version }}") { core.setFailed(`package version ${pkg.version} does not match release tag`); return }
             const tag = pkg.version.includes('-') ? 'next' : 'latest';
             core.setOutput('npm_url', `https://npm.im/package/${pkg.name}/v/${pkg.version}`);
+            const registry = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`);
+            if (registry.ok) {
+              core.info(`${pkg.name}@${pkg.version} already exists on npm; skipping publication`);
+              return;
+            }
+            if (registry.status !== 404) { core.setFailed(`npm registry returned ${registry.status} while checking ${pkg.name}@${pkg.version}`); return }
             const { stdout } = await exec.getExecOutput('bun', ['run', 'tar']);
             const tarball = stdout.trim();
             if (!tarball || !existsSync(tarball)) { core.setFailed(`bun run tar produced no tarball (got ${JSON.stringify(tarball)})`); return }
@@ -118,4 +124,15 @@ jobs:
             core.setOutput('name', jsr.name);
             core.setOutput('version', jsr.version);
             core.setOutput('jsr_url', `https://jsr.io/${jsr.name}@${jsr.version}`);
+            const registry = await fetch(`https://jsr.io/${jsr.name}/meta.json`);
+            if (registry.ok) {
+              const metadata = await registry.json();
+              if (Object.hasOwn(metadata.versions ?? {}, jsr.version)) {
+                core.info(`${jsr.name}@${jsr.version} already exists on JSR; skipping publication`);
+                return;
+              }
+            } else if (registry.status !== 404) {
+              core.setFailed(`JSR returned ${registry.status} while checking ${jsr.name}@${jsr.version}`);
+              return;
+            }
             await exec.getExecOutput('npx', ['--yes', 'jsr', 'publish', '--allow-dirty']);
