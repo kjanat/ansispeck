@@ -20,6 +20,7 @@ import {
 	rgbOpen,
 } from './internal/ansi.ts';
 import { detectColorSupport } from './internal/detect.ts';
+import { space, tab } from './internal/whitespace.ts';
 import type {
 	Chunk,
 	ChunkFormatter,
@@ -31,6 +32,8 @@ import type {
 	TextChunk,
 } from './types.ts';
 import { CHUNK_BRAND } from './types.ts';
+
+export { space, tab } from './internal/whitespace.ts';
 
 const RESET = c(0);
 
@@ -130,6 +133,8 @@ export function createRope(enabled: boolean = detectColorSupport()): Rope {
 	return {
 		...mapPalette(w),
 		isColorSupported: enabled,
+		space,
+		tab,
 		text,
 		concat,
 		render,

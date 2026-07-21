@@ -7,6 +7,8 @@
 import { createColors } from './internal/colors.ts';
 import type { Colors, Formatter, LinkFormatter } from './types.ts';
 
+export { space, tab } from './internal/whitespace.ts';
+
 /** Always-on color set. Emits ANSI regardless of environment. */
 const raw: Colors = createColors(true);
 

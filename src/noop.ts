@@ -7,6 +7,8 @@
 import { createColors } from './internal/colors.ts';
 import type { Colors, Formatter, LinkFormatter } from './types.ts';
 
+export { space, tab } from './internal/whitespace.ts';
+
 /** Passthrough color set — coerces input to string, emits no ANSI. */
 const noop: Colors = createColors(false);
 

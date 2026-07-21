@@ -8,6 +8,7 @@ import { detectColorSupport, detectHyperlinkSupport } from './detect.ts';
 /** Auto-detecting color set — the default entrypoint. */
 const colors: Colors = createColors(detectColorSupport(), detectHyperlinkSupport());
 
+export { space, tab } from './whitespace.ts';
 export { createColors, detectColorSupport, detectHyperlinkSupport, strip };
 
 /** Set the background with a 256-color palette index. */

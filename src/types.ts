@@ -85,6 +85,10 @@ export interface Colors extends Palette, Factories<Formatter> {
 	readonly isHyperlinkSupported: boolean;
 	/** Wrap text in an OSC 8 terminal hyperlink. */
 	readonly link: LinkFormatter;
+	/** Produce one space, or `count` spaces when provided. */
+	readonly space: (count?: number) => string;
+	/** Produce one tab, or `count` tabs when provided. */
+	readonly tab: (count?: number) => string;
 }
 
 /** Template-tag color set (`ansispeck/safe`). */
@@ -95,6 +99,10 @@ export interface SafeColors extends TemplatePalette, Factories<TemplateFormatter
 	readonly isHyperlinkSupported: boolean;
 	/** Wrap text in an OSC 8 terminal hyperlink. */
 	readonly link: LinkFormatter;
+	/** Produce one space, or `count` spaces when provided. */
+	readonly space: (count?: number) => string;
+	/** Produce one tab, or `count` tabs when provided. */
+	readonly tab: (count?: number) => string;
 }
 
 /** Internal brand for rope/chunk nodes. */
@@ -156,6 +164,10 @@ export interface Rope extends ChunkPalette, Factories<ChunkFormatter> {
 	readonly isColorSupported: boolean;
 	/** Render a chunk tree or plain value to a string. */
 	readonly render: (input: Chunkable) => string;
+	/** Produce one space, or `count` spaces when provided. */
+	readonly space: (count?: number) => string;
+	/** Produce one tab, or `count` tabs when provided. */
+	readonly tab: (count?: number) => string;
 	/** Create a text leaf chunk. */
 	readonly text: (input: Formattable) => Chunk;
 }

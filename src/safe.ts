@@ -21,7 +21,10 @@ import {
 } from './internal/ansi.ts';
 import { detectColorSupport, detectHyperlinkSupport } from './internal/detect.ts';
 import { makeTemplateFormatter } from './internal/template.ts';
+import { space, tab } from './internal/whitespace.ts';
 import type { LinkFormatter, SafeColors, TemplateFormatter } from './types.ts';
+
+export { space, tab } from './internal/whitespace.ts';
 
 /**
  * Create a template-tag color set with explicit enable toggles.
@@ -41,6 +44,8 @@ export function createSafeColors(
 		isHyperlinkSupported: hyperlinksEnabled,
 
 		link: mkLink(hyperlinksEnabled ? linkOpen : (_url, body) => body),
+		space,
+		tab,
 
 		fg256: (n) => t(fg256Open(n), FG_CLOSE),
 		bg256: (n) => t(bg256Open(n), BG_CLOSE),

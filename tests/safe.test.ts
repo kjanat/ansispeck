@@ -47,4 +47,9 @@ describe('safe template tags', () => {
 		expect(typeof safe.isColorSupported).toBe('boolean');
 		expect(typeof safe.red).toBe('function');
 	});
+
+	test('exposes whitespace helpers', () => {
+		expect(s.space(2)).toBe('  ');
+		expect(s.tab(2)).toBe('\t\t');
+	});
 });

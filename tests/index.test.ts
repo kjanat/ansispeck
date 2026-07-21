@@ -1,5 +1,30 @@
 import { describe, expect, test } from 'bun:test';
-import colors, { type Colors, createColors, isColorSupported, strip } from '#ansispeck';
+import colors, { type Colors, createColors, isColorSupported, space, strip, tab } from '#ansispeck';
+
+describe('whitespace helpers', () => {
+	test('produce one character by default', () => {
+		expect(space()).toBe(' ');
+		expect(tab()).toBe('\t');
+	});
+
+	test('repeat the character count times', () => {
+		expect(space(3)).toBe('   ');
+		expect(tab(3)).toBe('\t\t\t');
+		expect(space(0)).toBe('');
+		expect(tab(0)).toBe('');
+	});
+
+	test('reject invalid counts', () => {
+		expect(() => space(-1)).toThrow(RangeError);
+		expect(() => tab(1.5)).toThrow(RangeError);
+	});
+
+	test('are exposed on color sets', () => {
+		expect(colors.space).toBe(space);
+		expect(colors.tab).toBe(tab);
+		expect(createColors(true).space(2)).toBe('  ');
+	});
+});
 
 describe('createColors', () => {
 	const enabled = createColors(true);

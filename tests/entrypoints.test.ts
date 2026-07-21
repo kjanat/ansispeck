@@ -44,4 +44,11 @@ describe('entrypoints', () => {
 		expect(Object.keys(noop).sort()).toEqual(rawKeys);
 		expect(Object.keys(index).sort()).toEqual(rawKeys);
 	});
+
+	test('raw and noop expose whitespace helpers', () => {
+		expect(raw.space(2)).toBe('  ');
+		expect(raw.tab(2)).toBe('\t\t');
+		expect(noop.space(2)).toBe('  ');
+		expect(noop.tab(2)).toBe('\t\t');
+	});
 });

@@ -22,6 +22,7 @@ import {
 	text,
 } from './ansi.ts';
 import { detectColorSupport } from './detect.ts';
+import { space, tab } from './whitespace.ts';
 
 const noop: Formatter = text;
 
@@ -46,6 +47,8 @@ export function createColors(
 		isHyperlinkSupported: hyperlinksEnabled,
 
 		link: mkLink(hyperlinksEnabled ? linkOpen : (_url, body) => body),
+		space,
+		tab,
 
 		fg256: (n) => f(fg256Open(n), FG_CLOSE),
 		bg256: (n) => f(bg256Open(n), BG_CLOSE),

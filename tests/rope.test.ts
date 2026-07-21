@@ -53,6 +53,12 @@ describe('rope', () => {
 		expect(render(42)).toBe('42');
 	});
 
+	test('exposes whitespace helpers', () => {
+		expect(r.space(2)).toBe('  ');
+		expect(r.tab(2)).toBe('\t\t');
+		expect(r.render(r.concat('a', r.tab(), 'b'))).toBe('a\tb');
+	});
+
 	test('default export reflects detection', () => {
 		expect(typeof rope.isColorSupported).toBe('boolean');
 		expect(typeof rope.render).toBe('function');
