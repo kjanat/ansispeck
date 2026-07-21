@@ -8,6 +8,34 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-21
+
+### Added
+
+- `space(count?)` and `tab(count?)` helpers on every entrypoint and color-set
+  factory; each returns one character by default, accepts a non-negative repeat
+  count, and returns an empty string for zero
+
+### Changed
+
+- Benchmark Markdown and terminal output now link to mitata and Welch's *t*-test
+  methodology, with OSC 8 links in supported terminals
+- Benchmark automation formats combined summaries consistently and reports
+  loading-process timeouts and failures with runtime-specific diagnostics
+- Publication now accepts only verified signed annotated SemVer tags, validates
+  the stamped package version, and publishes to npm before JSR
+- Published package metadata omits development-only imports, overrides,
+  workspaces, and lifecycle configuration
+
+### Fixed
+
+- Nested empty underlines now restore an enclosing double underline sharing the
+  same close code
+- `strip()` now recognizes the complete SGR parameter/intermediate ranges,
+  including colon-delimited truecolor sequences
+- External benchmark implementations that reject a workload no longer abort the
+  entire cross-runtime benchmark matrix
+
 ## [0.2.1] - 2026-07-20
 
 ### Added
@@ -162,7 +190,8 @@ and this project adheres to
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)`
   for cross-platform URL/path correctness
 
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/kjanat/ansispeck/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/kjanat/ansispeck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kjanat/ansispeck/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/kjanat/ansispeck/compare/v0.1.1...v0.1.2
