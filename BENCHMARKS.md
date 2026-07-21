@@ -9,7 +9,7 @@ reviewed snapshot.
 Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ranking:
 `noop` is the control row in both modes, and `raw` is also excluded from
 no-color runs because it intentionally emits ANSI. The `ansispeck/ext#1` footer
-compares ansispeck's auto entrypoint against the fastest **external** library
+compares ansispeck's root entrypoint against the fastest **external** library
 ([Welch's *t*-test](https://en.wikipedia.org/wiki/Welch%27s_t-test) CI95; `~` =
 not significant, `—` = ansispeck is faster). `DNF` means the library failed
 while running that benchmark, so there is no result to report.
