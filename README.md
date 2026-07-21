@@ -91,7 +91,7 @@ All formatters accept `string | number | null | undefined` and return `string`.
 
 ### Colors
 
-`black` `red` `green` `yellow` `blue` `magenta` `cyan` `white` `gray`
+`black` `red` `green` `yellow` `blue` `magenta` `cyan` `white` `gray`/`grey`
 
 ### Bright colors
 

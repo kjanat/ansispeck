@@ -41,11 +41,21 @@ export type StyleName =
 	| 'strikethrough'
 	| 'underline';
 
-/** Base 8 ANSI foreground color names (plus gray). */
-export type BaseColorName = 'black' | 'blue' | 'cyan' | 'gray' | 'green' | 'magenta' | 'red' | 'white' | 'yellow';
+/** Base 8 ANSI foreground color names (plus gray/grey). */
+export type BaseColorName =
+	| 'black'
+	| 'blue'
+	| 'cyan'
+	| 'gray'
+	| 'green'
+	| 'grey'
+	| 'magenta'
+	| 'red'
+	| 'white'
+	| 'yellow';
 
-/** Only these get `Bright`/`bg` variants (so `gray` won't). */
-export type VariantBaseColorName = Exclude<BaseColorName, 'gray'>;
+/** Only these get `Bright`/`bg` variants (so `gray`/`grey` won't). */
+export type VariantBaseColorName = Exclude<BaseColorName, 'gray' | 'grey'>;
 
 /** Union of all valid formatter keys. */
 export type FormatterName =

@@ -119,6 +119,7 @@ export function mapPalette<T>(wrap: Wrap<T>): Readonly<Record<FormatterName, T>>
 	const R = c(0);
 	const U = c(4);
 	const UE = c(24);
+	const gray = wrap(c(90), FG_CLOSE);
 	return {
 		reset: wrap(R, R),
 		bold: wrap(c(1), ME, ME + c(1)),
@@ -135,7 +136,8 @@ export function mapPalette<T>(wrap: Wrap<T>): Readonly<Record<FormatterName, T>>
 		black: wrap(c(30), FG_CLOSE),
 		blue: wrap(c(34), FG_CLOSE),
 		cyan: wrap(c(36), FG_CLOSE),
-		gray: wrap(c(90), FG_CLOSE),
+		gray,
+		grey: gray,
 		green: wrap(c(32), FG_CLOSE),
 		magenta: wrap(c(35), FG_CLOSE),
 		red: wrap(c(31), FG_CLOSE),

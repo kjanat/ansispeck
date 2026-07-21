@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- `grey` as a British-spelling alias of `gray` across every entrypoint
+
 ## [0.3.0] - 2026-07-21
 
 ### Added

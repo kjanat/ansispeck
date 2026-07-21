@@ -59,6 +59,10 @@ describe('rope', () => {
 		expect(r.render(r.concat('a', r.tab(), 'b'))).toBe('a\tb');
 	});
 
+	test('exposes grey as the gray alias', () => {
+		expect(r.grey).toBe(r.gray);
+	});
+
 	test('default export reflects detection', () => {
 		expect(typeof rope.isColorSupported).toBe('boolean');
 		expect(typeof rope.render).toBe('function');

@@ -51,4 +51,10 @@ describe('entrypoints', () => {
 		expect(noop.space(2)).toBe('  ');
 		expect(noop.tab(2)).toBe('\t\t');
 	});
+
+	test('palettes expose grey as the gray alias', () => {
+		expect(index.grey).toBe(index.gray);
+		expect(raw.grey).toBe(raw.gray);
+		expect(noop.grey).toBe(noop.gray);
+	});
 });

@@ -73,6 +73,8 @@ export const doubleUnderline: Formatter = colors.doubleUnderline;
 export const fg256: (n: number) => Formatter = colors.fg256;
 /** Color the foreground gray. */
 export const gray: Formatter = colors.gray;
+/** Alias of {@link gray} using the British spelling. */
+export const grey: Formatter = colors.grey;
 /** Color the foreground green. */
 export const green: Formatter = colors.green;
 /** Color the foreground bright green. */

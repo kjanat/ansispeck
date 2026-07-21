@@ -74,6 +74,8 @@ export const doubleUnderline: Formatter = noop.doubleUnderline;
 export const fg256: (n: number) => Formatter = noop.fg256;
 /** Color the foreground gray. */
 export const gray: Formatter = noop.gray;
+/** Alias of {@link gray} using the British spelling. */
+export const grey: Formatter = noop.grey;
 /** Color the foreground green. */
 export const green: Formatter = noop.green;
 /** Color the foreground bright green. */

@@ -52,4 +52,8 @@ describe('safe template tags', () => {
 		expect(s.space(2)).toBe('  ');
 		expect(s.tab(2)).toBe('\t\t');
 	});
+
+	test('exposes grey as the gray alias', () => {
+		expect(s.grey).toBe(s.gray);
+	});
 });

@@ -213,6 +213,8 @@ export const doubleUnderline: ChunkFormatter = rope.doubleUnderline;
 export const fg256: (n: number) => ChunkFormatter = rope.fg256;
 /** Color the foreground gray. */
 export const gray: ChunkFormatter = rope.gray;
+/** Alias of {@link gray} using the British spelling. */
+export const grey: ChunkFormatter = rope.grey;
 /** Color the foreground green. */
 export const green: ChunkFormatter = rope.green;
 /** Color the foreground bright green. */

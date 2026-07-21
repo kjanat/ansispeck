@@ -114,6 +114,7 @@ describe('all formatters exist', () => {
 		'cyan',
 		'white',
 		'gray',
+		'grey',
 		'bgBlack',
 		'bgRed',
 		'bgGreen',
@@ -145,6 +146,15 @@ describe('all formatters exist', () => {
 			expect(typeof c[name]).toBe('function');
 		});
 	}
+});
+
+describe('color spelling aliases', () => {
+	const c = createColors(true);
+
+	test('grey is the same formatter as gray', () => {
+		expect(c.grey).toBe(c.gray);
+		expect(c.grey('x')).toBe('\x1b[90mx\x1b[39m');
+	});
 });
 
 describe('link', () => {
