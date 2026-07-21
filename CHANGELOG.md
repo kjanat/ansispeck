@@ -12,6 +12,11 @@ and this project adheres to
 
 - `grey` as a British-spelling alias of `gray` across every entrypoint
 
+### Fixed
+
+- Failed benchmark runs now render as `DNF` instead of looking like absent
+  results
+
 ## [0.3.0] - 2026-07-21
 
 ### Added

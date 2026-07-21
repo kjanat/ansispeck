@@ -47,9 +47,23 @@ jobs:
 
             core.setOutput('version', match[1]);
 
+  test:
+    name: tests
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: kjanat/install-dprint@v2
+      - uses: kjanat/runner@master
+      - uses: oven-sh/setup-bun@v2
+      - run: runner install -f build
+      - { name: Tests (non-TTY) + typecheck, run: bun run prepublishOnly }
+      - { name: Tests (TTY), run: "TERM=xterm-256color script -qec 'bun test' /dev/null" }
+
   publish-npm:
     name: npm
-    needs: validate
+    needs: [validate, test]
     runs-on: ubuntu-latest
     permissions: { contents: read, id-token: write }
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
@@ -64,8 +78,6 @@ jobs:
       - run: runner install -f build
       - name: Stamp version from tag
         run: bun pm version from-git --allow-same-version --no-git-tag-version
-      - name: Tests + typecheck
-        run: bun run prepublishOnly
       - name: Pack + publish
         id: publish
         uses: actions/github-script@v9

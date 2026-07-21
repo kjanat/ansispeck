@@ -5,8 +5,37 @@
  */
 
 const processRef = globalThis.process;
-const argv: readonly string[] = processRef?.argv ?? [];
-const env: Record<string, string | undefined> = processRef?.env ?? {};
+
+/** Runtime inputs used to determine terminal feature support. */
+export interface DetectionContext {
+	/** Process arguments used for explicit feature flags. */
+	readonly argv: readonly string[];
+	/** Environment variables used for explicit flags and terminal hints. */
+	readonly env: Readonly<Record<string, string | undefined>>;
+	/** Whether standard output is attached to a terminal. */
+	readonly isTTY: boolean;
+	/** Runtime platform identifier, when available. */
+	readonly platform: string | undefined;
+}
+
+const runtimeContext: DetectionContext = {
+	argv: processRef?.argv ?? [],
+	env: processRef?.env ?? {},
+	get isTTY(): boolean {
+		return processRef?.stdout?.isTTY === true;
+	},
+	platform: processRef?.platform,
+};
+
+/** Evaluate color support for explicit runtime inputs. */
+export const detectColorSupportFor = ({ argv, env, isTTY, platform }: DetectionContext): boolean => {
+	if (env['FORCE_COLOR'] || argv.includes('--color')) return true;
+	if (env['NO_COLOR'] || argv.includes('--no-color')) return false;
+	if (platform === 'win32') return true;
+	if (env['CI']) return true;
+	if (isTTY && env['TERM'] !== 'dumb') return true;
+	return false;
+};
 
 /**
  * Detect whether ANSI colors should be enabled.
@@ -17,12 +46,13 @@ const env: Record<string, string | undefined> = processRef?.env ?? {};
  * @see https://force-color.org/
  * @see https://no-color.org/
  */
-export const detectColorSupport = (): boolean => {
-	if (env['FORCE_COLOR'] || argv.includes('--color')) return true;
-	if (env['NO_COLOR'] || argv.includes('--no-color')) return false;
-	if (processRef?.platform === 'win32') return true;
-	if (env['CI']) return true;
-	if (processRef?.stdout?.isTTY && env['TERM'] !== 'dumb') return true;
+export const detectColorSupport = (): boolean => detectColorSupportFor(runtimeContext);
+
+/** Evaluate OSC 8 hyperlink support for explicit runtime inputs. */
+export const detectHyperlinkSupportFor = ({ argv, env, isTTY }: DetectionContext): boolean => {
+	if (env['NO_HYPERLINKS'] || argv.includes('--no-hyperlinks')) return false;
+	if (env['FORCE_HYPERLINKS'] || argv.includes('--hyperlinks')) return true;
+	if (isTTY && env['TERM'] !== 'dumb') return true;
 	return false;
 };
 
@@ -37,9 +67,4 @@ export const detectColorSupport = (): boolean => {
  *
  * @see https://no-hyperlinks.org/
  */
-export const detectHyperlinkSupport = (): boolean => {
-	if (env['NO_HYPERLINKS'] || argv.includes('--no-hyperlinks')) return false;
-	if (env['FORCE_HYPERLINKS'] || argv.includes('--hyperlinks')) return true;
-	if (processRef?.stdout?.isTTY && env['TERM'] !== 'dumb') return true;
-	return false;
-};
+export const detectHyperlinkSupport = (): boolean => detectHyperlinkSupportFor(runtimeContext);

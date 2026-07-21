@@ -127,6 +127,7 @@ function rankExcluded(isColorSupported: boolean): ReadonlySet<string> {
 interface Parsed {
 	activeSuites: string[];
 	context: BenchResult['context'];
+	dnf: Map<string, Set<string>>;
 	libs: string[];
 	ranked: Map<string, Array<{ lib: string; stats: LibStats }>>;
 	suites: Map<string, Map<string, LibStats>>;
@@ -137,6 +138,9 @@ function parse(result: BenchResult, excluded: ReadonlySet<string>): Parsed {
 	const suiteByGroup: Map<number, (typeof SUITES)[number]> = new Map();
 	let nextSuite = 0;
 
+	const active = new Set<string>();
+	const dnf: Map<string, Set<string>> = new Map();
+	const seenLibs = new Set<string>();
 	const suites: Map<string, Map<string, LibStats>> = new Map();
 	for (const trial of benchmarks) {
 		const group = trial.group;
@@ -149,8 +153,20 @@ function parse(result: BenchResult, excluded: ReadonlySet<string>): Parsed {
 			nextSuite++;
 		}
 		if (suite === undefined) continue;
-		const stats = trial.runs[0]?.stats;
-		if (stats === undefined) continue;
+		active.add(suite);
+		seenLibs.add(trial.alias);
+		const run = trial.runs[0];
+		if (run === undefined) continue;
+		const stats = run.stats;
+		if (stats === undefined) {
+			let failed = dnf.get(suite);
+			if (failed === undefined) {
+				failed = new Set();
+				dnf.set(suite, failed);
+			}
+			failed.add(trial.alias);
+			continue;
+		}
 		let map = suites.get(suite);
 		if (!map) {
 			map = new Map();
@@ -159,25 +175,12 @@ function parse(result: BenchResult, excluded: ReadonlySet<string>): Parsed {
 		map.set(trial.alias, { avg: stats.avg, samples: stats.samples });
 	}
 
-	const libs: string[] = [];
-	const firstSuite = SUITES.find((suite) => suites.has(suite));
-	if (firstSuite !== undefined) {
-		const firstSuiteEntries = suites.get(firstSuite);
-		if (firstSuiteEntries !== undefined) {
-			for (const lib of LIB_ORDER) {
-				if (firstSuiteEntries.has(lib)) libs.push(lib);
-			}
-			for (const lib of firstSuiteEntries.keys()) {
-				if (!libs.includes(lib)) libs.push(lib);
-			}
-		}
-	} else {
-		for (const trial of benchmarks) {
-			if (!libs.includes(trial.alias)) libs.push(trial.alias);
-		}
+	const libs: string[] = LIB_ORDER.filter((lib) => seenLibs.has(lib));
+	for (const lib of seenLibs) {
+		if (!libs.includes(lib)) libs.push(lib);
 	}
 
-	const activeSuites = [...suites.keys()];
+	const activeSuites = SUITES.filter((suite) => active.has(suite));
 
 	const ranked: Map<string, Array<{ lib: string; stats: LibStats }>> = new Map();
 	for (const [suite, entries] of suites) {
@@ -188,7 +191,7 @@ function parse(result: BenchResult, excluded: ReadonlySet<string>): Parsed {
 		ranked.set(suite, sorted);
 	}
 
-	return { context, suites, libs, activeSuites, ranked };
+	return { context, dnf, suites, libs, activeSuites, ranked };
 }
 
 function fmtTime(ns: number): string {
@@ -221,7 +224,7 @@ function computeCI95(parsed: Parsed): Map<string, { label: string; significant: 
 function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: Out): void {
 	const { color: c, log } = out;
 	const parsed = parse(result, excluded);
-	const { suites, libs, activeSuites, ranked, context } = parsed;
+	const { dnf, suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
 	const nameW = Math.max(4, BASELINE_LABEL.length, ...libs.map((l) => l.length));
@@ -244,6 +247,10 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 	for (const lib of libs) {
 		const cells: string[] = [];
 		for (const suite of activeSuites) {
+			if (dnf.get(suite)?.has(lib)) {
+				cells.push('DNF'.padStart(fullW));
+				continue;
+			}
 			const entry = suites.get(suite)?.get(lib);
 			if (entry === undefined) {
 				cells.push('—'.padStart(fullW));
@@ -274,7 +281,7 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 			c.link(WELCH_T_TEST_URL, `Welch's ${c.italic('t')}-test`)
 		} CI95.`,
 	);
-	const legend = '  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant';
+	const legend = '  * = fastest, DNF = did not finish, — = ansispeck beats fastest external lib, ~ = not significant';
 	const unranked = libs.some((lib) => excluded.has(lib));
 	log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
 }
@@ -341,7 +348,7 @@ function packageVersion(name: string): string {
 function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compact: boolean, out: Out): void {
 	const { log } = out;
 	const parsed = parse(result, excluded);
-	const { suites, libs, activeSuites, ranked, context } = parsed;
+	const { dnf, suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
 
 	const {
@@ -357,6 +364,7 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 		log(
 			`> \`${BASELINE_LABEL}\` compares ansispeck with the fastest external library using [Welch's *t*-test](${WELCH_T_TEST_URL}) CI95; \`~\` means not significant and \`—\` means ansispeck is faster.`,
 		);
+		log('> `DNF` means the benchmark did not finish.');
 		log('');
 	}
 
@@ -398,6 +406,10 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 		cells.push(`[${lib}](https://npm.im/package/${pkgName}/v/${v} "${pkgName} v${v}")`);
 
 		for (const suite of activeSuites) {
+			if (dnf.get(suite)?.has(lib)) {
+				cells.push('DNF');
+				continue;
+			}
 			const entry = suites.get(suite)?.get(lib);
 			if (entry === undefined) {
 				cells.push('—');
