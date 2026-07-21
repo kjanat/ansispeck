@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-21
+
 ### Added
 
 - `grey` as a British-spelling alias of `gray` across every entrypoint
@@ -199,7 +201,8 @@ and this project adheres to
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)`
   for cross-platform URL/path correctness
 
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/kjanat/ansispeck/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kjanat/ansispeck/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/kjanat/ansispeck/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/kjanat/ansispeck/compare/v0.1.2...v0.2.0
