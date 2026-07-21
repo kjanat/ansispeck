@@ -19,7 +19,7 @@ jobs:
       - uses: denoland/setup-deno@v2
       - uses: oven-sh/setup-bun@v2
       - uses: kjanat/runner@master
-      - uses: kjanat/install-dprint@v1
+      - uses: kjanat/install-dprint@v2
       - run: runner install --frozen bd
 
       - name: Bun bench (FORCE_COLOR=1)
@@ -29,6 +29,14 @@ jobs:
       - name: Bun bench (NO_COLOR=1)
         uses: ./.github/actions/bench
         with: { runtime: bun, color: none }
+
+      - name: Node bench (FORCE_COLOR=1)
+        uses: ./.github/actions/bench
+        with: { runtime: node, color: force }
+
+      - name: Node bench (NO_COLOR=1)
+        uses: ./.github/actions/bench
+        with: { runtime: node, color: none }
 
       - name: Deno bench (FORCE_COLOR=1)
         uses: ./.github/actions/bench
@@ -46,33 +54,29 @@ jobs:
           BUN_SIZE_EOF
           EOF
 
-      - name: Node bench (FORCE_COLOR=1)
-        uses: ./.github/actions/bench
-        with: { runtime: node, color: force }
-
-      - name: Node bench (NO_COLOR=1)
-        uses: ./.github/actions/bench
-        with: { runtime: node, color: none }
-
       - name: Write summary
+        shell: pwsh
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          $string = @"
           ## Size
-          $BUN_SIZE
 
-          ## Benchmarks (FORCE_COLOR=1)
+          $env:BUN_SIZE
 
-          #$BUN_BENCH_COLOR
+          ## Benchmarks (`FORCE_COLOR=1`)
 
-          #$DENO_BENCH_COLOR
+          #$env:BUN_BENCH_COLOR
 
-          #$NODE_BENCH_COLOR
+          #$env:DENO_BENCH_COLOR
 
-          ## Benchmarks (NO_COLOR=1)
+          #$env:NODE_BENCH_COLOR
 
-          #$BUN_BENCH_NOCOLOR
+          ## Benchmarks (`NO_COLOR=1`)
 
-          #$DENO_BENCH_NOCOLOR
+          #$env:BUN_BENCH_NOCOLOR
 
-          #$NODE_BENCH_NOCOLOR
-          EOF
+          #$env:DENO_BENCH_NOCOLOR
+
+          #$env:NODE_BENCH_NOCOLOR
+          "@
+
+          $string | dprint fmt --stdin md >> $env:GITHUB_STEP_SUMMARY

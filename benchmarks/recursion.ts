@@ -108,5 +108,5 @@ export function register({ count = DEFAULT_COUNT }: { count?: number } = {}): vo
 
 if (import.meta.main) {
 	register();
-	await run({ throw: true });
+	await run();
 }

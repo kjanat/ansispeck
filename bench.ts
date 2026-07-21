@@ -450,7 +450,7 @@ async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, comp
 	deferred({ layers: 32, repeat: 32 });
 	loading({ count: 1 });
 
-	const result = await run({ format: mitataFormat(format), filter, throw: true });
+	const result = await run({ format: mitataFormat(format), filter });
 	if (result.benchmarks.length === 0) {
 		throw new Error(`No benchmarks matched${filter === undefined ? '' : ` filter ${filter}`}`);
 	}

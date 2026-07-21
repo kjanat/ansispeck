@@ -190,5 +190,5 @@ export function register({
 
 if (import.meta.main) {
 	register();
-	await run({ throw: true });
+	await run();
 }
