@@ -82,6 +82,12 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 - Never bypass a repository rule or required pull request while preparing or
   publishing a release. If a remote operation reports a bypassed rule violation,
   stop immediately and report it.
+- Agents must never merge, auto-merge, or enqueue a pull request. If an agent
+  creates a PR, report its URL and reserve review and merge control for the user
+  while continuing any other authorized local work.
+- Before creating or pushing a release tag, verify the exact target commit with
+  `git verify-commit`. The target commit and annotated tag must both be signed;
+  a valid tag signature does not compensate for an unsigned commit.
 - After creating or pushing a release tag, monitor every publication job through
   completion and verify the resulting registry state.
 - If any publication job fails, investigate its logs and relevant read-only

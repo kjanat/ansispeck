@@ -54,8 +54,12 @@ chain() {
 
 read -r rt_bytes gz_bytes <<<"$(chain dist/index.js)"
 read -r ts_bytes _ <<<"$(chain dist/index.d.ts)"
-name=$(node -p "require('./package.json').name")
-version=$(node -p "require('./package.json').version")
+name=$(jq -r '.name' package.json)
+if version=$(git describe --tags --abbrev=0 2>/dev/null); then
+	version=${version#v}
+else
+	version=$(jq -r '.version' package.json)
+fi
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 full_commit=$(git rev-parse HEAD 2>/dev/null || echo "$commit")
 
