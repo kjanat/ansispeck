@@ -315,8 +315,8 @@ function readVersionField(jsonText: string): string {
 const versionCache: Map<string, string> = new Map();
 
 interface GitResult {
-	readonly status: number | null;
 	readonly output: string | undefined;
+	readonly status: number | null;
 }
 
 function git(args: string[]): GitResult {

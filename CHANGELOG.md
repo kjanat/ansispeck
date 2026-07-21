@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-21
+
+### Fixed
+
+- Benchmark size reports now derive ansispeck's npm link from the latest Git tag
+  instead of the in-tree `0.0.0` release sentinel
+
 ## [0.4.0] - 2026-07-21
 
 ### Added
@@ -201,7 +208,8 @@ and this project adheres to
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)`
   for cross-platform URL/path correctness
 
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/kjanat/ansispeck/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/kjanat/ansispeck/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kjanat/ansispeck/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/kjanat/ansispeck/compare/v0.2.0...v0.2.1

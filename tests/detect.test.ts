@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { detectColorSupportFor, detectHyperlinkSupportFor, type DetectionContext } from '#internal/detect';
+import { type DetectionContext, detectColorSupportFor, detectHyperlinkSupportFor } from '#internal/detect';
 
 const context = (overrides: Partial<DetectionContext> = {}): DetectionContext => ({
 	argv: [],
