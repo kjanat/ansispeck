@@ -108,6 +108,7 @@ function welchCI95(a: number[], b: number[]): { ratio: number; significant: bool
 type BenchResult = Awaited<ReturnType<typeof run>>;
 const SELF_LIB = 'ansispeck';
 const BASELINE_LABEL = `${SELF_LIB}/ext#1`;
+const WELCH_T_TEST_URL = 'https://en.wikipedia.org/wiki/Welch%27s_t-test';
 
 /** External = not ansispeck itself and not one of its `ansispeck/*` entrypoints. */
 const isExternal = (lib: string): boolean => lib !== SELF_LIB && !lib.startsWith(`${SELF_LIB}/`);
@@ -218,6 +219,7 @@ function computeCI95(parsed: Parsed): Map<string, { label: string; significant: 
 }
 
 function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: Out): void {
+	const { color: c, log } = out;
 	const parsed = parse(result, excluded);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
@@ -232,11 +234,11 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 		version,
 		cpu: { name: cpuName },
 	} = context;
-	out.log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
+	log(`\n  ${runtime ?? 'unknown'} ${version ?? ''}, ${cpuName ?? 'unknown'}\n`);
 
 	// header
-	out.log(''.padStart(nameW) + '  ' + activeSuites.map((s) => suiteLabel(s).padStart(fullW)).join('  '));
-	out.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	log(''.padStart(nameW) + '  ' + activeSuites.map((s) => suiteLabel(s).padStart(fullW)).join('  '));
+	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
 
 	// rows
 	for (const lib of libs) {
@@ -250,9 +252,9 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 			const rank = ranked.get(suite)?.findIndex((r) => r.lib === lib) ?? -1;
 			const val = fmtTime(entry.avg);
 			const tag = rank === -1 ? '†' : rank === 0 ? ' *' : `#${rank + 1}`;
-			cells.push(`${val.padStart(colW)} ${out.color.dim(tag.padStart(tagW))}`);
+			cells.push(`${val.padStart(colW)} ${c.dim(tag.padStart(tagW))}`);
 		}
-		out.log(lib.padEnd(nameW) + '  ' + cells.join('  '));
+		log(lib.padEnd(nameW) + '  ' + cells.join('  '));
 	}
 
 	// CI95 footer row
@@ -261,15 +263,20 @@ function printOverview(result: BenchResult, excluded: ReadonlySet<string>, out: 
 		if (!entry) return ''.padStart(fullW);
 		if (entry.label === '—' || entry.significant) return entry.label.padStart(fullW);
 		// pad before dimming — the ANSI bytes must not count toward the column width
-		return out.color.dim(`${entry.label} ~`.padStart(fullW));
+		return c.dim(`${entry.label} ~`.padStart(fullW));
 	});
-	out.log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
-	out.log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
+	log(''.padStart(nameW, '─') + '  ' + activeSuites.map(() => ''.padStart(fullW, '─')).join('  '));
+	log(BASELINE_LABEL.padEnd(nameW) + '  ' + ciCells.join('  '));
 
-	out.log('');
+	log('');
+	log(
+		`  Measured with ${c.link('https://npm.im/mitata', 'mitata')}; ${BASELINE_LABEL} uses ${
+			c.link(WELCH_T_TEST_URL, `Welch's ${c.italic('t')}-test`)
+		} CI95.`,
+	);
 	const legend = '  * = fastest, — = ansispeck beats fastest external lib, ~ = not significant';
 	const unranked = libs.some((lib) => excluded.has(lib));
-	out.log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
+	log(unranked ? `${legend}, † = unranked (mode-mismatched)` : legend);
 }
 
 const EXPORT_NOTES: Record<string, string> = {
@@ -332,6 +339,7 @@ function packageVersion(name: string): string {
 }
 
 function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compact: boolean, out: Out): void {
+	const { log } = out;
 	const parsed = parse(result, excluded);
 	const { suites, libs, activeSuites, ranked, context } = parsed;
 	const ci95 = computeCI95(parsed);
@@ -341,34 +349,34 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 		version,
 		cpu: { name: cpuName },
 	} = context;
-	out.log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
-	out.log(`\n> ${cpuName ?? 'unknown'}\n`);
+	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
+	log(`\n> ${cpuName ?? 'unknown'}\n`);
 
 	if (!compact) {
-		out.log('> Measured with mitata. Rankings are per column: 🥇, 🥈, 🥉, then `#N`.');
-		out.log(
-			`> \`${BASELINE_LABEL}\` compares ansispeck with the fastest external library using Welch's t-test CI95; \`~\` means not significant and \`—\` means ansispeck is faster.`,
+		log('> Measured with [mitata](https://npm.im/mitata). Rankings are per column: 🥇, 🥈, 🥉, then `#N`.');
+		log(
+			`> \`${BASELINE_LABEL}\` compares ansispeck with the fastest external library using [Welch's *t*-test](${WELCH_T_TEST_URL}) CI95; \`~\` means not significant and \`—\` means ansispeck is faster.`,
 		);
-		out.log('');
+		log('');
 	}
 
 	// ansispeck export notes
 	const noted = libs.filter((lib) => EXPORT_NOTES[lib] !== undefined);
 	if (!compact && noted.length > 0) {
-		out.log('> ansispeck exports in this table:');
+		log('> ansispeck exports in this table:');
 		for (const lib of noted) {
 			const note = EXPORT_NOTES[lib];
 			if (note === undefined) continue;
-			out.log(`> - \`${lib}\`: ${note}`);
+			log(`> - \`${lib}\`: ${note}`);
 		}
-		out.log('');
-		out.log('> Cold load starts an isolated runtime process using packages installed from local tarballs.');
-		out.log('');
+		log('');
+		log('> Cold load starts an isolated runtime process using packages installed from local tarballs.');
+		log('');
 	}
 
 	if (!compact && libs.some((lib) => excluded.has(lib))) {
-		out.log('> † unranked — behavior does not match this color mode');
-		out.log('');
+		log('> † unranked — behavior does not match this color mode');
+		log('');
 	}
 
 	// header
@@ -379,8 +387,8 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 			return label.charAt(0).toUpperCase() + label.slice(1);
 		}),
 	];
-	out.log(`| ${hdr.join(' | ')} |`);
-	out.log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
+	log(`| ${hdr.join(' | ')} |`);
+	log(`| ${hdr.map((_, i) => (i === 0 ? '---' : '---:')).join(' | ')} |`);
 
 	for (const lib of libs) {
 		const pkgName = packageNameOf(lib);
@@ -409,7 +417,7 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 				cells.push(`${val} #${rank + 1}`);
 			}
 		}
-		out.log(`| ${cells.join(' | ')} |`);
+		log(`| ${cells.join(' | ')} |`);
 	}
 
 	// CI95 footer
@@ -419,7 +427,7 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 		if (entry.label === '—') return '—';
 		return entry.significant ? entry.label : `${entry.label} ~`;
 	});
-	out.log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
+	log(`| **${BASELINE_LABEL}** | ${ciCells.join(' | ')} |`);
 }
 
 function parseFilter(raw: unknown): RegExp {
