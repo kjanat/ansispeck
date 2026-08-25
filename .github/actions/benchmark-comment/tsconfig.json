@@ -19,8 +19,8 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noPropertyAccessFromIndexSignature": false,
-		"types": ["*"]
+		"types": ["bun", "node"]
 	},
-	"include": ["*.mjs"],
+	"include": ["*.mjs", "benchmark-comment.test.ts"],
 	"exclude": ["node_modules"]
 }

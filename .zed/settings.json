@@ -50,7 +50,7 @@
 			"settings": {
 				"deno": {
 					"enable": true,
-					"enablePaths": ["./*.ts", "./src", "./scripts"],
+					"enablePaths": ["./*.config.ts", "./src"],
 					"importMap": "./import_map.json"
 				}
 			}

@@ -5,7 +5,7 @@
  * @module ansispeck/safe
  */
 
-import type { Wrap } from './internal/ansi.ts';
+import type { Wrap } from '#internal/ansi.ts';
 import {
 	BG_CLOSE,
 	FG_CLOSE,
@@ -18,13 +18,13 @@ import {
 	mapPalette,
 	mkLink,
 	rgbOpen,
-} from './internal/ansi.ts';
-import { detectColorSupport, detectHyperlinkSupport } from './internal/detect.ts';
-import { makeTemplateFormatter } from './internal/template.ts';
-import { space, tab } from './internal/whitespace.ts';
-import type { LinkFormatter, SafeColors, TemplateFormatter } from './types.ts';
+} from '#internal/ansi.ts';
+import { detectColorSupport, detectHyperlinkSupport } from '#internal/detect.ts';
+import { makeTemplateFormatter } from '#internal/template.ts';
+import { space, tab } from '#internal/whitespace.ts';
+import type { LinkFormatter, SafeColors, TemplateFormatter } from '#types';
 
-export { space, tab } from './internal/whitespace.ts';
+export { space, tab } from '#internal/whitespace.ts';
 
 /**
  * Create a template-tag color set with explicit enable toggles.

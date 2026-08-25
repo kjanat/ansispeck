@@ -1,12 +1,9 @@
-import { afterEach, describe, expect, test } from 'bun:test';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { env } from 'node:process';
-import comment, {
-	BENCHMARK_COMMENT_MARKER,
-	benchmarkCommentBody,
-} from '../.github/actions/benchmark-comment/scripts/benchmark-comment.mjs';
+import { afterEach, describe, expect, test } from 'bun:test';
+import comment, { BENCHMARK_COMMENT_MARKER, benchmarkCommentBody } from '#action';
 
 const HEAD_SHA = '0123456789abcdef0123456789abcdef01234567';
 const RUN_URL = 'https://github.com/kjanat/ansispeck/actions/runs/123';

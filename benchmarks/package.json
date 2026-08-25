@@ -2,6 +2,11 @@
 	"name": "benchmarks",
 	"version": "0.0.0",
 	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kjanat/ansispeck.git",
+		"directory": "benchmarks"
+	},
 	"type": "module",
 	"imports": {
 		"#*": "./*.ts",
@@ -21,6 +26,7 @@
 		"picocolors": "catalog:bench"
 	},
 	"devDependencies": {
+		"@types/bun": "catalog:",
 		"@types/node": "catalog:",
 		"typescript": "catalog:"
 	}

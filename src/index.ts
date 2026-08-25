@@ -9,5 +9,5 @@
  * @module ansispeck
  */
 
-export * from './internal/default.ts';
-export { default } from './internal/default.ts';
+export * from '#internal/default.ts';
+export { default } from '#internal/default.ts';

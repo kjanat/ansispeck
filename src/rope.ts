@@ -6,7 +6,7 @@
  * @module ansispeck/rope
  */
 
-import type { Wrap } from './internal/ansi.ts';
+import type { Wrap } from '#internal/ansi.ts';
 import {
 	BG_CLOSE,
 	FG_CLOSE,
@@ -18,22 +18,13 @@ import {
 	hexOpen,
 	mapPalette,
 	rgbOpen,
-} from './internal/ansi.ts';
-import { detectColorSupport } from './internal/detect.ts';
-import { space, tab } from './internal/whitespace.ts';
-import type {
-	Chunk,
-	ChunkFormatter,
-	Chunkable,
-	ConcatChunk,
-	Formattable,
-	Rope,
-	StyledChunk,
-	TextChunk,
-} from './types.ts';
-import { CHUNK_BRAND } from './types.ts';
+} from '#internal/ansi.ts';
+import { detectColorSupport } from '#internal/detect.ts';
+import { space, tab } from '#internal/whitespace.ts';
+import type { Chunk, ChunkFormatter, Chunkable, ConcatChunk, Formattable, Rope, StyledChunk, TextChunk } from '#types';
+import { CHUNK_BRAND } from '#types';
 
-export { space, tab } from './internal/whitespace.ts';
+export { space, tab } from '#internal/whitespace.ts';
 
 const RESET = c(0);
 

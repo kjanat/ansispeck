@@ -4,8 +4,8 @@
  * @module ansispeck/internal/template
  */
 
-import type { TemplateFormatter } from '../types.ts';
-import { text } from './ansi.ts';
+import { text } from '#internal/ansi.ts';
+import type { TemplateFormatter } from '#types';
 
 /** Template-tag factory: re-opens the style after each interpolated value. */
 export function makeTemplateFormatter(open: string, close: string): TemplateFormatter {

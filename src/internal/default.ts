@@ -1,14 +1,14 @@
 /** Shared default implementation for the auto-detected public entrypoints. */
 
-import type { Colors, Formatter, LinkFormatter } from '../types.ts';
-import { strip } from './ansi.ts';
-import { createColors } from './colors.ts';
-import { detectColorSupport, detectHyperlinkSupport } from './detect.ts';
+import { strip } from '#internal/ansi.ts';
+import { createColors } from '#internal/colors.ts';
+import { detectColorSupport, detectHyperlinkSupport } from '#internal/detect.ts';
+import type { Colors, Formatter, LinkFormatter } from '#types';
 
 /** Auto-detecting color set — the default entrypoint. */
 const colors: Colors = createColors(detectColorSupport(), detectHyperlinkSupport());
 
-export { space, tab } from './whitespace.ts';
+export { space, tab } from '#internal/whitespace.ts';
 export { createColors, detectColorSupport, detectHyperlinkSupport, strip };
 
 /** Set the background with a 256-color palette index. */

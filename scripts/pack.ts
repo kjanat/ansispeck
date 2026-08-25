@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-/// <reference types="bun" />
-
 import { cpSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
@@ -43,8 +41,8 @@ if (!Array.isArray(files) || !files.every((entry) => typeof entry === 'string'))
 	throw new Error('package.json must contain a string "files" array');
 }
 
-await Bun.$`rm -rf ${STAGING}`;
-await Bun.$`mkdir -p ${STAGING}`;
+await Bun.$`rm -rf ${STAGING}`.cwd(ROOT);
+await Bun.$`mkdir -p ${STAGING}`.cwd(ROOT);
 
 for (const entry of files) {
 	const path = packageFile(entry);

@@ -3,13 +3,15 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+import { packageRepositoryUrl } from 'dreamcli';
 import { describeRevision } from '#bench/revision';
+import { repository } from '#pkg';
 
-const REPOSITORY_URL = 'https://github.com/kjanat/ansispeck';
-
-function git(directory: string, args: string[]): void {
+// biome-ignore lint/style/noNonNullAssertion: shut up
+const REPOSITORY_URL = packageRepositoryUrl({ repository })!;
+const git = (directory: string, args: string[]): void => {
 	execFileSync('git', ['-C', directory, ...args], { stdio: 'ignore' });
-}
+};
 
 function revision(directory: string): ReturnType<typeof describeRevision> {
 	return describeRevision({

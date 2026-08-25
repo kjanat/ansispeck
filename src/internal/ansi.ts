@@ -4,7 +4,7 @@
  * @module ansispeck/internal/ansi
  */
 
-import type { Formattable, Formatter, FormatterName, LinkFormatter } from '../types.ts';
+import type { Formattable, Formatter, FormatterName, LinkFormatter } from '#types';
 
 // Shared ANSI fragments — hoisted to avoid repeating in every formatter call
 /** Escape character that starts ANSI control sequences. */

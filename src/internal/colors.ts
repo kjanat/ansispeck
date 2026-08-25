@@ -4,8 +4,7 @@
  * @module ansispeck/internal/colors
  */
 
-import type { Colors, Formatter } from '../types.ts';
-import type { Wrap } from './ansi.ts';
+import type { Wrap } from '#internal/ansi.ts';
 import {
 	BG_CLOSE,
 	FG_CLOSE,
@@ -20,9 +19,10 @@ import {
 	mkLink,
 	rgbOpen,
 	text,
-} from './ansi.ts';
-import { detectColorSupport } from './detect.ts';
-import { space, tab } from './whitespace.ts';
+} from '#internal/ansi.ts';
+import { detectColorSupport } from '#internal/detect.ts';
+import { space, tab } from '#internal/whitespace.ts';
+import type { Colors, Formatter } from '#types';
 
 const noop: Formatter = text;
 

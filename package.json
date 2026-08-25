@@ -98,7 +98,7 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18",
-		"@types/bun": "^1.4",
+		"@types/bun": "catalog:",
 		"@types/node": "catalog:",
 		"@typescript/native": "catalog:",
 		"ansi-colors": "catalog:bench",
@@ -126,6 +126,7 @@
 	"catalog": {
 		"@typescript/native": "npm:typescript@^7",
 		"@actions/github-script": "github:actions/github-script",
+		"@types/bun": "^1.4",
 		"@types/node": ">=24",
 		"biome": "npm:@biomejs/biome@^2.5",
 		"typescript": "^7"

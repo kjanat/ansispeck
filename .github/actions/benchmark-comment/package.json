@@ -1,8 +1,19 @@
 {
 	"name": "benchmark-compat",
+	"version": "0.0.0",
 	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kjanat/ansispeck.git",
+		"directory": ".github/actions/benchmark-comment"
+	},
 	"type": "module",
+	"imports": {
+		"#pkg": "./package.json",
+		"#action": "./benchmark-comment.mjs"
+	},
 	"scripts": {
+		"test": "bun test",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
