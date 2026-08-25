@@ -1,7 +1,5 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 // deno-lint-ignore-file no-sloppy-imports
-/// <reference types="bun" />
-
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
