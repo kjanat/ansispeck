@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-08-25
+
 ### Fixed
 
 - Explicit `--no-hyperlinks` / `--hyperlinks` flags now take precedence over
@@ -218,7 +220,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 - `benchmarks/size.ts` now resolves paths with `fileURLToPath(import.meta.url)`
   for cross-platform URL/path correctness
 
-[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/kjanat/ansispeck/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/kjanat/ansispeck/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/kjanat/ansispeck/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/kjanat/ansispeck/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/kjanat/ansispeck/compare/v0.2.1...v0.3.0
