@@ -1,8 +1,6 @@
 #!/usr/bin/env bun
-/// <reference types="bun" />
-
 import { dirname, join, sep } from 'node:path';
-import { BENCH_LIBRARIES } from '#bench/libraries';
+import { BENCH_LIBRARIES } from '@/bench/libraries';
 
 const ROOT = dirname(import.meta.dir);
 const FIXTURE = join(ROOT, '.cache', 'bench-loading');

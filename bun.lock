@@ -10,6 +10,7 @@
         "@types/node": "catalog:",
         "@typescript/native": "catalog:",
         "ansi-colors": "catalog:bench",
+        "benchmarks": "workspace:*",
         "biome": "catalog:",
         "chalk": "catalog:bench",
         "colorette": "catalog:bench",
@@ -29,6 +30,7 @@
     },
     ".github/actions/benchmark-comment": {
       "name": "benchmark-compat",
+      "version": "0.0.0",
       "devDependencies": {
         "@actions/github-script": "catalog:",
         "@types/node": "catalog:",
@@ -38,6 +40,9 @@
     "benchmarks": {
       "name": "benchmarks",
       "version": "0.0.0",
+      "bin": {
+        "bench": "bench.ts",
+      },
       "dependencies": {
         "@types/node": "catalog:",
         "@typescript/native": "catalog:",

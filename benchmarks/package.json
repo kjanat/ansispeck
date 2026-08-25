@@ -12,6 +12,11 @@
 		"#*": "./*.ts",
 		"#pkg": "./package.json"
 	},
+	"main": "bench.ts",
+	"types": "bench.ts",
+	"bin": {
+		"bench": "bench.ts"
+	},
 	"scripts": {
 		"typecheck": "tsc --noEmit"
 	},

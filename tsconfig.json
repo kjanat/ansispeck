@@ -29,7 +29,19 @@
 		"composite": true,
 
 		// Types
-		"types": ["bun", "node"]
+		"types": ["bun", "node"],
+		"paths": {
+			"@/bench/*": ["./benchmarks/*.ts"]
+		}
 	},
+	"include": [
+		"./benchmarks/revision.ts",
+		"./benchmarks/libraries.ts",
+		"./scripts",
+		"./src",
+		"./tests",
+		"./*.ts",
+		"./*.json"
+	],
 	"exclude": ["./dist", "./node_modules", "./.github/actions/**"]
 }

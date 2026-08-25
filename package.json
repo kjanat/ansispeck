@@ -31,7 +31,6 @@
 			"types": "./dist/*.d.ts",
 			"default": "./dist/*.js"
 		},
-		"#bench/*": "./benchmarks/*.ts",
 		"#internal/*.ts": "./src/internal/*.ts",
 		"#pkg": "./package.json"
 	},
@@ -77,8 +76,8 @@
 	"scripts": {
 		"bd": "run -q build",
 		"bench": "run -s bench:bun bench:node",
-		"bench:bun": "bun --bun bench.ts",
-		"bench:node": "node bench.ts",
+		"bench:bun": "bunx --bun bench",
+		"bench:node": "npx bench",
 		"build": "bun --bun tsdown",
 		"build:quiet": "bun --bun tsdown -l error",
 		"deno:check": "deno check src/",
@@ -102,6 +101,7 @@
 		"@types/node": "catalog:",
 		"@typescript/native": "catalog:",
 		"ansi-colors": "catalog:bench",
+		"benchmarks": "workspace:*",
 		"biome": "catalog:",
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",

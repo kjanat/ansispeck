@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { packageRepositoryUrl } from 'dreamcli';
-import { describeRevision } from '#bench/revision';
 import { repository } from '#pkg';
+import { describeRevision } from '@/bench/revision';
 
 // biome-ignore lint/style/noNonNullAssertion: shut up
 const REPOSITORY_URL = packageRepositoryUrl({ repository })!;
