@@ -31,6 +31,5 @@
 		// Types
 		"types": ["node", "bun"]
 	},
-	"include": ["./src/**/*.ts", "./tests/**/*.ts", "./benchmarks/**/*.ts", "./*.ts"],
-	"exclude": ["./dist"]
+	"exclude": ["./dist", "./node_modules"]
 }

@@ -55,13 +55,18 @@ chain() {
 read -r rt_bytes gz_bytes <<<"$(chain dist/index.js)"
 read -r ts_bytes _ <<<"$(chain dist/index.d.ts)"
 name=$(jq -r '.name' package.json)
-if version=$(git describe --tags --abbrev=0 2>/dev/null); then
-	version=${version#v}
-else
-	version=$(jq -r '.version' package.json)
-fi
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 full_commit=$(git rev-parse HEAD 2>/dev/null || echo "$commit")
+description=$(git describe --tags --always --abbrev=7 2>/dev/null || echo "$commit")
+dirty=false
+if [[ -n "$(git status --porcelain=v1 --untracked-files=normal 2>/dev/null)" ]]; then
+	description="${description}-dirty"
+	dirty=true
+fi
+exact_tag=""
+if [[ "${dirty}" == false ]]; then
+	exact_tag=$(git describe --tags --exact-match --match 'v*.*.*' HEAD 2>/dev/null || true)
+fi
 
 kb() { awk "BEGIN { printf \"%.2f KB\", $1 / 1024 }"; }
 
@@ -70,8 +75,12 @@ gz_kb=$(kb "${gz_bytes}")
 ts_kb=$(kb "${ts_bytes}")
 
 repo_url=$(git remote get-url origin 2>/dev/null | sed -e 's/\.git$//' -e 's|^git@\([^:]*\):|https://\1/|' || echo "")
-npm_url="https://npm.im/package/${name}/v/${version}"
 commit_url="${repo_url:+${repo_url}/commit/${full_commit}}"
+if [[ -n "${exact_tag}" ]]; then
+	package_url="https://npm.im/package/${name}/v/${exact_tag#v}"
+else
+	package_url="${commit_url:-${repo_url}}"
+fi
 
 osc8() {
 	local url="${1}" label id="${3:-}"
@@ -154,7 +163,7 @@ case "${FMT}" in
 		# data row: only pkg col gets the link, others plain; widths from plains
 		body=$(
 			printf '  '
-			cell "$pkg_plain" "$npm_url" "$w0" L
+			cell "$pkg_plain" "$package_url" "$w0" L
 			printf ' '
 			cell "$rt_plain" '' "$w1" R
 			printf ' '
@@ -165,7 +174,7 @@ case "${FMT}" in
 		row=$body$'\n'
 
 		# footer re-uses links for ver/sha (natural spacing, not forced into cols)
-		as_ver_label=$(osc8 "${npm_url}" "${version}")
+		as_ver_label=$(osc8 "${package_url}" "${description}")
 		as_sha_label=$(osc8 "${commit_url}" "${commit}")
 		if [[ -n "${commit_url}" ]]; then
 			ver=$(printf '  ansispeck %s (%s)\n' "${as_ver_label}" "${as_sha_label}")
@@ -184,9 +193,9 @@ EOF
 			cat <<EOF
 | Package | Runtime | Gzip | Types |
 | --- | --- | --- | --- |
-| [ansispeck] ([${commit}][as-commit]) | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
+| [ansispeck] ([${description}][as-commit]) | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
 
-[ansispeck]: ${npm_url}
+[ansispeck]: ${package_url}
 [as-commit]: ${commit_url}
 EOF
 		else
@@ -195,7 +204,7 @@ EOF
 | --- | --- | --- | --- |
 | [ansispeck] | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
 
-[ansispeck]: ${npm_url}
+[ansispeck]: ${package_url}
 EOF
 		fi
 		;;

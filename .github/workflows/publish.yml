@@ -54,7 +54,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
+      - uses: kjanat/dprint-check@v3
+        with: { install-only: true }
       - uses: kjanat/runner@master
       - uses: oven-sh/setup-bun@v2
       - run: runner install -f build
@@ -70,7 +71,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
+      - uses: kjanat/dprint-check@v3
+        with: { install-only: true }
       - uses: kjanat/runner@master
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v7
@@ -110,7 +112,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
+      - uses: kjanat/dprint-check@v3
+        with: { install-only: true }
       - name: Publish to JSR
         id: publish
         uses: actions/github-script@v9

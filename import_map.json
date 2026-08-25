@@ -28,6 +28,7 @@
 		"#bench/libraries": "./benchmarks/libraries.ts",
 		"#bench/loading": "./benchmarks/loading.ts",
 		"#bench/recursion": "./benchmarks/recursion.ts",
+		"#bench/revision": "./benchmarks/revision.ts",
 		"#bench/simple": "./benchmarks/simple.ts",
 		"#bench/size": "./benchmarks/size.ts",
 		"#index": "./src/index.ts",

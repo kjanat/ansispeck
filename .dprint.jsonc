@@ -1,6 +1,7 @@
 {
+	// git ls-remote "https://github.com/kjanat/kjanat.git" HEAD | awk '{print substr($1, 1, 8)}' | tee /dev/stderr | wl-copy -n
 	"lineWidth": 120,
-	"extends": "https://github.com/kjanat/kjanat/raw/7d87c3af/configs/dprint.remote.json",
+	"extends": "https://github.com/kjanat/kjanat/raw/ba61f5cb/configs/dprint.remote.json",
 	"markdown": { "associations": ["!README.md"], "textWrap": "always", "lineWidth": 80 },
 	"prettier": { "associations": ["!**/*", "!!./README.md", "./README.md"], "useTabs": false },
 	"typescript": {

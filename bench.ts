@@ -2,7 +2,7 @@
 // deno-lint-ignore-file no-sloppy-imports
 /// <reference types="bun" />
 
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { URL } from 'node:url';
@@ -14,6 +14,7 @@ import { register as deferred } from '#bench/deferred';
 import { BENCH_LIBRARIES } from '#bench/libraries';
 import { register as loading } from '#bench/loading';
 import { register as recursion } from '#bench/recursion';
+import { describeRevision } from '#bench/revision';
 import { register as simple } from '#bench/simple';
 import pkg from '#pkg' with { type: 'json' };
 
@@ -314,20 +315,11 @@ function readVersionField(jsonText: string): string {
 
 const versionCache: Map<string, string> = new Map();
 
-interface GitResult {
-	readonly output: string | undefined;
-	readonly status: number | null;
-}
-
-function git(args: string[]): GitResult {
-	const result = spawnSync('git', args, { encoding: 'utf8' });
-	const output = result.stdout?.trim();
-	return { status: result.status, output: output || undefined };
-}
-
-const described = git(['describe', '--tags', '--abbrev=0']);
-const describedVersion = described.status === 0 ? described.output?.replace(/^v/, '') : undefined;
-const releaseVersion = describedVersion || pkg.version;
+const selfRevision = describeRevision({
+	name: pkg.name,
+	packageVersion: pkg.version,
+	repositoryUrl: `https://github.com/${pkg.repository}`,
+});
 
 /** Installed version: resolve the package, read its node_modules package.json (repo root for ansispeck). */
 function packageVersion(name: string): string {
@@ -336,13 +328,27 @@ function packageVersion(name: string): string {
 	const resolved = import.meta.resolve(name);
 	const marker = `/node_modules/${name}/`;
 	const at = resolved.lastIndexOf(marker);
-	const version = name === SELF_LIB
-		? releaseVersion
-		: at === -1
+	const version = at === -1
 		? pkg.version
 		: readVersionField(readFileSync(new URL(`${resolved.slice(0, at + marker.length)}package.json`), 'utf8'));
 	versionCache.set(name, version);
 	return version;
+}
+
+interface PackageReference {
+	readonly description: string;
+	readonly url: string;
+}
+
+function packageReference(name: string): PackageReference {
+	if (name === SELF_LIB) {
+		return { description: selfRevision.description, url: selfRevision.url };
+	}
+	const version = packageVersion(name);
+	return {
+		description: `v${version}`,
+		url: `https://npm.im/package/${name}/v/${version}`,
+	};
 }
 
 function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compact: boolean, out: Out): void {
@@ -358,6 +364,7 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 	} = context;
 	log(`## ${runtime ?? 'unknown'} ${version ?? ''}`);
 	log(`\n> ${cpuName ?? 'unknown'}\n`);
+	log(`> ansispeck revision: [\`${selfRevision.description}\`](${selfRevision.url})\n`);
 
 	if (!compact) {
 		log('> Measured with [mitata](https://npm.im/mitata). Rankings are per column: 🥇, 🥈, 🥉, then `#N`.');
@@ -400,10 +407,10 @@ function printMarkdown(result: BenchResult, excluded: ReadonlySet<string>, compa
 
 	for (const lib of libs) {
 		const pkgName = packageNameOf(lib);
-		const v = packageVersion(pkgName);
+		const reference = packageReference(pkgName);
 
 		const cells: string[] = [];
-		cells.push(`[${lib}](https://npm.im/package/${pkgName}/v/${v} "${pkgName} v${v}")`);
+		cells.push(`[${lib}](${reference.url} "${pkgName} ${reference.description}")`);
 
 		for (const suite of activeSuites) {
 			if (dnf.get(suite)?.has(lib)) {
@@ -495,8 +502,7 @@ const benchmark = command('bench')
 		await runBenchmarks(format, flags.filter, flags.compact, out);
 	});
 
-const dirty = git(['diff', '--exit-code', '--quiet', 'HEAD']).status === 1;
-const v = `${releaseVersion}${dirty ? '-dirty' : ''}`;
+const v = selfRevision.description.replace(/^v/, '');
 
 if (import.meta.main) {
 	void cli(basename(import.meta.filename)).version(v)

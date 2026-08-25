@@ -159,3 +159,4 @@ dist
 # End of https://gitignore.kjanat.com/api/node,linux
 /.denodocs/
 summary_raw*.txt
+/.worktrees/
