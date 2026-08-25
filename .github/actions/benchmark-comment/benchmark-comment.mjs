@@ -61,7 +61,10 @@ ${report.trim()}
 `;
 }
 
-/** @param {{ core: GitHubCore, context: GitHubContext, github: GitHubClient }} args */
+/**
+ * @param {import('@actions/github-script').AsyncFunctionArguments} args
+ * @returns {Promise<void>}
+ */
 export default async ({ core, context, github }) => {
 	const { owner, repo } = context.repo;
 	const workflowRun = parseWorkflowRun(context.payload);
@@ -116,19 +119,3 @@ export default async ({ core, context, github }) => {
 	});
 	core.info(`Created comment ${newComment.id}`);
 };
-
-/**
- * @typedef {{ info: (message: string) => void }} GitHubCore
- * @typedef {{ payload: unknown, repo: { owner: string, repo: string }, serverUrl: string }} GitHubContext
- * @typedef {{
- *   paginate: (method: unknown, parameters: Record<string, unknown>) => Promise<Array<{ body?: string, id: number }>>,
- *   rest: {
- *     issues: {
- *       createComment: (parameters: Record<string, unknown>) => Promise<{ data: { id: number } }>,
- *       listComments: unknown,
- *       updateComment: (parameters: Record<string, unknown>) => Promise<unknown>,
- *     },
- *     pulls: { get: (parameters: Record<string, unknown>) => Promise<{ data: { head: { sha: string } } }> },
- *   },
- * }} GitHubClient
- */

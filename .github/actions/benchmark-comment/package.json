@@ -1,0 +1,13 @@
+{
+	"name": "benchmark-compat",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@actions/github-script": "catalog:",
+		"@types/node": "catalog:",
+		"@typescript/native": "catalog:"
+	}
+}

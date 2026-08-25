@@ -1,4 +1,12 @@
 // deno-lint-ignore-file no-sloppy-imports
+
+import ansispeck from '@ansispeck-dist';
+import auto from '@ansispeck-dist/auto';
+import noop from '@ansispeck-dist/noop';
+import raw from '@ansispeck-dist/raw';
+import type { Chunk } from '@ansispeck-dist/rope';
+import rope from '@ansispeck-dist/rope';
+import safe from '@ansispeck-dist/safe';
 import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
@@ -6,13 +14,6 @@ import kleur from 'kleur';
 import * as kleurColors from 'kleur/colors';
 import { bench, do_not_optimize, run, summary } from 'mitata';
 import picocolors from 'picocolors';
-import ansispeck from '#ansispeck-dist';
-import auto from '#ansispeck-dist/auto';
-import noop from '#ansispeck-dist/noop';
-import raw from '#ansispeck-dist/raw';
-import type { Chunk } from '#ansispeck-dist/rope';
-import rope from '#ansispeck-dist/rope';
-import safe from '#ansispeck-dist/safe';
 
 const DEFAULT_LAYERS = 32;
 const DEFAULT_REPEAT = 32;

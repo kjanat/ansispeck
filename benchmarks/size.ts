@@ -4,21 +4,15 @@ import { dirname, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const root = dirname(import.meta.dirname);
-function measure(path: string): { raw: number; gzip: number } {
+const measure = (path: string): { raw: number; gzip: number } => {
 	const code = readFileSync(resolve(root, path));
 	return { raw: code.length, gzip: gzipSync(code).length };
-}
-
-function isFirstParty(path: string): boolean {
-	return !path.startsWith('node_modules/');
-}
-
-function toKB(bytes: number): string {
-	return `${(Math.round((bytes / 1024) * 100) / 100).toFixed(2)} KB`;
-}
+};
+const isFirstParty = (path: string): boolean => !path.startsWith('node_modules/');
+const toKB = (bytes: number): string => `${(Math.round((bytes / 1024) * 100) / 100).toFixed(2)} KB`;
 
 const libs: Array<[string, string]> = [
-	['ansispeck', 'dist/index.js'],
+	['ansispeck', '../dist/index.js'],
 	['picocolors', 'node_modules/picocolors/picocolors.js'],
 	['colorette', 'node_modules/colorette/index.js'],
 	['kleur', 'node_modules/kleur/index.mjs'],

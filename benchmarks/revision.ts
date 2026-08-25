@@ -25,6 +25,11 @@ function git(cwd: string | undefined, args: string[]): GitResult {
 	return { status: result.status, output: output || undefined };
 }
 
+const getNpmUrl = (name: string, version: string | undefined): string =>
+	new URL(`/package/${name}${version ? `/v/${version}` : ''}`, 'https://www.npmjs.com').href;
+const getCommitUrl = (repositoryUrl: string, commit: string | undefined): string =>
+	commit === undefined ? repositoryUrl : `${repositoryUrl}/commit/${commit}`;
+
 export function describeRevision(options: RevisionOptions): Revision {
 	const { cwd, name, packageVersion, repositoryUrl } = options;
 	const commit = git(cwd, ['rev-parse', 'HEAD']).output;
@@ -39,8 +44,8 @@ export function describeRevision(options: RevisionOptions): Revision {
 	const isRelease = exactTag !== undefined;
 	const description = isRelease ? exactTag : `${described}${dirty ? '-dirty' : ''}`;
 	const releaseVersion = exactTag?.replace(/^v/, '');
-	const npmUrl = `https://npm.im/package/${name}/v/${releaseVersion ?? packageVersion}`;
-	const commitUrl = commit === undefined ? repositoryUrl : `${repositoryUrl}/commit/${commit}`;
+	const npmUrl = getNpmUrl(name, releaseVersion ?? packageVersion);
+	const commitUrl = getCommitUrl(repositoryUrl, commit);
 
 	return {
 		commit,

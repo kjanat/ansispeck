@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: benchmark-comment-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.id }}
-  cancel-in-progress: true
+  queue: max
 
 permissions:
   actions: read
@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
 
       - name: Update benchmark comment
-        uses: ./.github/actions/benchmark-comment
+        uses: $/.github/actions/benchmark-comment
         with:
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}

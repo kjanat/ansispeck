@@ -4,19 +4,21 @@
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
+import { basename, dirname } from 'node:path';
 import { URL } from 'node:url';
+import pkg from '@pkg' with { type: 'json' };
 import type { Out } from 'dreamcli';
 import { cli, command, flag } from 'dreamcli';
 import { run } from 'mitata';
-import { register as complex } from '#bench/complex';
-import { register as deferred } from '#bench/deferred';
-import { BENCH_LIBRARIES } from '#bench/libraries';
-import { register as loading } from '#bench/loading';
-import { register as recursion } from '#bench/recursion';
-import { describeRevision } from '#bench/revision';
-import { register as simple } from '#bench/simple';
-import pkg from '#pkg' with { type: 'json' };
+import { register as complex } from '#complex';
+import { register as deferred } from '#deferred';
+import { BENCH_LIBRARIES } from '#libraries';
+import { register as loading } from '#loading';
+import { register as recursion } from '#recursion';
+import { describeRevision } from '#revision';
+import { register as simple } from '#simple';
+
+const ROOT = dirname(import.meta.dirname);
 
 declare module 'mitata' {
 	interface ctx {
@@ -466,9 +468,9 @@ function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
 }
 
 async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, compact: boolean, out: Out): Promise<void> {
-	execFileSync('run', ['-q', 'build'], { stdio: 'ignore' });
-	execFileSync('bun', ['--bun', 'scripts/prepare-loading-fixture.ts'], { stdio: 'ignore' });
-	const { default: ansispeck } = await import('#ansispeck-dist');
+	execFileSync('run', ['-q', 'build'], { stdio: 'ignore', cwd: ROOT });
+	execFileSync('bun', ['--bun', 'scripts/prepare-loading-fixture.ts'], { stdio: 'ignore', cwd: ROOT });
+	const { default: ansispeck } = await import('@ansispeck-dist');
 	const excluded = rankExcluded(ansispeck.isColorSupported);
 
 	simple({ count: 1 });

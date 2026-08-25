@@ -15,43 +15,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - { uses: actions/checkout@v7, with: { fetch-depth: 0 } }
-      - { uses: actions/setup-node@v7, with: { node-version-file: .node-version } }
-      - uses: denoland/setup-deno@v2
-      - uses: oven-sh/setup-bun@v2
-      - uses: kjanat/runner@master
-      - uses: kjanat/dprint-check@v3
-        with: { install-only: true }
+      - parallel:
+          - { uses: actions/setup-node@v7, with: { node-version-file: .node-version } }
+          - uses: denoland/setup-deno@v2
+          - uses: oven-sh/setup-bun@v2
+          - uses: kjanat/runner@master
+          - uses: kjanat/dprint-check@v3
+            with: { install-only: true }
       - run: runner install --frozen bd
 
       - name: Bun bench (FORCE_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: bun, color: force, compact: false }
 
       - name: Bun bench (NO_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: bun, color: none }
 
       - name: Node bench (FORCE_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: node, color: force }
 
       - name: Node bench (NO_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: node, color: none }
 
       - name: Deno bench (FORCE_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: deno, color: force }
 
       - name: Deno bench (NO_COLOR=1)
-        uses: ./.github/actions/bench
+        uses: $/.github/actions/bench
         with: { runtime: deno, color: none }
 
       - name: Size
         run: |
-          cat >> "$GITHUB_ENV" <<EOF
+          SIZE="$(bash scripts/compare-size.sh --markdown)"
+          cat >> "${GITHUB_ENV}" <<EOF
           BUN_SIZE<<BUN_SIZE_EOF
-          $(bash scripts/compare-size.sh --markdown)
+          ${SIZE}
           BUN_SIZE_EOF
           EOF
 

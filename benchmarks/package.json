@@ -1,0 +1,27 @@
+{
+	"name": "benchmarks",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"imports": {
+		"#*": "./*.ts",
+		"#pkg": "./package.json"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@types/node": "catalog:",
+		"@typescript/native": "catalog:",
+		"ansi-colors": "catalog:bench",
+		"chalk": "catalog:bench",
+		"colorette": "catalog:bench",
+		"kleur": "catalog:bench",
+		"mitata": "catalog:bench",
+		"picocolors": "catalog:bench"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}

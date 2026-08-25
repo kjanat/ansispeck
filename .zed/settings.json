@@ -10,7 +10,7 @@
 	"prettier": { "allowed": false },
 	"languages": {
 		"TypeScript": {
-			"language_servers": ["typescript-ls", "biome", "deno", "..."],
+			"language_servers": ["typescript", "biome", "deno"],
 			"formatter": [
 				{ "language_server": { "name": "biome" } },
 				{ "external": { "command": "dprint", "arguments": ["fmt", "--stdin", "{buffer_path}"] } }
@@ -50,6 +50,7 @@
 			"settings": {
 				"deno": {
 					"enable": true,
+					"enablePaths": ["./*.ts", "./src", "./scripts"],
 					"importMap": "./import_map.json"
 				}
 			}

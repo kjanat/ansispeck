@@ -1,14 +1,14 @@
 // deno-lint-ignore-file no-sloppy-imports
 import { spawnSync } from 'node:child_process';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { execPath } from 'node:process';
-import { URL, fileURLToPath } from 'node:url';
 import { bench, group, run } from 'mitata';
-import { BENCH_LIBRARIES } from './libraries.ts';
+import { BENCH_LIBRARIES } from '#libraries';
 
+const ROOT = dirname(import.meta.dirname);
 const DEFAULT_COUNT = 1;
 const LOAD_TIMEOUT_MS = 30_000;
-const FIXTURE = fileURLToPath(new URL('../.cache/bench-loading/', import.meta.url));
+const FIXTURE = join(ROOT, '.cache/bench-loading/');
 const LOADER = join(FIXTURE, 'load.mjs');
 const IS_DENO = basename(execPath).startsWith('deno');
 
