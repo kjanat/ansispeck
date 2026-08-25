@@ -50,8 +50,10 @@ export const detectColorSupport = (): boolean => detectColorSupportFor(runtimeCo
 
 /** Evaluate OSC 8 hyperlink support for explicit runtime inputs. */
 export const detectHyperlinkSupportFor = ({ argv, env, isTTY }: DetectionContext): boolean => {
-	if (env['NO_HYPERLINKS'] || argv.includes('--no-hyperlinks')) return false;
-	if (env['FORCE_HYPERLINKS'] || argv.includes('--hyperlinks')) return true;
+	if (argv.includes('--no-hyperlinks')) return false;
+	if (argv.includes('--hyperlinks')) return true;
+	if (env['NO_HYPERLINKS']) return false;
+	if (env['FORCE_HYPERLINKS']) return true;
 	if (isTTY && env['TERM'] !== 'dumb') return true;
 	return false;
 };
@@ -60,10 +62,10 @@ export const detectHyperlinkSupportFor = ({ argv, env, isTTY }: DetectionContext
  * Detect whether OSC 8 hyperlinks should be emitted.
  *
  * Independent of color support (SGR color and OSC 8 links are separate
- * terminal capabilities). Precedence: explicit disable (`NO_HYPERLINKS`)
- * beats explicit force (`FORCE_HYPERLINKS`) — the reverse of the color
- * convention — which beats TTY detection. A non-interactive stream (CI logs,
- * pipes) gets no links, since captured OSC 8 sequences are noise, not links.
+ * terminal capabilities). Precedence: explicit `--no-hyperlinks` /
+ * `--hyperlinks` flags, then `NO_HYPERLINKS`, then `FORCE_HYPERLINKS`, then
+ * TTY detection. A non-interactive stream (CI logs, pipes) gets no links,
+ * since captured OSC 8 sequences are noise, not links.
  *
  * @see https://no-hyperlinks.org/
  */
