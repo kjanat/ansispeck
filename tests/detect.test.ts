@@ -44,6 +44,20 @@ describe('detectColorSupport precedence', () => {
 });
 
 describe('detectHyperlinkSupport precedence', () => {
+	test('--hyperlinks beats NO_HYPERLINKS', () => {
+		expect(
+			detectHyperlinkSupportFor(context({ argv: ['--hyperlinks'], env: { NO_HYPERLINKS: '1' } })),
+		).toBe(true);
+	});
+
+	test('--no-hyperlinks beats FORCE_HYPERLINKS', () => {
+		expect(
+			detectHyperlinkSupportFor(
+				context({ argv: ['--no-hyperlinks'], env: { FORCE_HYPERLINKS: '1' } }),
+			),
+		).toBe(false);
+	});
+
 	test('NO_HYPERLINKS beats FORCE_HYPERLINKS', () => {
 		expect(
 			detectHyperlinkSupportFor(context({ env: { FORCE_HYPERLINKS: '1', NO_HYPERLINKS: '1' } })),

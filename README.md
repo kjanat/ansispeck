@@ -185,9 +185,10 @@ tab(2); // "\t\t"
 which beats platform heuristics.
 
 **Hyperlinks** are detected separately, following the
-[no-hyperlinks](https://no-hyperlinks.org/) convention. `NO_HYPERLINKS` /
-`--no-hyperlinks` beats `FORCE_HYPERLINKS` / `--hyperlinks`, which beats TTY
-status. Without an explicit override, non-interactive streams get no links.
+[no-hyperlinks](https://no-hyperlinks.org/) convention. Explicit
+`--no-hyperlinks` / `--hyperlinks` flags win first, then `NO_HYPERLINKS`, then
+`FORCE_HYPERLINKS`, then TTY status. Without an explicit override,
+non-interactive streams get no links.
 
 ## Size
 
