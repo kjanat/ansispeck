@@ -75,8 +75,11 @@
 	],
 	"scripts": {
 		"bd": "run -q build",
-		"bench": "run -s bench:bun bench:node",
+		"prebench": "run scripts/prepare-benchmark-package.ts",
+		"bench": "env BENCH_MULTI=1 run -s bench:bun bench:node",
+		"prebench:bun": "run -q scripts/prepare-benchmark-package.ts",
 		"bench:bun": "bunx --bun bench",
+		"prebench:node": "run -q scripts/prepare-benchmark-package.ts",
 		"bench:node": "npx bench",
 		"build": "bun --bun tsdown",
 		"build:quiet": "bun --bun tsdown -l error",

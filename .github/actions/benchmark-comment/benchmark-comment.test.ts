@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { env } from 'node:process';
 import { afterEach, describe, expect, test } from 'bun:test';
-import comment, { BENCHMARK_COMMENT_MARKER, benchmarkCommentBody } from '#action';
+import { BENCHMARK_COMMENT_MARKER, benchmarkCommentBody, updateBenchmarkComment } from '#action';
 
 const HEAD_SHA = '0123456789abcdef0123456789abcdef01234567';
 const RUN_URL = 'https://github.com/kjanat/ansispeck/actions/runs/123';
@@ -17,8 +17,25 @@ afterEach(async () => {
 	directory = '';
 });
 
-function harness(existingComments = [], pullRequestHead = HEAD_SHA) {
-	const calls = { create: [], update: [] };
+type CommentFixture = { body?: string | null; id: number };
+type CreateCommentParameters = {
+	body: string;
+	issue_number: number;
+	owner: string;
+	repo: string;
+};
+type UpdateCommentParameters = {
+	body: string;
+	comment_id: number;
+	owner: string;
+	repo: string;
+};
+
+function harness(existingComments: CommentFixture[] = [], pullRequestHead = HEAD_SHA) {
+	const calls: {
+		create: CreateCommentParameters[];
+		update: UpdateCommentParameters[];
+	} = { create: [], update: [] };
 	const core = { info() {} };
 	const context = {
 		payload: {
@@ -35,12 +52,12 @@ function harness(existingComments = [], pullRequestHead = HEAD_SHA) {
 		paginate: async () => existingComments,
 		rest: {
 			issues: {
-				createComment: async (parameters) => {
+				createComment: async (parameters: CreateCommentParameters) => {
 					calls.create.push(parameters);
 					return { data: { id: 2 } };
 				},
 				listComments() {},
-				updateComment: async (parameters) => {
+				updateComment: async (parameters: UpdateCommentParameters) => {
 					calls.update.push(parameters);
 				},
 			},
@@ -78,27 +95,27 @@ describe('benchmark PR comment', () => {
 	test('creates the first tracking comment', async () => {
 		await writeReport();
 		const fixture = harness();
-		await comment(fixture);
+		await updateBenchmarkComment(fixture);
 
 		expect(fixture.calls.create).toHaveLength(1);
 		expect(fixture.calls.update).toHaveLength(0);
-		expect(fixture.calls.create[0].body).toContain(BENCHMARK_COMMENT_MARKER);
+		expect(fixture.calls.create[0]?.body).toContain(BENCHMARK_COMMENT_MARKER);
 	});
 
 	test('updates the existing marked comment', async () => {
 		await writeReport();
 		const fixture = harness([{ id: 41, body: `${BENCHMARK_COMMENT_MARKER}\nold` }]);
-		await comment(fixture);
+		await updateBenchmarkComment(fixture);
 
 		expect(fixture.calls.create).toHaveLength(0);
 		expect(fixture.calls.update).toHaveLength(1);
-		expect(fixture.calls.update[0].comment_id).toBe(41);
+		expect(fixture.calls.update[0]?.comment_id).toBe(41);
 	});
 
 	test('does not overwrite the current comment with a stale run', async () => {
 		await writeReport();
 		const fixture = harness([], 'fedcba9876543210fedcba9876543210fedcba98');
-		await comment(fixture);
+		await updateBenchmarkComment(fixture);
 
 		expect(fixture.calls.create).toHaveLength(0);
 		expect(fixture.calls.update).toHaveLength(0);

@@ -5,9 +5,10 @@ import { BENCH_LIBRARIES } from '@/bench/libraries';
 const ROOT = dirname(import.meta.dir);
 const FIXTURE = join(ROOT, '.cache', 'bench-loading');
 const TARBALLS = join(FIXTURE, 'tarballs');
+const BENCHMARK_PACKAGE = join(ROOT, 'benchmarks', 'node_modules', 'ansispeck');
 
 function packageRoot(name: string): string {
-	if (name === 'ansispeck') return ROOT;
+	if (name === 'ansispeck') return BENCHMARK_PACKAGE;
 
 	const entry = Bun.fileURLToPath(import.meta.resolve(name));
 	const marker = `${sep}node_modules${sep}${name.split('/').join(sep)}${sep}`;
@@ -18,10 +19,11 @@ function packageRoot(name: string): string {
 
 function packedFilename(output: string, name: string): string {
 	const parsed: unknown = JSON.parse(output);
-	if (!Array.isArray(parsed) || parsed.length !== 1) {
-		throw new Error(`npm pack returned an unexpected result for ${name}`);
-	}
-	const result: unknown = parsed[0];
+	const result: unknown = Array.isArray(parsed)
+		? parsed.length === 1 ? parsed[0] : undefined
+		: typeof parsed === 'object' && parsed !== null && name in parsed
+		? Reflect.get(parsed, name)
+		: undefined;
 	if (typeof result !== 'object' || result === null || !('filename' in result) || typeof result.filename !== 'string') {
 		throw new Error(`npm pack did not report a filename for ${name}`);
 	}

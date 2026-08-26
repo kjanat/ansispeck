@@ -220,8 +220,8 @@ while running that benchmark, so there is no result to report.
 ## Run locally
 
 Use the package scripts or the recipes in the [justfile](justfile). For an
-individual runtime or output format, invoke the [benchmark CLI](bench.ts)
-directly:
+individual runtime or output format, invoke the
+[benchmark CLI](benchmarks/bench.ts) directly:
 
 ```sh
 bun run bench          # both runtimes, auto color detection
@@ -230,10 +230,10 @@ just bench-forced      # FORCE_COLOR=1, both runtimes
 just bench-md-forced   # markdown output, FORCE_COLOR=1
 
 # Single-runtime Markdown runs
-FORCE_COLOR=1 bun --bun bench.ts -f markdown
-FORCE_COLOR=1 deno run -A bench.ts -f markdown
-FORCE_COLOR=1 node bench.ts -f markdown
-NO_COLOR=1 bun --bun bench.ts -f markdown
-NO_COLOR=1 deno run -A bench.ts -f markdown
-NO_COLOR=1 node bench.ts -f markdown
+FORCE_COLOR=1 bun --bun benchmarks/bench.ts -f markdown
+FORCE_COLOR=1 deno run -A benchmarks/bench.ts -f markdown
+FORCE_COLOR=1 node benchmarks/bench.ts -f markdown
+NO_COLOR=1 bun --bun benchmarks/bench.ts -f markdown
+NO_COLOR=1 deno run -A benchmarks/bench.ts -f markdown
+NO_COLOR=1 node benchmarks/bench.ts -f markdown
 ```

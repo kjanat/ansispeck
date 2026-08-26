@@ -29,9 +29,9 @@ var="${RUNTIME^^}_BENCH_${mode}"
 
 # Build command based on runtime
 case "${RUNTIME}" in
-	bun) set -- bun --bun bench.ts -f markdown ;;
-	node) set -- node bench.ts -f markdown ;;
-	deno) set -- deno run -A bench.ts -f markdown ;;
+	bun) set -- bun --bun benchmarks/bench.ts -f markdown ;;
+	node) set -- node benchmarks/bench.ts -f markdown ;;
+	deno) set -- deno run -A benchmarks/bench.ts -f markdown ;;
 	*)
 		echo "Unknown runtime: ${RUNTIME}" >&2
 		exit 1

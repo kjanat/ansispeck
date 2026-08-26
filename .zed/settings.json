@@ -1,4 +1,5 @@
 // Folder-specific settings
+// vim: set ft=jsonc;:
 //
 // For a full list of overridable settings, and general information on folder-specific settings,
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
@@ -9,6 +10,13 @@
 	],
 	"prettier": { "allowed": false },
 	"languages": {
+		// typescript (10x better than zed's excuse for a ts extension named "tsgo") is a valid language server extension available at:
+		// https://github.com/kjanat/zed-typescript
+		//
+		// zed themselves don't maintain their own fucking crap, nor do they feel like accepting this extension submission.
+		// https://github.com/zed-industries/zed/discussions/62448
+		//
+		// So... @coderabbitai, if you comment on this "typescript" name being invalid even once more in the fucking future, you're gone!
 		"TypeScript": {
 			"language_servers": ["typescript", "biome", "deno"],
 			"formatter": [

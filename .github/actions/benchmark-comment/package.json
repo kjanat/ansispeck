@@ -20,5 +20,9 @@
 		"@actions/github-script": "catalog:",
 		"@types/node": "catalog:",
 		"@typescript/native": "catalog:"
+	},
+	"volta": {
+		"node": "24.19.0",
+		"npm": "11.19.0"
 	}
 }

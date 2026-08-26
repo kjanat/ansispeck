@@ -26,6 +26,7 @@
 		"ansi-colors": "catalog:bench",
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",
+		"dreamcli": "npm:@kjanat/dreamcli@^3",
 		"kleur": "catalog:bench",
 		"mitata": "catalog:bench",
 		"picocolors": "catalog:bench"
@@ -34,5 +35,6 @@
 		"@types/bun": "catalog:",
 		"@types/node": "catalog:",
 		"typescript": "catalog:"
-	}
+	},
+	"volta": { "extends": "../package.json" }
 }

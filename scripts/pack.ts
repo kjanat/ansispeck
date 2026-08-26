@@ -4,6 +4,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 
 const ROOT = dirname(import.meta.dir);
 const STAGING = join(ROOT, '.cache', 'npm-package');
+const DESTINATION = resolve(ROOT, process.argv[2] ?? '.');
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -78,6 +79,7 @@ const strippedDts = (await Bun.file(dtsPath).text())
 
 await Bun.write(dtsPath, `${strippedDts}\n`);
 
-const output = await Bun.$`npm pack ${STAGING} --ignore-scripts --json --pack-destination ${ROOT}`.text();
-const tarball = join(ROOT, basename(packFilename(output)));
+await Bun.$`mkdir -p ${DESTINATION}`;
+const output = await Bun.$`npm pack ${STAGING} --ignore-scripts --json --pack-destination ${DESTINATION}`.text();
+const tarball = join(DESTINATION, basename(packFilename(output)));
 process.stdout.write(`${tarball}\n`);

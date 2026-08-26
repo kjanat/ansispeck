@@ -26,7 +26,7 @@ function git(cwd: string | undefined, args: string[]): GitResult {
 }
 
 const getNpmUrl = (name: string, version: string | undefined): string =>
-	new URL(`/package/${name}${version ? `/v/${version}` : ''}`, 'https://www.npmjs.com').href;
+	new URL(`/package/${name}${version ? `/v/${version}` : ''}`, 'https://npm.im').href;
 const getCommitUrl = (repositoryUrl: string, commit: string | undefined): string =>
 	commit === undefined ? repositoryUrl : `${repositoryUrl}/commit/${commit}`;
 

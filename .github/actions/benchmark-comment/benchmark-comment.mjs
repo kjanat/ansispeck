@@ -62,10 +62,42 @@ ${report.trim()}
 }
 
 /**
- * @param {import('@actions/github-script').AsyncFunctionArguments} args
+ * @typedef {{ body?: string | null, id: number }} IssueComment
+ * @typedef {{ body: string, issue_number: number, owner: string, repo: string }} CreateCommentParameters
+ * @typedef {{ body: string, comment_id: number, owner: string, repo: string }} UpdateCommentParameters
+ * @typedef {{ issue_number: number, owner: string, repo: string }} ListCommentsParameters
+ * @typedef {{ owner: string, pull_number: number, repo: string }} GetPullParameters
+ * @typedef {{
+ *   core: { info(message: string): void },
+ *   context: {
+ *     payload: unknown,
+ *     repo: { owner: string, repo: string },
+ *     serverUrl: string,
+ *   },
+ *   github: {
+ *     paginate(
+ *       route: (...args: never[]) => unknown,
+ *       parameters: ListCommentsParameters,
+ *     ): Promise<IssueComment[]>,
+ *     rest: {
+ *       issues: {
+ *         createComment(parameters: CreateCommentParameters): Promise<{ data: { id: number } }>,
+ *         listComments(...args: never[]): unknown,
+ *         updateComment(parameters: UpdateCommentParameters): Promise<unknown>,
+ *       },
+ *       pulls: {
+ *         get(parameters: GetPullParameters): Promise<{ data: { head: { sha: string } } }>,
+ *       },
+ *     },
+ *   },
+ * }} BenchmarkCommentArguments
+ */
+
+/**
+ * @param {BenchmarkCommentArguments} args
  * @returns {Promise<void>}
  */
-export default async ({ core, context, github }) => {
+export async function updateBenchmarkComment({ core, context, github }) {
 	const { owner, repo } = context.repo;
 	const workflowRun = parseWorkflowRun(context.payload);
 	const reportPath = env.BENCHMARK_REPORT_PATH;
@@ -118,4 +150,9 @@ export default async ({ core, context, github }) => {
 		body,
 	});
 	core.info(`Created comment ${newComment.id}`);
-};
+}
+
+/** @param {import('@actions/github-script').AsyncFunctionArguments} args */
+export default async function comment(args) {
+	await updateBenchmarkComment(args);
+}

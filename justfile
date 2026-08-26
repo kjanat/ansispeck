@@ -4,8 +4,8 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 unexport FORCE_COLOR
 unexport NO_COLOR
 
-BENCH_BUN := 'bun --bun bench.ts'
-BENCH_NODE := 'node bench.ts'
+BENCH_BUN := 'bun --bun benchmarks/bench.ts'
+BENCH_NODE := 'node benchmarks/bench.ts'
 
 default:
 	@just --list --unsorted

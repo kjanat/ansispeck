@@ -4,17 +4,12 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 import { URL } from 'node:url';
-import pkg from '@pkg' with { type: 'json' };
+import pkg from '../package.json' with { type: 'json' };
 import type { Out } from 'dreamcli';
 import { cli, command, flag } from 'dreamcli';
 import { run } from 'mitata';
-import { register as complex } from '#complex';
-import { register as deferred } from '#deferred';
 import { BENCH_LIBRARIES } from '#libraries';
-import { register as loading } from '#loading';
-import { register as recursion } from '#recursion';
 import { describeRevision } from '#revision';
-import { register as simple } from '#simple';
 
 const ROOT = dirname(import.meta.dirname);
 
@@ -466,9 +461,26 @@ function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
 }
 
 async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, compact: boolean, out: Out): Promise<void> {
-	execFileSync('run', ['-q', 'build'], { stdio: 'ignore', cwd: ROOT });
+	const packageScript = process.env['npm_lifecycle_event'];
+	if (packageScript !== 'bench:bun' && packageScript !== 'bench:node') {
+		execFileSync('bun', ['--bun', 'scripts/prepare-benchmark-package.ts'], { stdio: 'ignore', cwd: ROOT });
+	}
 	execFileSync('bun', ['--bun', 'scripts/prepare-loading-fixture.ts'], { stdio: 'ignore', cwd: ROOT });
-	const { default: ansispeck } = await import('@ansispeck-dist');
+	const [
+		{ default: ansispeck },
+		{ register: simple },
+		{ register: complex },
+		{ register: recursion },
+		{ register: deferred },
+		{ register: loading },
+	] = await Promise.all([
+		import('ansispeck'),
+		import('#simple'),
+		import('#complex'),
+		import('#recursion'),
+		import('#deferred'),
+		import('#loading'),
+	]);
 	const excluded = rankExcluded(ansispeck.isColorSupported);
 
 	simple({ count: 1 });

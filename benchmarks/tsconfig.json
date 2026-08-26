@@ -19,12 +19,7 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noPropertyAccessFromIndexSignature": false,
-		"types": ["*"],
-		"paths": {
-			"@pkg": ["../package.json"],
-			"@ansispeck-dist": ["../dist/index.d.ts", "../dist/index.js"],
-			"@ansispeck-dist/*": ["../dist/*.d.ts", "../dist/*.js"]
-		}
+		"types": ["*"]
 	},
 	"exclude": ["node_modules"]
 }
