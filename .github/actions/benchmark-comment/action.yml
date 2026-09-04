@@ -31,5 +31,5 @@ runs:
       with:
         github-token: ${{ inputs.github-token }}
         script: |
-          const { default: comment } = await import("${{ github.action_path }}/benchmark-comment.mjs");
+          const { default: comment } = await import(`${process.env.GITHUB_ACTION_PATH}/benchmark-comment.mjs`);
           return await comment({ core, context, github });
