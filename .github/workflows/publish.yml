@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with: &gitFull+noCreds { fetch-depth: 0, persist-credentials: false }
+        with: &gitFullNoCreds { fetch-depth: 0, persist-credentials: false }
       - parallel:
           - { uses: kjanat/dprint-check@v3, with: &dprint { install-only: true } }
           - { uses: kjanat/runner@master }
@@ -51,11 +51,11 @@ jobs:
     name: npm
     needs: [validate, test]
     runs-on: ubuntu-latest
-    permissions: &r+tw { contents: read, id-token: write }
+    permissions: &readTokenWrite { contents: read, id-token: write }
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
     steps:
       - uses: actions/checkout@v7
-        with: *gitFull+noCreds
+        with: *gitFullNoCreds
       - parallel:
           - uses: kjanat/dprint-check@v3
             with: *dprint
@@ -99,11 +99,11 @@ jobs:
     name: jsr
     needs: [validate, publish-npm]
     runs-on: ubuntu-latest
-    permissions: *r+tw
+    permissions: *readTokenWrite
     environment: { name: jsr, url: "${{ steps.publish.outputs.jsr_url }}" }
     steps:
       - uses: actions/checkout@v7
-        with: *gitFull+noCreds
+        with: *gitFullNoCreds
       - uses: kjanat/dprint-check@v3
         with: *dprint
       - name: Publish to JSR
