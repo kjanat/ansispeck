@@ -33,10 +33,9 @@ dist entrypoints, never `src/*`.
   `ansispeck/safe`, `ansispeck/rope`, `ansispeck/noop`).
 - `ansispeck/noop` is the control path (string coercion only) — it exists to
   bound formatter overhead.
-- Suite/column names are STABLE for historical table continuity:
-  `simple, complex, recursion, deferred-build,
-  loading`. Registration order in
-  `bench.ts` must match `SUITES` order (group→suite mapping is positional).
+- Suite/column names are STABLE for historical table continuity: `simple,
+  complex, recursion, deferred-build, loading`. Registration order in `bench.ts`
+  must match `SUITES` order (group→suite mapping is positional).
 - Anti-DCE: results go to a local `sink` consumed by `do_not_optimize`; string
   inputs carry `++n` or Counter entropy so engines can't constant-fold.
 - `register` options take explicit annotations (`{ count?: number }`, deferred:

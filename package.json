@@ -108,8 +108,8 @@
 		"biome": "catalog:",
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",
-		"dprint": "^0",
-		"dreamcli": "npm:@kjanat/dreamcli@^3",
+		"dprint": "^0.57",
+		"dreamcli": "npm:@kjanat/dreamcli@^4.0.0-rc.2",
 		"importmapify": "^1",
 		"kleur": "catalog:bench",
 		"mitata": "catalog:bench",
@@ -118,7 +118,7 @@
 		"runner-run": "^0",
 		"rust-just": "^1",
 		"sort-package-json": "^4",
-		"tsdown": "^0.22",
+		"tsdown": "^0.23",
 		"typescript": "<7"
 	},
 	"packageManager": "bun@1.4.0",
@@ -127,19 +127,19 @@
 		"npm": "11.19.0"
 	},
 	"catalog": {
-		"@typescript/native": "npm:typescript@^7",
+		"@typescript/native": "npm:typescript@>=7",
 		"@actions/github-script": "github:actions/github-script",
 		"@types/bun": "^1.4",
-		"@types/node": ">=24",
-		"biome": "npm:@biomejs/biome@^2.5",
+		"@types/node": ">=26",
+		"biome": "npm:@biomejs/biome@>=2.5",
 		"typescript": "^7"
 	},
 	"catalogs": {
 		"bench": {
 			"ansi-colors": "^4",
-			"chalk": "^5",
+			"chalk": "^6",
 			"colorette": "^2",
-			"kleur": "^4.1.5",
+			"kleur": "^4",
 			"mitata": "^1",
 			"picocolors": "^1"
 		}

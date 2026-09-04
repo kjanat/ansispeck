@@ -36,5 +36,7 @@
 		"@types/node": "catalog:",
 		"typescript": "catalog:"
 	},
-	"volta": { "extends": "../package.json" }
+	"volta": {
+		"extends": "../package.json"
+	}
 }

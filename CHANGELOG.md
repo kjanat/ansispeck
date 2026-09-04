@@ -139,8 +139,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- `link(url, text?)` — OSC 8 terminal hyperlink formatter; accepts
-  `string | URL`, `text` defaults to the URL, usable as a template tag
+- `link(url, text?)` — OSC 8 terminal hyperlink formatter; accepts `string |
+  URL`, `text` defaults to the URL, usable as a template tag
 - `overline`, `doubleUnderline`, `blink` style modifiers
 - `fg256(n)` / `bg256(n)` — 256-color palette formatters
 - `rgb(r, g, b)` / `bgRgb(r, g, b)`, `hex(color)` / `bgHex(color)` — truecolor
