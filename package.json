@@ -121,7 +121,7 @@
 		"tsdown": "^0.23",
 		"typescript": "<7"
 	},
-	"packageManager": "bun@1.4.0",
+	"packageManager": "bun@1.4.1",
 	"volta": {
 		"node": "26.7.0",
 		"npm": "11.19.0"

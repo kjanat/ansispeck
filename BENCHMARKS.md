@@ -18,16 +18,16 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 ## Size
 
-| Package                            | Runtime     | Gzip    | Types    |
-| ---------------------------------- | ----------- | ------- | -------- |
-| [ansispeck] ([7795787][as-commit]) | **5.54 KB** | 2.44 KB | 15.83 KB |
+| Package                                      | Runtime     | Gzip    | Types    |
+| -------------------------------------------- | ----------- | ------- | -------- |
+| [ansispeck] ([v0.4.2-4-gb83253f][as-commit]) | **5.54 KB** | 2.44 KB | 15.80 KB |
 
-[ansispeck]: https://npm.im/package/ansispeck/v/0.4.0
-[as-commit]: https://github.com/kjanat/ansispeck/commit/77957873765ec2d2b4f16577fc2dde20c1970a2f
+[ansispeck]: https://npm.im/package/ansispeck/v/0.4.2
+[as-commit]: https://github.com/kjanat/ansispeck/commit/b83253f5b6702d6d669c1e094ccc4e400653ddb9
 
 ## Benchmarks (FORCE_COLOR=1)
 
-### bun 1.3.14
+### bun 1.4.0
 
 > AMD EPYC 7763 64-Core Processor
 
@@ -48,23 +48,23 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 >
 > Cold load starts an isolated runtime process using packages installed from local tarballs.
 
-| Library                    |                      Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
-| -------------------------- | --------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      |          ***115.02 ns*** 🥈 |                508.25 ns #4 |                603.04 µs #6 |                 32.22 µs #7 |                30.66 ms #4 |
-| ansispeck/auto[^ansispeck] |                129.13 ns #5 |              *503.36 ns* 🥉 |                577.45 µs #5 |                 30.06 µs #5 |                30.97 ms #6 |
-| ansispeck/raw[^ansispeck]  |              *125.36 ns* 🥉 |                508.28 ns #5 |                608.16 µs #7 |                 29.45 µs #4 |                31.60 ms #9 |
-| ansispeck/safe[^ansispeck] | <ins>**102.43 ns**</ins> 🥇 | <ins>**205.85 ns**</ins> 🥇 | <ins>**235.00 ns**</ins> 🥇 |          ***520.70 ns*** 🥈 |               33.62 ms #10 |
-| ansispeck/rope[^ansispeck] |               271.13 ns #11 |                 3.80 µs #11 |                 1.13 ms #10 | <ins>**499.60 ns**</ins> 🥇 |                30.67 ms #5 |
-| ansispeck/noop[^ansispeck] |                  48.08 ns † |                  52.57 ns † |                 211.77 ns † |                 325.08 ns † |                 30.86 ms † |
-| picocolors[^picocolors]    |                132.28 ns #6 |          ***500.17 ns*** 🥈 |                616.54 µs #8 |               *28.78 µs* 🥉 | <ins>**16.66 ms**</ins> 🥇 |
-| colorette[^colorette]      |                125.88 ns #4 |                601.66 ns #6 |                 1.14 ms #11 |                 30.63 µs #6 |              *29.28 ms* 🥉 |
-| kleur[^kleur]              |                144.70 ns #9 |                975.36 ns #9 |              *412.58 µs* 🥉 |                75.04 µs #10 |                31.38 ms #7 |
-| kleur/colors[^kleur]       |                135.65 ns #7 |                706.42 ns #7 |          ***397.88 µs*** 🥈 |                 72.11 µs #9 |                31.45 ms #8 |
-| chalk[^chalk]              |                137.59 ns #8 |                791.18 ns #8 |                855.58 µs #9 |                 64.83 µs #8 |               35.27 ms #11 |
-| ansi-colors[^ansi-colors]  |               228.69 ns #10 |                 1.51 µs #10 |                421.59 µs #4 |                79.32 µs #11 |          ***20.06 ms*** 🥈 |
-| **ansispeck/ext#1**        |                           — |                     1.02x ~ |                       1.52x |                       1.12x |                      1.84x |
+| Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                 Cold load |
+| -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | ------------------------: |
+| ansispeck[^ansispeck]      |               109.50 ns #5 |                473.22 ns #4 |                452.05 µs #5 |                 25.71 µs #6 |               21.42 ms #8 |
+| ansispeck/auto[^ansispeck] |         ***100.27 ns*** 🥈 |                478.23 ns #5 |                487.19 µs #8 |               *25.44 µs* 🥉 |               21.39 ms #7 |
+| ansispeck/raw[^ansispeck]  |               109.97 ns #6 |              *472.96 ns* 🥉 |                470.95 µs #6 |                 25.47 µs #4 |               21.26 ms #6 |
+| ansispeck/safe[^ansispeck] | <ins>**89.32 ns**</ins> 🥇 | <ins>**191.99 ns**</ins> 🥇 | <ins>**214.88 ns**</ins> 🥇 | <ins>**508.16 ns**</ins> 🥇 |               21.59 ms #9 |
+| ansispeck/rope[^ansispeck] |               209.93 ns #9 |                 1.44 µs #10 |                 1.43 ms #11 |          ***510.60 ns*** 🥈 |              22.07 ms #11 |
+| ansispeck/noop[^ansispeck] |                 41.84 ns † |                  47.88 ns † |                 177.75 ns † |                 315.78 ns † |                21.43 ms † |
+| picocolors[^picocolors]    |               116.10 ns #7 |          ***469.00 ns*** 🥈 |                477.66 µs #7 |                 25.50 µs #5 | <ins>**7.32 ms**</ins> 🥇 |
+| colorette[^colorette]      |              335.95 ns #11 |                599.03 ns #6 |                 1.15 ms #10 |                 26.39 µs #7 |             *19.59 ms* 🥉 |
+| kleur[^kleur]              |               108.79 ns #4 |                749.77 ns #8 |          ***430.78 µs*** 🥈 |                73.40 µs #10 |               20.06 ms #5 |
+| kleur/colors[^kleur]       |             *105.58 ns* 🥉 |                670.20 ns #7 |                433.83 µs #4 |                 69.68 µs #9 |               19.91 ms #4 |
+| chalk[^chalk]              |               121.11 ns #8 |                757.92 ns #9 |                737.06 µs #9 |                 56.22 µs #8 |              21.87 ms #10 |
+| ansi-colors[^ansi-colors]  |              231.77 ns #10 |                 1.51 µs #11 |              *433.15 µs* 🥉 |                74.26 µs #11 |          ***8.49 ms*** 🥈 |
+| **ansispeck/ext#1**        |                      1.04x |                     1.01x ~ |                     1.05x ~ |                     1.01x ~ |                     2.93x |
 
-[^ansispeck]: ansispeck [v0.4.0](https://npm.im/package/ansispeck/v/0.4.0 "NPM")
+[^ansispeck]: ansispeck [v0.4.2-4-gb83253f](https://github.com/kjanat/ansispeck/commit/b83253f5b6702d6d669c1e094ccc4e400653ddb9 "GitHub")
 
 [^picocolors]: picocolors [v1.1.1](https://npm.im/package/picocolors/v/1.1.1 "NPM")
 
@@ -72,11 +72,11 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 [^kleur]: kleur [v4.1.5](https://npm.im/package/kleur/v/4.1.5 "NPM")
 
-[^chalk]: chalk [v5.6.2](https://npm.im/package/chalk/v/5.6.2 "NPM")
+[^chalk]: chalk [v6.0.0](https://npm.im/package/chalk/v/6.0.0 "NPM")
 
 [^ansi-colors]: ansi-colors [v4.1.3](https://npm.im/package/ansi-colors/v/4.1.3 "NPM")
 
-### deno 2.9.3
+### deno 2.9.6
 
 > AMD EPYC 7763 64-Core Processor
 
@@ -86,21 +86,21 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 | Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      |                73.88 ns #4 |              *362.98 ns* 🥉 |                498.61 µs #8 |               *16.24 µs* 🥉 |                46.19 ms #7 |
-| ansispeck/auto[^ansispeck] |                76.75 ns #6 |                371.84 ns #5 |                487.30 µs #7 |                 16.42 µs #4 | <ins>**43.58 ms**</ins> 🥇 |
-| ansispeck/raw[^ansispeck]  |                73.92 ns #5 |                366.05 ns #4 |                480.95 µs #6 |                 16.48 µs #5 |                44.68 ms #5 |
-| ansispeck/safe[^ansispeck] | <ins>**57.61 ns**</ins> 🥇 |          ***277.04 ns*** 🥈 | <ins>**172.39 ns**</ins> 🥇 |            ***1.29 µs*** 🥈 |          ***43.83 ms*** 🥈 |
-| ansispeck/rope[^ansispeck] |              243.44 ns #10 |                 1.27 µs #10 |                 1.44 ms #10 | <ins>**583.15 ns**</ins> 🥇 |                45.80 ms #6 |
-| ansispeck/noop[^ansispeck] |                 31.26 ns † |                  35.96 ns † |                 110.33 ns † |                 352.01 ns † |                 43.90 ms † |
-| picocolors[^picocolors]    |          ***69.34 ns*** 🥈 | <ins>**263.81 ns**</ins> 🥇 |                441.40 µs #5 |                 16.66 µs #7 |               53.49 ms #10 |
-| colorette[^colorette]      |              *70.08 ns* 🥉 |                428.88 ns #6 |                         DNF |                 16.52 µs #6 |                47.24 ms #8 |
-| kleur[^kleur]              |                92.48 ns #9 |                596.56 ns #8 |              *375.59 µs* 🥉 |                 43.41 µs #9 |              *44.31 ms* 🥉 |
-| kleur/colors[^kleur]       |                79.98 ns #7 |                514.11 ns #7 |          ***375.54 µs*** 🥈 |                 43.02 µs #8 |                44.42 ms #4 |
-| chalk[^chalk]              |                90.23 ns #8 |                668.28 ns #9 |                801.74 µs #9 |                45.34 µs #10 |                48.11 ms #9 |
-| ansi-colors[^ansi-colors]  |              264.46 ns #11 |                 1.87 µs #11 |                376.27 µs #4 |                45.38 µs #11 |               55.22 ms #11 |
-| **ansispeck/ext#1**        |                      1.07x |                       1.38x |                       1.33x |                           — |                    1.04x ~ |
+| ansispeck[^ansispeck]      |                68.04 ns #4 |                347.59 ns #4 |                493.25 µs #7 |                 16.03 µs #4 |                41.15 ms #6 |
+| ansispeck/auto[^ansispeck] |                70.03 ns #6 |              *343.00 ns* 🥉 |                469.52 µs #6 |                 16.30 µs #7 |                41.07 ms #5 |
+| ansispeck/raw[^ansispeck]  |                69.28 ns #5 |                350.77 ns #5 |                427.52 µs #5 |               *15.96 µs* 🥉 |          ***39.16 ms*** 🥈 |
+| ansispeck/safe[^ansispeck] | <ins>**57.64 ns**</ins> 🥇 |          ***278.76 ns*** 🥈 | <ins>**169.28 ns**</ins> 🥇 |            ***1.31 µs*** 🥈 |              *40.14 ms* 🥉 |
+| ansispeck/rope[^ansispeck] |              235.35 ns #10 |                 1.29 µs #10 |                 1.43 ms #10 | <ins>**590.63 ns**</ins> 🥇 |                40.63 ms #4 |
+| ansispeck/noop[^ansispeck] |                 30.87 ns † |                  36.13 ns † |                 108.26 ns † |                 352.05 ns † |                 39.13 ms † |
+| picocolors[^picocolors]    |          ***66.66 ns*** 🥈 | <ins>**249.88 ns**</ins> 🥇 |                508.87 µs #8 |                 16.20 µs #5 |                41.93 ms #8 |
+| colorette[^colorette]      |              *66.77 ns* 🥉 |                385.78 ns #6 |                         DNF |                 16.23 µs #6 |                42.25 ms #9 |
+| kleur[^kleur]              |                79.75 ns #8 |                577.70 ns #8 |          ***353.98 µs*** 🥈 |                42.69 µs #10 |                41.25 ms #7 |
+| kleur/colors[^kleur]       |                75.00 ns #7 |                516.54 ns #7 |              *356.58 µs* 🥉 |                 42.30 µs #9 | <ins>**39.08 ms**</ins> 🥇 |
+| chalk[^chalk]              |                80.69 ns #9 |                646.20 ns #9 |                735.02 µs #9 |                 42.21 µs #8 |               44.52 ms #11 |
+| ansi-colors[^ansi-colors]  |              241.36 ns #11 |                 1.83 µs #11 |                357.81 µs #4 |                43.79 µs #11 |               43.68 ms #10 |
+| **ansispeck/ext#1**        |                      1.02x |                       1.39x |                       1.39x |                           — |                    1.05x ~ |
 
-### node 26.3.0
+### node 26.7.0
 
 > AMD EPYC 7763 64-Core Processor
 
@@ -110,23 +110,47 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 | Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      |                72.34 ns #5 |                345.00 ns #4 |                500.95 µs #8 |                 16.08 µs #4 |                29.71 ms #7 |
-| ansispeck/auto[^ansispeck] |                73.56 ns #6 |              *342.57 ns* 🥉 |                484.28 µs #7 |                 16.09 µs #5 |                29.67 ms #6 |
-| ansispeck/raw[^ansispeck]  |              *69.60 ns* 🥉 |                355.85 ns #5 |                446.63 µs #5 |                 16.11 µs #6 |                30.20 ms #9 |
-| ansispeck/safe[^ansispeck] | <ins>**64.89 ns**</ins> 🥇 |          ***283.79 ns*** 🥈 | <ins>**174.96 ns**</ins> 🥇 |            ***1.55 µs*** 🥈 |               30.99 ms #10 |
-| ansispeck/rope[^ansispeck] |              256.84 ns #10 |                 1.34 µs #10 |                 1.37 ms #10 | <ins>**596.74 ns**</ins> 🥇 |                30.17 ms #8 |
-| ansispeck/noop[^ansispeck] |                 35.27 ns † |                  39.24 ns † |                 115.27 ns † |                 347.92 ns † |                 30.24 ms † |
-| picocolors[^picocolors]    |          ***68.06 ns*** 🥈 | <ins>**252.99 ns**</ins> 🥇 |                453.03 µs #6 |                 16.21 µs #7 | <ins>**27.52 ms**</ins> 🥇 |
-| colorette[^colorette]      |                69.76 ns #4 |                395.94 ns #6 |                         DNF |               *15.98 µs* 🥉 |                29.09 ms #5 |
-| kleur[^kleur]              |                79.96 ns #8 |                556.42 ns #8 |                359.04 µs #4 |                 42.34 µs #8 |                28.56 ms #4 |
-| kleur/colors[^kleur]       |                78.55 ns #7 |                493.52 ns #7 |          ***350.51 µs*** 🥈 |                42.69 µs #10 |              *28.46 ms* 🥉 |
-| chalk[^chalk]              |                86.37 ns #9 |                648.56 ns #9 |                716.31 µs #9 |                 42.38 µs #9 |               38.82 ms #11 |
-| ansi-colors[^ansi-colors]  |              264.09 ns #11 |                 1.93 µs #11 |              *356.79 µs* 🥉 |                43.35 µs #11 |          ***27.95 ms*** 🥈 |
-| **ansispeck/ext#1**        |                      1.06x |                       1.36x |                       1.43x |                     1.01x ~ |                      1.08x |
+| ansispeck[^ansispeck]      |                72.00 ns #5 |              *337.72 ns* 🥉 |                499.55 µs #8 |                 16.13 µs #7 |                29.02 ms #5 |
+| ansispeck/auto[^ansispeck] |                73.84 ns #6 |                341.64 ns #5 |                485.30 µs #7 |                 16.04 µs #6 |                29.24 ms #7 |
+| ansispeck/raw[^ansispeck]  |          ***68.52 ns*** 🥈 |                341.62 ns #4 |                442.16 µs #5 |                 15.97 µs #5 |                28.97 ms #4 |
+| ansispeck/safe[^ansispeck] | <ins>**60.41 ns**</ins> 🥇 |          ***278.53 ns*** 🥈 | <ins>**176.03 ns**</ins> 🥇 |            ***1.59 µs*** 🥈 |                30.20 ms #9 |
+| ansispeck/rope[^ansispeck] |              250.19 ns #10 |                 1.28 µs #10 |                 1.35 ms #10 | <ins>**593.62 ns**</ins> 🥇 |                29.67 ms #8 |
+| ansispeck/noop[^ansispeck] |                 32.75 ns † |                  39.02 ns † |                 111.97 ns † |                 362.50 ns † |                 29.38 ms † |
+| picocolors[^picocolors]    |              *69.06 ns* 🥉 | <ins>**264.04 ns**</ins> 🥇 |                446.09 µs #6 |                 15.78 µs #4 | <ins>**26.96 ms**</ins> 🥇 |
+| colorette[^colorette]      |                69.52 ns #4 |                404.22 ns #6 |                         DNF |               *15.75 µs* 🥉 |               30.27 ms #10 |
+| kleur[^kleur]              |                87.92 ns #9 |                538.66 ns #8 |              *359.40 µs* 🥉 |                41.96 µs #10 |                29.12 ms #6 |
+| kleur/colors[^kleur]       |                78.17 ns #7 |                497.34 ns #7 |          ***356.92 µs*** 🥈 |                 41.83 µs #9 |              *28.34 ms* 🥉 |
+| chalk[^chalk]              |                80.17 ns #8 |                643.97 ns #9 |                686.80 µs #9 |                 41.65 µs #8 |               39.52 ms #11 |
+| ansi-colors[^ansi-colors]  |              265.11 ns #11 |                 2.08 µs #11 |                367.20 µs #4 |                42.69 µs #11 |          ***28.25 ms*** 🥈 |
+| **ansispeck/ext#1**        |                      1.04x |                       1.28x |                       1.40x |                     1.02x ~ |                      1.08x |
 
 ## Benchmarks (NO_COLOR=1)
 
-### bun 1.3.14
+### bun 1.4.0
+
+> AMD EPYC 7763 64-Core Processor
+
+<!-- -->
+
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
+
+| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                 Cold load |
+| -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | ------------------------: |
+| ansispeck[^ansispeck]      | <ins>**38.18 ns**</ins> 🥇 | <ins>**50.17 ns**</ins> 🥇 | <ins>**192.60 ns**</ins> 🥇 |          ***155.86 ns*** 🥈 |               21.20 ms #8 |
+| ansispeck/auto[^ansispeck] |          ***39.88 ns*** 🥈 |                52.36 ns #4 |                198.98 ns #4 | <ins>**154.97 ns**</ins> 🥇 |               20.86 ms #6 |
+| ansispeck/raw[^ansispeck]  |                108.74 ns † |                484.64 ns † |                 535.63 µs † |                  26.29 µs † |                21.00 ms † |
+| ansispeck/safe[^ansispeck] |                91.76 ns #8 |               190.47 ns #8 |                216.98 ns #8 |                549.61 ns #9 |               21.11 ms #7 |
+| ansispeck/rope[^ansispeck] |                97.09 ns #9 |               602.82 ns #9 |                385.91 µs #9 |              *223.38 ns* 🥉 |               21.38 ms #9 |
+| ansispeck/noop[^ansispeck] |                 46.12 ns † |                 49.71 ns † |                 184.56 ns † |                 287.91 ns † |                20.75 ms † |
+| picocolors[^picocolors]    |                47.21 ns #5 |                53.20 ns #5 |              *196.92 ns* 🥉 |                287.88 ns #5 | <ins>**7.29 ms**</ins> 🥇 |
+| colorette[^colorette]      |              *46.24 ns* 🥉 |              *51.89 ns* 🥉 |                200.60 ns #5 |                286.67 ns #4 |             *19.91 ms* 🥉 |
+| kleur[^kleur]              |                47.65 ns #6 |          ***51.48 ns*** 🥈 |          ***196.31 ns*** 🥈 |                468.90 ns #7 |               19.93 ms #4 |
+| kleur/colors[^kleur]       |                46.29 ns #4 |                53.41 ns #6 |                202.27 ns #6 |                333.06 ns #6 |               19.94 ms #5 |
+| chalk[^chalk]              |                51.89 ns #7 |               103.62 ns #7 |                209.92 ns #7 |                513.66 ns #8 |              21.56 ms #10 |
+| ansi-colors[^ansi-colors]  |              221.63 ns #10 |                1.61 µs #10 |               428.32 µs #10 |                75.02 µs #10 |          ***8.76 ms*** 🥈 |
+| **ansispeck/ext#1**        |                          — |                          — |                           — |                           — |                     2.91x |
+
+### deno 2.9.6
 
 > AMD EPYC 7763 64-Core Processor
 
@@ -136,45 +160,21 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      | <ins>**42.19 ns**</ins> 🥇 | <ins>**53.11 ns**</ins> 🥇 |                218.70 ns #6 |          ***175.54 ns*** 🥈 |                31.83 ms #9 |
-| ansispeck/auto[^ansispeck] |          ***47.06 ns*** 🥈 |                55.26 ns #6 |                214.53 ns #5 | <ins>**171.58 ns**</ins> 🥇 |                30.15 ms #5 |
-| ansispeck/raw[^ansispeck]  |                128.90 ns † |                536.59 ns † |                 627.76 µs † |                  30.33 µs † |                 30.50 ms † |
-| ansispeck/safe[^ansispeck] |               106.94 ns #8 |               214.29 ns #8 |                237.09 ns #8 |                558.47 ns #9 |                30.28 ms #6 |
-| ansispeck/rope[^ansispeck] |               114.82 ns #9 |               615.22 ns #9 |                317.31 µs #9 |              *246.01 ns* 🥉 |                30.95 ms #8 |
-| ansispeck/noop[^ansispeck] |                 47.93 ns † |                 53.58 ns † |                 209.64 ns † |                 319.73 ns † |                 30.92 ms † |
-| picocolors[^picocolors]    |                50.51 ns #4 |                54.99 ns #4 |              *210.06 ns* 🥉 |                311.95 ns #4 | <ins>**16.58 ms**</ins> 🥇 |
-| colorette[^colorette]      |              *50.19 ns* 🥉 |              *54.78 ns* 🥉 |                214.44 ns #4 |                318.56 ns #5 |              *29.05 ms* 🥉 |
-| kleur[^kleur]              |                52.51 ns #5 |          ***53.29 ns*** 🥈 | <ins>**208.99 ns**</ins> 🥇 |                464.30 ns #7 |                29.97 ms #4 |
-| kleur/colors[^kleur]       |                54.99 ns #7 |                55.23 ns #5 |          ***209.49 ns*** 🥈 |                330.85 ns #6 |                30.91 ms #7 |
-| chalk[^chalk]              |                53.27 ns #6 |                84.40 ns #7 |                229.57 ns #7 |                520.05 ns #8 |               34.18 ms #10 |
-| ansi-colors[^ansi-colors]  |              236.74 ns #10 |                1.55 µs #10 |               417.56 µs #10 |                75.84 µs #10 |          ***19.71 ms*** 🥈 |
-| **ansispeck/ext#1**        |                          — |                          — |                       1.05x |                           — |                      1.92x |
+| ansispeck[^ansispeck]      | <ins>**30.25 ns**</ins> 🥇 | <ins>**35.36 ns**</ins> 🥇 |                109.82 ns #5 |          ***245.23 ns*** 🥈 |              *39.00 ms* 🥉 |
+| ansispeck/auto[^ansispeck] |                37.81 ns #6 |          ***35.54 ns*** 🥈 |              *105.53 ns* 🥉 |              *248.04 ns* 🥉 |                39.74 ms #4 |
+| ansispeck/raw[^ansispeck]  |                 70.21 ns † |                359.24 ns † |                 480.57 µs † |                  15.73 µs † |                 39.91 ms † |
+| ansispeck/safe[^ansispeck] |                52.28 ns #8 |               192.26 ns #8 |                148.37 ns #8 |                  1.18 µs #9 |                39.81 ms #5 |
+| ansispeck/rope[^ansispeck] |                99.38 ns #9 |               556.90 ns #9 |                263.44 µs #9 | <ins>**117.66 ns**</ins> 🥇 |                40.01 ms #6 |
+| ansispeck/noop[^ansispeck] |                 31.07 ns † |                 35.99 ns † |                 108.58 ns † |                 348.77 ns † |                 38.06 ms † |
+| picocolors[^picocolors]    |                42.06 ns #7 |                97.84 ns #6 |                114.94 ns #6 |                280.52 ns #4 |                41.29 ms #7 |
+| colorette[^colorette]      |                36.78 ns #5 |                93.94 ns #5 |                117.32 ns #7 |                281.46 ns #5 |                42.25 ms #8 |
+| kleur[^kleur]              |              *33.59 ns* 🥉 |                78.33 ns #4 |                106.91 ns #4 |                283.63 ns #6 |          ***38.36 ms*** 🥈 |
+| kleur/colors[^kleur]       |          ***32.31 ns*** 🥈 |              *38.94 ns* 🥉 |          ***105.43 ns*** 🥈 |                298.64 ns #7 | <ins>**37.59 ms**</ins> 🥇 |
+| chalk[^chalk]              |                35.56 ns #4 |               114.51 ns #7 | <ins>**104.65 ns**</ins> 🥇 |                402.92 ns #8 |               44.28 ms #10 |
+| ansi-colors[^ansi-colors]  |              235.20 ns #10 |                1.94 µs #10 |               528.98 µs #10 |                43.51 µs #10 |                43.86 ms #9 |
+| **ansispeck/ext#1**        |                          — |                          — |                       1.05x |                           — |                    1.04x ~ |
 
-### deno 2.9.3
-
-> AMD EPYC 7763 64-Core Processor
-
-<!-- -->
-
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
-
-| Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
-| -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      | <ins>**30.34 ns**</ins> 🥇 | <ins>**35.39 ns**</ins> 🥇 |                109.21 ns #5 |          ***245.16 ns*** 🥈 |              *42.42 ms* 🥉 |
-| ansispeck/auto[^ansispeck] |                37.91 ns #7 |          ***36.11 ns*** 🥈 |                107.29 ns #4 |              *246.76 ns* 🥉 |                43.70 ms #6 |
-| ansispeck/raw[^ansispeck]  |                 73.99 ns † |                353.79 ns † |                 586.27 µs † |                  16.22 µs † |                 42.62 ms † |
-| ansispeck/safe[^ansispeck] |                50.45 ns #8 |               196.58 ns #8 |                149.70 ns #8 |                  1.14 µs #9 |                43.32 ms #5 |
-| ansispeck/rope[^ansispeck] |                97.81 ns #9 |               554.43 ns #9 |                262.09 µs #9 | <ins>**116.91 ns**</ins> 🥇 |                43.11 ms #4 |
-| ansispeck/noop[^ansispeck] |                 30.95 ns † |                 35.68 ns † |                 107.20 ns † |                 351.34 ns † |                 44.15 ms † |
-| picocolors[^picocolors]    |                37.18 ns #6 |                99.08 ns #6 |                113.46 ns #6 |                276.98 ns #5 |               53.60 ms #10 |
-| colorette[^colorette]      |                36.99 ns #5 |                95.12 ns #5 |                115.89 ns #7 |                274.58 ns #4 |                46.87 ms #7 |
-| kleur[^kleur]              |              *34.22 ns* 🥉 |                77.83 ns #4 |              *104.84 ns* 🥉 |                288.20 ns #6 |          ***41.34 ms*** 🥈 |
-| kleur/colors[^kleur]       |          ***33.15 ns*** 🥈 |              *38.89 ns* 🥉 |          ***104.55 ns*** 🥈 |                295.45 ns #7 | <ins>**40.79 ms**</ins> 🥇 |
-| chalk[^chalk]              |                35.12 ns #4 |               102.87 ns #7 | <ins>**104.49 ns**</ins> 🥇 |                417.93 ns #8 |                47.61 ms #8 |
-| ansi-colors[^ansi-colors]  |              255.40 ns #10 |                1.86 µs #10 |               544.62 µs #10 |                44.40 µs #10 |                52.90 ms #9 |
-| **ansispeck/ext#1**        |                          — |                          — |                       1.05x |                           — |                      1.04x |
-
-### node 26.3.0
+### node 26.7.0
 
 > AMD EPYC 7763 64-Core Processor
 
@@ -184,19 +184,19 @@ Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ra
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
-| ansispeck[^ansispeck]      |                36.40 ns #4 | <ins>**38.13 ns**</ins> 🥇 |          ***109.95 ns*** 🥈 |              *251.41 ns* 🥉 |                29.66 ms #6 |
-| ansispeck/auto[^ansispeck] | <ins>**33.51 ns**</ins> 🥇 |              *41.96 ns* 🥉 |                111.81 ns #4 |          ***249.95 ns*** 🥈 |                29.24 ms #5 |
-| ansispeck/raw[^ansispeck]  |                 73.09 ns † |                360.62 ns † |                 572.04 µs † |                  16.20 µs † |                 29.52 ms † |
-| ansispeck/safe[^ansispeck] |                56.40 ns #8 |               195.62 ns #8 |                157.36 ns #8 |                  1.16 µs #9 |                29.94 ms #9 |
-| ansispeck/rope[^ansispeck] |               111.81 ns #9 |               569.97 ns #9 |                269.89 µs #9 | <ins>**120.10 ns**</ins> 🥇 |                29.81 ms #7 |
-| ansispeck/noop[^ansispeck] |                 32.71 ns † |                 37.83 ns † |                 111.32 ns † |                 365.40 ns † |                 29.35 ms † |
-| picocolors[^picocolors]    |                38.48 ns #7 |                99.27 ns #6 |                117.30 ns #7 |                292.83 ns #6 | <ins>**26.68 ms**</ins> 🥇 |
-| colorette[^colorette]      |                37.94 ns #6 |                96.86 ns #5 |                116.78 ns #6 |                285.63 ns #5 |                29.88 ms #8 |
-| kleur[^kleur]              |                37.10 ns #5 |                79.62 ns #4 |              *110.87 ns* 🥉 |                281.62 ns #4 |                28.94 ms #4 |
-| kleur/colors[^kleur]       |          ***33.91 ns*** 🥈 |          ***40.60 ns*** 🥈 |                112.12 ns #5 |                301.27 ns #7 |              *28.87 ms* 🥉 |
-| chalk[^chalk]              |              *35.97 ns* 🥉 |               107.10 ns #7 | <ins>**107.25 ns**</ins> 🥇 |                408.87 ns #8 |               38.90 ms #10 |
-| ansi-colors[^ansi-colors]  |              263.07 ns #10 |                1.95 µs #10 |               541.63 µs #10 |                43.48 µs #10 |          ***27.83 ms*** 🥈 |
-| **ansispeck/ext#1**        |                      1.07x |                          — |                       1.03x |                           — |                      1.11x |
+| ansispeck[^ansispeck]      |              *34.73 ns* 🥉 |          ***38.04 ns*** 🥈 |                110.92 ns #4 |              *251.85 ns* 🥉 |                29.49 ms #7 |
+| ansispeck/auto[^ansispeck] | <ins>**33.63 ns**</ins> 🥇 | <ins>**37.75 ns**</ins> 🥇 |              *109.89 ns* 🥉 |          ***250.97 ns*** 🥈 |                28.75 ms #4 |
+| ansispeck/raw[^ansispeck]  |                 68.92 ns † |                331.77 ns † |                 553.54 µs † |                  15.87 µs † |                 29.31 ms † |
+| ansispeck/safe[^ansispeck] |                53.10 ns #8 |               193.99 ns #8 |                154.42 ns #8 |                  1.02 µs #9 |                30.13 ms #9 |
+| ansispeck/rope[^ansispeck] |               106.45 ns #9 |               556.16 ns #9 |                274.76 µs #9 | <ins>**126.29 ns**</ins> 🥇 |                29.29 ms #6 |
+| ansispeck/noop[^ansispeck] |                 33.78 ns † |                 37.88 ns † |                 109.73 ns † |                 346.97 ns † |                 29.07 ms † |
+| picocolors[^picocolors]    |                38.91 ns #7 |                98.79 ns #6 |                112.66 ns #6 |                293.67 ns #6 | <ins>**26.93 ms**</ins> 🥇 |
+| colorette[^colorette]      |                38.40 ns #6 |                98.11 ns #5 |                112.50 ns #5 |                290.26 ns #5 |                29.99 ms #8 |
+| kleur[^kleur]              |                38.18 ns #5 |                80.26 ns #4 |                114.15 ns #7 |                289.46 ns #4 |          ***28.05 ms*** 🥈 |
+| kleur/colors[^kleur]       |          ***34.03 ns*** 🥈 |              *39.84 ns* 🥉 |          ***109.16 ns*** 🥈 |                304.57 ns #7 |                29.07 ms #5 |
+| chalk[^chalk]              |                36.17 ns #4 |               113.87 ns #7 | <ins>**108.61 ns**</ins> 🥇 |                407.62 ns #8 |               39.90 ms #10 |
+| ansi-colors[^ansi-colors]  |              261.44 ns #10 |                1.99 µs #10 |               544.36 µs #10 |                42.70 µs #10 |              *28.20 ms* 🥉 |
+| **ansispeck/ext#1**        |                      1.02x |                          — |                       1.02x |                           — |                      1.10x |
 
 ## Run locally
 
