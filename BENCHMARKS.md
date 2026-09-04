@@ -1,18 +1,10 @@
 # Benchmarks
 
-Measured with [mitata](https://github.com/evanwashere/mitata) in CI (GitHub
-Actions `ubuntu-latest`, AMD EPYC 7763), one run per color mode × runtime, at
-the pinned commit below. The [benchmark workflow](.github/workflows/bench.yml)
-produces a fresh source report on every push to master; this file records the
-reviewed snapshot.
+Measured with [mitata](https://github.com/evanwashere/mitata) in CI (GitHub Actions `ubuntu-latest`, AMD EPYC 7763), one run per color mode × runtime, at the pinned commit below. The [benchmark workflow](.github/workflows/bench.yml) produces a fresh source report on every push to master; this file records the reviewed snapshot.
 
-Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ranking:
-`noop` is the control row in both modes, and `raw` is also excluded from
-no-color runs because it intentionally emits ANSI. The `ansispeck/ext#1` footer
-compares ansispeck's root entrypoint against the fastest **external** library
-([Welch's *t*-test](https://en.wikipedia.org/wiki/Welch%27s_t-test) CI95; `~` =
-not significant, `—` = ansispeck is faster). `DNF` means the library failed
-while running that benchmark, so there is no result to report.
+Rankings are per column: 🥇🥈🥉 then `#N`. `†` rows are excluded from ranking: `noop` is the control row in both modes, and `raw` is also excluded from no-color runs because it intentionally emits ANSI. The `ansispeck/ext#1` footer compares ansispeck's root entrypoint against the fastest **external** library ([Welch's *t*-test][t-test] CI95; `~` = not significant, `—` = ansispeck is faster). `DNF` means the library failed while running that benchmark, so there is no result to report.
+
+[t-test]: https://en.wikipedia.org/wiki/Welch%27s_t-test
 
 ## Suites
 
@@ -43,8 +35,7 @@ while running that benchmark, so there is no result to report.
 
 > ansispeck exports in this table:
 >
-> - `ansispeck`: auto mode — picks raw or noop once at import;
->   FORCE_COLOR/`--color` wins
+> - `ansispeck`: auto mode — picks raw or noop once at import; FORCE_COLOR/`--color` wins
 > - `ansispeck/auto`: same behavior as the root export, via explicit subpath
 > - `ansispeck/raw`: always emits ANSI codes
 > - `ansispeck/safe`: template-tag API preserving style across interpolations
@@ -53,11 +44,9 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 >
-> Cold load starts an isolated runtime process using packages installed from
-> local tarballs.
+> Cold load starts an isolated runtime process using packages installed from local tarballs.
 
 | Library                    |                      Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | --------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -77,18 +66,15 @@ while running that benchmark, so there is no result to report.
 
 [^ansispeck]: ansispeck [v0.4.0](https://npm.im/package/ansispeck/v/0.4.0 "NPM")
 
-[^picocolors]: picocolors
-    [v1.1.1](https://npm.im/package/picocolors/v/1.1.1 "NPM")
+[^picocolors]: picocolors [v1.1.1](https://npm.im/package/picocolors/v/1.1.1 "NPM")
 
-[^colorette]: colorette
-    [v2.0.20](https://npm.im/package/colorette/v/2.0.20 "NPM")
+[^colorette]: colorette [v2.0.20](https://npm.im/package/colorette/v/2.0.20 "NPM")
 
 [^kleur]: kleur [v4.1.5](https://npm.im/package/kleur/v/4.1.5 "NPM")
 
 [^chalk]: chalk [v5.6.2](https://npm.im/package/chalk/v/5.6.2 "NPM")
 
-[^ansi-colors]: ansi-colors
-    [v4.1.3](https://npm.im/package/ansi-colors/v/4.1.3 "NPM")
+[^ansi-colors]: ansi-colors [v4.1.3](https://npm.im/package/ansi-colors/v/4.1.3 "NPM")
 
 ### deno 2.9.3
 
@@ -96,8 +82,7 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 
 | Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -121,8 +106,7 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 
 | Library                    |                     Simple |                     Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | --------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -148,8 +132,7 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -173,8 +156,7 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -198,8 +180,7 @@ while running that benchmark, so there is no result to report.
 
 <!-- -->
 
-> † excluded from ranking — `noop` is the control; `raw` is also excluded in
-> no-color runs
+> † excluded from ranking — `noop` is the control; `raw` is also excluded in no-color runs
 
 | Library                    |                     Simple |                    Complex |                   Recursion |              Deferred-build |                  Cold load |
 | -------------------------- | -------------------------: | -------------------------: | --------------------------: | --------------------------: | -------------------------: |
@@ -219,9 +200,8 @@ while running that benchmark, so there is no result to report.
 
 ## Run locally
 
-Use the package scripts or the recipes in the [justfile](justfile). For an
-individual runtime or output format, invoke the
-[benchmark CLI](benchmarks/bench.ts) directly:
+Use the package scripts or the recipes in the [justfile](justfile).\
+For an individual runtime or output format, invoke the [benchmark CLI](benchmarks/bench.ts) directly:
 
 ```sh
 bun run bench          # both runtimes, auto color detection

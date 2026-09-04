@@ -1,7 +1,7 @@
 {
 	"lineWidth": 120,
 	"extends": "https://cdn.jsdelivr.net/gh/kjanat/kjanat@master/configs/dprint.remote.json",
-	"markdown": { "associations": ["!README.md"], "textWrap": "always", "lineWidth": 80 },
+	"markdown": { "associations": ["!README.md"], "textWrap": "never", "lineWidth": 80 },
 	"prettier": { "associations": ["!**/*", "!!./README.md", "./README.md"], "useTabs": false },
 	"typescript": {
 		"module.sortExportDeclarations": "maintain",
