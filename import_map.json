@@ -23,13 +23,6 @@
 		"#ansispeck/safe": "./src/safe.ts",
 		"#ansispeck/types": "./src/types.ts",
 		"#auto": "./src/auto.ts",
-		"#bench/complex": "./benchmarks/complex.ts",
-		"#bench/deferred": "./benchmarks/deferred.ts",
-		"#bench/libraries": "./benchmarks/libraries.ts",
-		"#bench/loading": "./benchmarks/loading.ts",
-		"#bench/recursion": "./benchmarks/recursion.ts",
-		"#bench/simple": "./benchmarks/simple.ts",
-		"#bench/size": "./benchmarks/size.ts",
 		"#index": "./src/index.ts",
 		"#internal/ansi": "./src/internal/ansi.ts",
 		"#internal/ansi.ts": "./src/internal/ansi.ts",
@@ -50,7 +43,10 @@
 		"#safe": "./src/safe.ts",
 		"#types": "./src/types.ts",
 		"@types/bun": "npm:@types/bun@1.4.0",
+		"@types/bun/": "npm:/@types/bun@1.4.0/",
 		"bun": "npm:bun-types@1.4.0",
+		"bun-types": "npm:bun-types@1.4.0",
+		"bun-types/": "npm:/bun-types@1.4.0/",
 		"bun:test": "npm:bun-types@1.4.0/test.d.ts"
 	}
 }

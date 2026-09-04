@@ -1,32 +1,29 @@
 #!/usr/bin/env bun
-/// <reference types="bun" />
-
 import { cpSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
 const ROOT = dirname(import.meta.dir);
 const STAGING = join(ROOT, '.cache', 'npm-package');
+const DESTINATION = resolve(ROOT, process.argv[2] ?? '.');
 
-function isObjectRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
 
 function packageFile(entry: string): string {
 	const path = entry.replace(/^\/+/u, '');
 	const source = resolve(ROOT, path);
 	const fromRoot = relative(ROOT, source);
-	if (path.length === 0 || fromRoot.startsWith('..')) {
-		throw new Error(`Invalid package file path: ${entry}`);
-	}
+	if (path.length === 0 || fromRoot.startsWith('..')) throw new Error(`Invalid package file path: ${entry}`);
 	return path;
 }
 
 function packFilename(output: string): string {
 	const parsed: unknown = JSON.parse(output);
-	if (!Array.isArray(parsed) || parsed.length !== 1) {
-		throw new Error('npm pack returned an unexpected result');
-	}
-	const result: unknown = parsed[0];
+	const results: unknown[] = Array.isArray(parsed) ? parsed : isObjectRecord(parsed)
+		? Object.values(parsed)
+		: [];
+	if (results.length !== 1) throw new Error('npm pack returned an unexpected result');
+	const result: unknown = results[0];
 	if (!isObjectRecord(result) || typeof result['filename'] !== 'string') {
 		throw new Error('npm pack did not report a filename');
 	}
@@ -34,17 +31,15 @@ function packFilename(output: string): string {
 }
 
 const parsedPackageJson = await Bun.file(join(ROOT, 'package.json')).json();
-if (!isObjectRecord(parsedPackageJson)) {
-	throw new Error('package.json must be a JSON object');
-}
+if (!isObjectRecord(parsedPackageJson)) throw new Error('package.json must be a JSON object');
 
 const files = parsedPackageJson['files'];
 if (!Array.isArray(files) || !files.every((entry) => typeof entry === 'string')) {
 	throw new Error('package.json must contain a string "files" array');
 }
 
-await Bun.$`rm -rf ${STAGING}`;
-await Bun.$`mkdir -p ${STAGING}`;
+await Bun.$`rm -rf ${STAGING}`.cwd(ROOT);
+await Bun.$`mkdir -p ${STAGING}`.cwd(ROOT);
 
 for (const entry of files) {
 	const path = packageFile(entry);
@@ -63,11 +58,8 @@ delete parsedPackageJson['volta'];
 delete parsedPackageJson['workspaces'];
 
 const author = parsedPackageJson['author'];
-if (typeof author === 'string') {
-	parsedPackageJson['author'] = author.replace(/\s*\(https?:\/\/[^)]+\)\s*$/u, '').trim();
-} else if (isObjectRecord(author)) {
-	delete author['url'];
-}
+if (typeof author === 'string') parsedPackageJson['author'] = author.replace(/\s*\(https?:\/\/[^)]+\)\s*$/u, '').trim();
+else if (isObjectRecord(author)) delete author['url'];
 
 await Bun.write(join(STAGING, 'package.json'), `${JSON.stringify(parsedPackageJson)}\n`);
 
@@ -80,6 +72,7 @@ const strippedDts = (await Bun.file(dtsPath).text())
 
 await Bun.write(dtsPath, `${strippedDts}\n`);
 
-const output = await Bun.$`npm pack ${STAGING} --ignore-scripts --json --pack-destination ${ROOT}`.text();
-const tarball = join(ROOT, basename(packFilename(output)));
-process.stdout.write(`${tarball}\n`);
+await Bun.$`mkdir -p ${DESTINATION}`;
+const output = await Bun.$`npm pack ${STAGING} --ignore-scripts --json --pack-destination ${DESTINATION}`.text();
+const tarball = join(DESTINATION, basename(packFilename(output)));
+Bun.stdout.write(`${tarball}\n`);

@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		// Environment setup & latest features
-		"lib": ["ESNext", "DOM"],
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"target": "ESNext",
 		"module": "Preserve",
 		"moduleDetection": "force",
@@ -29,8 +29,19 @@
 		"composite": true,
 
 		// Types
-		"types": ["node", "bun"]
+		"types": ["bun", "node"],
+		"paths": {
+			"@/bench/*": ["./benchmarks/*.ts"]
+		}
 	},
-	"include": ["./src/**/*.ts", "./tests/**/*.ts", "./benchmarks/**/*.ts", "./*.ts"],
-	"exclude": ["./dist"]
+	"include": [
+		"./benchmarks/revision.ts",
+		"./benchmarks/libraries.ts",
+		"./scripts",
+		"./src",
+		"./tests",
+		"./*.ts",
+		"./*.json"
+	],
+	"exclude": ["./dist", "./node_modules", "./.github/actions/**"]
 }

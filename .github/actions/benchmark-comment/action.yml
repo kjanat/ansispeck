@@ -1,0 +1,35 @@
+name: Update benchmark PR comment
+description: Downloads a benchmark report and creates or updates its PR tracking comment
+
+inputs:
+  github-token:
+    description: Token with actions read and pull requests write access
+    required: true
+    default: ${{ github.token }}
+  run-id:
+    description: Workflow run containing the benchmark artifact
+    required: true
+  artifact-name:
+    description: Benchmark report artifact name
+    required: false
+    default: benchmark-report
+
+runs:
+  using: composite
+  steps:
+    - name: Download benchmark report
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}-action/benchmark-report-${{ inputs.run-id }}
+        github-token: ${{ inputs.github-token }}
+        run-id: ${{ inputs.run-id }}
+
+    - name: Create or update benchmark comment
+      uses: actions/github-script@v9
+      env: { BENCHMARK_REPORT_PATH: "${{ runner.temp }}-action/benchmark-report-${{ inputs.run-id }}/benchmark-report.md" }
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const { default: comment } = await import(`${process.env.GITHUB_ACTION_PATH}/benchmark-comment.mjs`);
+          return await comment({ core, context, github });

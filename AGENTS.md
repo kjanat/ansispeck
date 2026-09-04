@@ -46,8 +46,8 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 
 ## CONVENTIONS
 
-- Tabs, single quotes; formatting via dprint, linting via Biome
-  (`biome check src/`).
+- Tabs, single quotes; formatting via dprint, linting via Biome (`biome check
+  src/`).
 - Node builtins imported named: `import { error, log } from 'node:console'` —
   never bare `console.log`/`process.exit`.
 - No `any`, no `as` assertions (bench.ts holds the only two validated
@@ -85,12 +85,12 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 - Agents must never merge, auto-merge, or enqueue a pull request. If an agent
   creates a PR, report its URL and reserve review and merge control for the user
   while continuing any other authorized local work.
-- Before creating a release tag, verify the exact target commit with
-  `git verify-commit <target-commit>`. After creating the signed annotated tag
-  and before pushing it, run `git verify-tag <tag>` and confirm that
-  `git rev-parse <tag>^{commit}` exactly matches the target commit. The target
-  commit and annotated tag must both be signed; a valid tag signature does not
-  compensate for an unsigned commit.
+- Before creating a release tag, verify the exact target commit with `git
+  verify-commit <target-commit>`. After creating the signed annotated tag and
+  before pushing it, run `git verify-tag <tag>` and confirm that `git rev-parse
+  <tag>^{commit}` exactly matches the target commit. The target commit and
+  annotated tag must both be signed; a valid tag signature does not compensate
+  for an unsigned commit.
 - After creating or pushing a release tag, monitor every publication job through
   completion and verify the resulting registry state.
 - If any publication job fails, investigate its logs and relevant read-only
@@ -103,9 +103,8 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 - `run build` / `run build:quiet` — tsdown build (quiet = `-l error`); `run dev`
   — watch.
 - `bun test`, `run lint`, `run typecheck` (tsgo), `run fmt` (dprint).
-- `run bench` (= bench:bun then bench:node);
-  `bun --bun bench.ts -f markdown|md|overview|json|mitata` (`-q`/`--quiet`
-  suppresses output).
+- `run bench` (= bench:bun then bench:node); `bun --bun bench.ts -f
+  markdown|md|overview|json|mitata` (`-q`/`--quiet` suppresses output).
 - just: `bench-bun`/`bench-node`/`bench` (+ `-forced` variants,
   `bench-md-auto`/`bench-md-forced`) run `bun --bun bench.ts` / `node bench.ts`
   directly (NOT the `bench:*` npm scripts) so they control the color env; `test`
@@ -116,8 +115,8 @@ justfile        dev + benchmark recipes (bench/test run commands directly; other
 
 - npm scripts are runner-based (`run ...` = `runner-run`); scripts never call
   the justfile. Justfile bench/test recipes duplicate the command strings —
-  changing `bench:bun`/`bench:node` in package.json does NOT change
-  `just bench-*`.
+  changing `bench:bun`/`bench:node` in package.json does NOT change `just
+  bench-*`.
 - `tar` = quiet build + `scripts/pack.ts`, which copies publishable files into
   `.cache/npm-package`, strips publication-only manifest fields and declaration
   comments there, then packs that staging directory. It never edits tracked

@@ -1,0 +1,42 @@
+{
+	"name": "benchmarks",
+	"version": "0.0.0",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kjanat/ansispeck.git",
+		"directory": "benchmarks"
+	},
+	"type": "module",
+	"imports": {
+		"#*": "./*.ts",
+		"#pkg": "./package.json"
+	},
+	"main": "bench.ts",
+	"types": "bench.ts",
+	"bin": {
+		"bench": "bench.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@types/node": "catalog:",
+		"@typescript/native": "catalog:",
+		"ansi-colors": "catalog:bench",
+		"chalk": "catalog:bench",
+		"colorette": "catalog:bench",
+		"dreamcli": "catalog:",
+		"kleur": "catalog:bench",
+		"mitata": "catalog:bench",
+		"picocolors": "catalog:bench"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	},
+	"volta": {
+		"extends": "../package.json"
+	}
+}

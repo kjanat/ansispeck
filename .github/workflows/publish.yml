@@ -13,37 +13,21 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
-            if (!context.ref.startsWith('refs/tags/')) {
-              throw new Error(`release ref is not a tag: ${context.ref}`);
-            }
+            if (!context.ref.startsWith('refs/tags/')) throw new Error(`release ref is not a tag: ${context.ref}`)
 
             const tag = context.ref.slice('refs/tags/'.length);
             const numeric = '(?:0|[1-9]\\d*)';
             const nonNumeric = '(?:[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)';
             const identifier = `(?:${numeric}|${nonNumeric})`;
             const match = new RegExp(`^v(${numeric}\\.${numeric}\\.${numeric}(?:-${identifier}(?:\\.${identifier})*)?)$`).exec(tag);
-            if (!match) {
-              throw new Error(`invalid release tag: ${tag}`);
-            }
+            if (!match) throw new Error(`invalid release tag: ${tag}`);
 
-            const ref = await github.rest.git.getRef({
-              ...context.repo,
-              ref: `tags/${tag}`,
-            });
-            if (ref.data.object.type !== 'tag') {
-              throw new Error(`release tag is not annotated: ${tag}`);
-            }
+            const ref = await github.rest.git.getRef({...context.repo, ref: `tags/${tag}`});
+            if (ref.data.object.type !== 'tag') throw new Error(`release tag is not annotated: ${tag}`);
 
-            const annotatedTag = await github.rest.git.getTag({
-              ...context.repo,
-              tag_sha: ref.data.object.sha,
-            });
-            if (annotatedTag.data.tag !== tag || annotatedTag.data.object.type !== 'commit') {
-              throw new Error(`release tag does not directly reference a commit: ${tag}`);
-            }
-            if (!annotatedTag.data.verification?.verified) {
-              throw new Error(`release tag signature is not verified: ${tag} (${annotatedTag.data.verification?.reason ?? 'unknown'})`);
-            }
+            const annotatedTag = await github.rest.git.getTag({...context.repo, tag_sha: ref.data.object.sha});
+            if (annotatedTag.data.tag !== tag || annotatedTag.data.object.type !== 'commit') throw new Error(`release tag does not directly reference a commit: ${tag}`);
+            if (!annotatedTag.data.verification?.verified) throw new Error(`release tag signature is not verified: ${tag} (${annotatedTag.data.verification?.reason ?? 'unknown'})`);
 
             core.setOutput('version', match[1]);
 
@@ -53,86 +37,98 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
-      - uses: kjanat/runner@master
-      - uses: oven-sh/setup-bun@v2
+        with: &gitFull+noCreds { fetch-depth: 0, persist-credentials: false }
+      - parallel:
+          - { uses: kjanat/dprint-check@v3, with: &dprint { install-only: true } }
+          - { uses: kjanat/runner@master }
+          - { uses: oven-sh/setup-bun@v2 }
       - run: runner install -f build
-      - { name: Tests (non-TTY) + typecheck, run: bun run prepublishOnly }
-      - { name: Tests (TTY), run: "TERM=xterm-256color script -qec 'bun test' /dev/null" }
+      - parallel:
+          - { name: Tests (non-TTY) + typecheck, run: bun run prepublishOnly }
+          - { name: Tests (TTY), run: "TERM=xterm-256color script -qec 'bun test' /dev/null" }
 
   publish-npm:
     name: npm
     needs: [validate, test]
     runs-on: ubuntu-latest
-    permissions: { contents: read, id-token: write }
+    permissions: &r+tw { contents: read, id-token: write }
     environment: { name: npm, url: "${{ steps.publish.outputs.npm_url }}" }
     steps:
       - uses: actions/checkout@v7
-        with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
-      - uses: kjanat/runner@master
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-node@v7
-        with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
+        with: *gitFull+noCreds
+      - parallel:
+          - uses: kjanat/dprint-check@v3
+            with: *dprint
+          - uses: kjanat/runner@master
+          - uses: oven-sh/setup-bun@v2
+          - uses: actions/setup-node@v7
+            with: { node-version-file: .node-version, registry-url: https://registry.npmjs.org }
       - run: runner install -f build
       - name: Stamp version from tag
         run: bun pm version from-git --allow-same-version --no-git-tag-version
       - name: Pack + publish
         id: publish
         uses: actions/github-script@v9
+        env:
+          version: ${{ needs.validate.outputs.version }}
+          workspace: ${{ github.workspace }}
         with:
           script: |
+            const env = process.env;
             const { existsSync } = await import('node:fs');
-            const { default: pkg } = await import("${{ github.workspace }}/package.json", { with: { type: "json" } });
+            const { default: pkg } = await import(`${env.workspace}/package.json`, { with: { type: "json" } });
+
             core.setOutput('name', pkg.name);
             core.setOutput('version', pkg.version);
-            if (pkg.version !== "${{ needs.validate.outputs.version }}") { core.setFailed(`package version ${pkg.version} does not match release tag`); return }
+
+            if (pkg.version !== env.version) {core.setFailed(`package version ${pkg.version} does not match release tag`); return}
             const tag = pkg.version.includes('-') ? 'next' : 'latest';
             core.setOutput('npm_url', `https://npm.im/package/${pkg.name}/v/${pkg.version}`);
+
             const registry = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${encodeURIComponent(pkg.version)}`);
-            if (registry.ok) {
-              core.info(`${pkg.name}@${pkg.version} already exists on npm; skipping publication`);
-              return;
-            }
+            if (registry.ok) { core.info(`${pkg.name}@${pkg.version} already exists on npm; skipping publication`); return }
             if (registry.status !== 404) { core.setFailed(`npm registry returned ${registry.status} while checking ${pkg.name}@${pkg.version}`); return }
+
             const { stdout } = await exec.getExecOutput('bun', ['run', 'tar']);
             const tarball = stdout.trim();
             if (!tarball || !existsSync(tarball)) { core.setFailed(`bun run tar produced no tarball (got ${JSON.stringify(tarball)})`); return }
+
             await exec.getExecOutput('bunx', ['npm@latest', 'publish', '--provenance', '--access', 'public', '--tag', tag, tarball]);
 
   publish-jsr:
     name: jsr
     needs: [validate, publish-npm]
     runs-on: ubuntu-latest
-    permissions: { contents: read, id-token: write }
+    permissions: *r+tw
     environment: { name: jsr, url: "${{ steps.publish.outputs.jsr_url }}" }
     steps:
       - uses: actions/checkout@v7
-        with: { fetch-depth: 0, persist-credentials: false }
-      - uses: kjanat/install-dprint@v2
+        with: *gitFull+noCreds
+      - uses: kjanat/dprint-check@v3
+        with: *dprint
       - name: Publish to JSR
         id: publish
         uses: actions/github-script@v9
+        env:
+          version: ${{ needs.validate.outputs.version }}
+          workspace: ${{ github.workspace }}
         with:
           script: |
+            const env = process.env;
             const { readFileSync, writeFileSync } = await import('node:fs');
-            const path = "${{ github.workspace }}/jsr.json";
+            const path = `${env.workspace}/jsr.json`;
             const jsr = JSON.parse(readFileSync(path, "utf8"));
-            jsr.version = "${{ needs.validate.outputs.version }}";
+            jsr.version = env.version;
             writeFileSync(path, `${JSON.stringify(jsr, null, "\t")}\n`);
+
             core.setOutput('name', jsr.name);
             core.setOutput('version', jsr.version);
             core.setOutput('jsr_url', `https://jsr.io/${jsr.name}@${jsr.version}`);
+
             const registry = await fetch(`https://jsr.io/${jsr.name}/meta.json`);
             if (registry.ok) {
               const metadata = await registry.json();
-              if (Object.hasOwn(metadata.versions ?? {}, jsr.version)) {
-                core.info(`${jsr.name}@${jsr.version} already exists on JSR; skipping publication`);
-                return;
-              }
-            } else if (registry.status !== 404) {
-              core.setFailed(`JSR returned ${registry.status} while checking ${jsr.name}@${jsr.version}`);
-              return;
-            }
+              if (Object.hasOwn(metadata.versions ?? {}, jsr.version)) {core.info(`${jsr.name}@${jsr.version} already exists on JSR; skipping publication`); return}
+            } else if (registry.status !== 404) {core.setFailed(`JSR returned ${registry.status} while checking ${jsr.name}@${jsr.version}`); return}
+
             await exec.getExecOutput('npx', ['--yes', 'jsr', 'publish', '--allow-dirty']);

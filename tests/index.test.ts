@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import colors, { type Colors, createColors, isColorSupported, space, strip, tab } from '#ansispeck';
+import type { Colors } from '#ansispeck';
+import colors, { createColors, isColorSupported, space, strip, tab } from '#ansispeck';
 
 describe('whitespace helpers', () => {
 	test('produce one character by default', () => {

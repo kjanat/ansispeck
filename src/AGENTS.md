@@ -43,10 +43,10 @@ internal/
 
 `fmt(open, close, replace = open)` replaces every nested `close` occurrence in
 the input with `replace` (bold/dim use `ME + open` since they share close code
-`\x1b[22m`), so nested same-close styles never leak. Fast path:
-`skip = min(open.length, close.length)`, `least = skip + close.length`; inputs
-shorter than `least` provably contain no nested close and return via pure O(1)
-concat without calling `indexOf`. This applies to every ENABLED palette built on
+`\x1b[22m`), so nested same-close styles never leak. Fast path: `skip =
+min(open.length, close.length)`, `least = skip + close.length`; inputs shorter
+than `least` provably contain no nested close and return via pure O(1) concat
+without calling `indexOf`. This applies to every ENABLED palette built on
 `createColors` (root/`auto` when color is detected, and `raw`); `noop`
 (`createColors(false)`) swaps in the plain-coercion formatter and never enters
 `fmt` at all.

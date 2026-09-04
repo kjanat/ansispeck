@@ -7,17 +7,21 @@ function lockSpec(name: string): string {
 	if (entry === undefined) throw new Error(`bun.lock is missing package "${name}"`);
 	return entry[0];
 }
+
 const importMapCfg: import('importmapify').WriteImportMapOptions = defineConfig({
 	root: import.meta.dir,
-	extensions: ['ts', 'js'],
-	additionalImports: {
+	extensions: ['ts', 'js', 'json'],
+	packages: {
 		'@types/bun': `npm:${lockSpec('@types/bun')}`,
+		'bun-types': `npm:${lockSpec('bun-types')}`,
+	},
+	additionalImports: {
 		'bun:test': `${`npm:${lockSpec('bun-types')}`}/test.d.ts`,
 		bun: `npm:${lockSpec('bun-types')}`,
 	},
 });
 
 // The build completion hook writes the map after dist is current.
-if (import.meta.main) await Bun.$`bun bd`;
+if (import.meta.main) await Bun.$`bun bd`.cwd(import.meta.dir);
 
 export { importMapCfg };

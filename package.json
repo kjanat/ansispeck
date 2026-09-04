@@ -31,7 +31,6 @@
 			"types": "./dist/*.d.ts",
 			"default": "./dist/*.js"
 		},
-		"#bench/*": "./benchmarks/*.ts",
 		"#internal/*.ts": "./src/internal/*.ts",
 		"#pkg": "./package.json"
 	},
@@ -71,13 +70,17 @@
 		"/package.json"
 	],
 	"workspaces": [
-		"."
+		"./.github/actions/*",
+		"./benchmarks"
 	],
 	"scripts": {
 		"bd": "run -q build",
-		"bench": "run -s bench:bun bench:node",
-		"bench:bun": "bun --bun bench.ts",
-		"bench:node": "node bench.ts",
+		"prebench": "run scripts/prepare-benchmark-package.ts",
+		"bench": "env BENCH_MULTI=1 run -s bench:bun bench:node",
+		"prebench:bun": "run -q scripts/prepare-benchmark-package.ts",
+		"bench:bun": "bunx --bun bench",
+		"prebench:node": "run -q scripts/prepare-benchmark-package.ts",
+		"bench:node": "npx bench",
 		"build": "bun --bun tsdown",
 		"build:quiet": "bun --bun tsdown -l error",
 		"deno:check": "deno check src/",
@@ -97,29 +100,49 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18",
-		"@biomejs/biome": "^2.5",
-		"@types/bun": "^1.4",
-		"@types/node": "26",
-		"@typescript/native": "npm:typescript@^7",
-		"ansi-colors": "^4",
-		"chalk": "^5",
-		"colorette": "^2",
-		"dprint": "^0",
-		"dreamcli": "npm:@kjanat/dreamcli@^3",
+		"@types/bun": "catalog:",
+		"@types/node": "catalog:",
+		"@typescript/native": "catalog:",
+		"ansi-colors": "catalog:bench",
+		"benchmarks": "workspace:*",
+		"biome": "catalog:",
+		"chalk": "catalog:bench",
+		"colorette": "catalog:bench",
+		"dprint": "^0.57",
+		"dreamcli": "catalog:",
 		"importmapify": "^1",
-		"kleur": "^4.1.5",
-		"mitata": "^1",
-		"picocolors": "^1",
+		"kleur": "catalog:bench",
+		"mitata": "catalog:bench",
+		"picocolors": "catalog:bench",
 		"publint": "^0.3",
 		"runner-run": "^0",
 		"rust-just": "^1",
 		"sort-package-json": "^4",
-		"tsdown": "^0.22",
+		"tsdown": "^0.23",
 		"typescript": "<7"
 	},
 	"packageManager": "bun@1.4.0",
 	"volta": {
 		"node": "26.7.0",
 		"npm": "11.19.0"
+	},
+	"catalog": {
+		"@typescript/native": "npm:typescript@>=7",
+		"@actions/github-script": "github:actions/github-script",
+		"@types/bun": "^1.4",
+		"@types/node": ">=26",
+		"dreamcli": "npm:@kjanat/dreamcli@^4.0.0-rc.2",
+		"biome": "npm:@biomejs/biome@>=2.5",
+		"typescript": "^7"
+	},
+	"catalogs": {
+		"bench": {
+			"ansi-colors": "^4",
+			"chalk": "^6",
+			"colorette": "^2",
+			"kleur": "^4",
+			"mitata": "^1",
+			"picocolors": "^1"
+		}
 	}
 }

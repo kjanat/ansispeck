@@ -23,5 +23,8 @@ runs:
   steps:
     - id: run
       shell: bash
-      env: { RUNTIME: "${{ inputs.runtime }}", COLOR: "${{ inputs.color }}", COMPACT: "${{ inputs.compact }}" }
+      env:
+        COLOR: ${{ inputs.color }}
+        COMPACT: ${{ inputs.compact }}
+        RUNTIME: ${{ inputs.runtime }}
       run: bash "${GITHUB_ACTION_PATH}/run.sh"

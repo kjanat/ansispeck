@@ -55,13 +55,18 @@ chain() {
 read -r rt_bytes gz_bytes <<<"$(chain dist/index.js)"
 read -r ts_bytes _ <<<"$(chain dist/index.d.ts)"
 name=$(jq -r '.name' package.json)
-if version=$(git describe --tags --abbrev=0 2>/dev/null); then
-	version=${version#v}
-else
-	version=$(jq -r '.version' package.json)
-fi
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-full_commit=$(git rev-parse HEAD 2>/dev/null || echo "$commit")
+full_commit=$(git rev-parse HEAD 2>/dev/null || echo "${commit}")
+description=$(git describe --tags --always --abbrev=7 2>/dev/null || echo "${commit}")
+dirty=false
+if [[ -n "$(git status --porcelain=v1 --untracked-files=normal 2>/dev/null)" ]]; then
+	description="${description}-dirty"
+	dirty=true
+fi
+exact_tag=""
+if [[ "${dirty}" == false ]]; then
+	exact_tag=$(git describe --tags --exact-match --match 'v*.*.*' HEAD 2>/dev/null || true)
+fi
 
 kb() { awk "BEGIN { printf \"%.2f KB\", $1 / 1024 }"; }
 
@@ -70,17 +75,21 @@ gz_kb=$(kb "${gz_bytes}")
 ts_kb=$(kb "${ts_bytes}")
 
 repo_url=$(git remote get-url origin 2>/dev/null | sed -e 's/\.git$//' -e 's|^git@\([^:]*\):|https://\1/|' || echo "")
-npm_url="https://npm.im/package/${name}/v/${version}"
 commit_url="${repo_url:+${repo_url}/commit/${full_commit}}"
+if [[ -n "${exact_tag}" ]]; then
+	package_url="https://npm.im/package/${name}/v/${exact_tag#v}"
+else
+	package_url="${commit_url:-${repo_url}}"
+fi
 
 osc8() {
 	local url="${1}" label id="${3:-}"
-	label="${2:-$url}"
+	label="${2:-${url}}"
 
-	if [[ -n "$url" ]]; then
-		printf '\e]8;id=%s;%s\a%s\e]8;;\a' "$id" "$url" "$label"
+	if [[ -n "${url}" ]]; then
+		printf '\e]8;id=%s;%s\a%s\e]8;;\a' "${id}" "${url}" "${label}"
 	else
-		printf '%s' "$label"
+		printf '%s' "${label}"
 	fi
 }
 
@@ -90,9 +99,9 @@ case "${FMT}" in
 	table)
 		# dynamic widths from actual content (plain text only)
 		pkg_plain=ansispeck
-		rt_plain=$rt_kb
-		gz_plain=$gz_kb
-		ts_plain=$ts_kb
+		rt_plain=${rt_kb}
+		gz_plain=${gz_kb}
+		ts_plain=${ts_kb}
 		h0=Package
 		h1=Runtime
 		h2=Gzip
@@ -111,18 +120,18 @@ case "${FMT}" in
 		cell() {
 			local plain=$1 url=$2 w=$3 align=${4:-L}
 			local styled pad vis
-			if [[ -n $url ]]; then
-				styled=$(osc8 "$url" "$plain")
+			if [[ -n ${url} ]]; then
+				styled=$(osc8 "${url}" "${plain}")
 			else
-				styled=$plain
+				styled=${plain}
 			fi
 			vis=${#plain}
 			pad=$((w - vis))
-			[[ $pad -lt 0 ]] && pad=0
-			if [[ $align == L ]]; then
-				printf '%s%*s' "$styled" "$pad" ''
+			[[ ${pad} -lt 0 ]] && pad=0
+			if [[ ${align} == L ]]; then
+				printf '%s%*s' "${styled}" "${pad}" ''
 			else
-				printf '%*s%s' "$pad" '' "$styled"
+				printf '%*s%s' "${pad}" '' "${styled}"
 			fi
 		}
 		dashes() { printf '%*s' "$1" '' | tr ' ' '-'; }
@@ -130,42 +139,42 @@ case "${FMT}" in
 		# header (plain, L for pkg col, R for the rest)
 		body=$(
 			printf '  '
-			cell "$h0" '' "$w0" L
+			cell "${h0}" '' "${w0}" L
 			printf ' '
-			cell "$h1" '' "$w1" R
+			cell "${h1}" '' "${w1}" R
 			printf ' '
-			cell "$h2" '' "$w2" R
+			cell "${h2}" '' "${w2}" R
 			printf ' '
-			cell "$h3" '' "$w3" R
+			cell "${h3}" '' "${w3}" R
 		)
-		hdr=$body$'\n'
+		hdr=${body}$'\n'
 		# separator: exact dashes per computed width, same spacing
 		body=$(
 			printf '  '
-			dashes "$w0"
+			dashes "${w0}"
 			printf ' '
-			dashes "$w1"
+			dashes "${w1}"
 			printf ' '
-			dashes "$w2"
+			dashes "${w2}"
 			printf ' '
-			dashes "$w3"
+			dashes "${w3}"
 		)
-		sep=$body$'\n'
+		sep=${body}$'\n'
 		# data row: only pkg col gets the link, others plain; widths from plains
 		body=$(
 			printf '  '
-			cell "$pkg_plain" "$npm_url" "$w0" L
+			cell "${pkg_plain}" "${package_url}" "${w0}" L
 			printf ' '
-			cell "$rt_plain" '' "$w1" R
+			cell "${rt_plain}" '' "${w1}" R
 			printf ' '
-			cell "$gz_plain" '' "$w2" R
+			cell "${gz_plain}" '' "${w2}" R
 			printf ' '
-			cell "$ts_plain" '' "$w3" R
+			cell "${ts_plain}" '' "${w3}" R
 		)
-		row=$body$'\n'
+		row=${body}$'\n'
 
 		# footer re-uses links for ver/sha (natural spacing, not forced into cols)
-		as_ver_label=$(osc8 "${npm_url}" "${version}")
+		as_ver_label=$(osc8 "${package_url}" "${description}")
 		as_sha_label=$(osc8 "${commit_url}" "${commit}")
 		if [[ -n "${commit_url}" ]]; then
 			ver=$(printf '  ansispeck %s (%s)\n' "${as_ver_label}" "${as_sha_label}")
@@ -184,9 +193,9 @@ EOF
 			cat <<EOF
 | Package | Runtime | Gzip | Types |
 | --- | --- | --- | --- |
-| [ansispeck] ([${commit}][as-commit]) | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
+| [ansispeck] ([${description}][as-commit]) | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
 
-[ansispeck]: ${npm_url}
+[ansispeck]: ${package_url}
 [as-commit]: ${commit_url}
 EOF
 		else
@@ -195,7 +204,7 @@ EOF
 | --- | --- | --- | --- |
 | [ansispeck] | **${rt_kb}** | ${gz_kb} | ${ts_kb} |
 
-[ansispeck]: ${npm_url}
+[ansispeck]: ${package_url}
 EOF
 		fi
 		;;
