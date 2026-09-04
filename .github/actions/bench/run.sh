@@ -5,6 +5,7 @@ set -euo pipefail
 : GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 : RUNTIME="${RUNTIME:-}"
 : COLOR="${COLOR:-}"
+: COMPACT="${COMPACT:-}"
 
 # Set color env from input
 case "${COLOR}" in
@@ -46,6 +47,14 @@ case "${COMPACT}" in
 		exit 1
 		;;
 esac
+
+# Prepare the package and loading fixture once per job. GITHUB_ENV makes the
+# marker available to later invocations of this composite action.
+if [[ "${BENCH_MULTI:-}" != "1" ]]; then
+	bun --bun scripts/prepare-benchmark-package.ts
+	export BENCH_MULTI=1
+	echo "BENCH_MULTI=1" >>"${GITHUB_ENV}"
+fi
 
 output="$("$@")"
 if formatted="$(printf '%s\n' "${output}" | dprint fmt --stdin md)"; then

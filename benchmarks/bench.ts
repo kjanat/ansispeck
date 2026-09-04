@@ -462,10 +462,9 @@ function mitataFormat(format: RunFormat): 'json' | 'mitata' | 'quiet' {
 
 async function runBenchmarks(format: RunFormat, filter: RegExp | undefined, compact: boolean, out: Out): Promise<void> {
 	const packageScript = process.env['npm_lifecycle_event'];
-	if (packageScript !== 'bench:bun' && packageScript !== 'bench:node') {
+	if (process.env['BENCH_MULTI'] !== '1' && packageScript !== 'bench:bun' && packageScript !== 'bench:node') {
 		execFileSync('bun', ['--bun', 'scripts/prepare-benchmark-package.ts'], { stdio: 'ignore', cwd: ROOT });
 	}
-	execFileSync('bun', ['--bun', 'scripts/prepare-loading-fixture.ts'], { stdio: 'ignore', cwd: ROOT });
 	const [
 		{ default: ansispeck },
 		{ register: simple },
@@ -518,6 +517,7 @@ const v = selfRevision.description.replace(/^v/, '');
 
 if (import.meta.main) {
 	void cli(basename(import.meta.filename)).version(v)
+		.builtins({ quiet: 'off' })
 		.manifest({ files: ['package.json', 'jsr.json'] }).links()
 		.description('Run the ansispeck benchmark matrix')
 		.default(benchmark)

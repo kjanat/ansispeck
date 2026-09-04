@@ -9,7 +9,6 @@ const BENCHMARK_PACKAGE = join(ROOT, 'benchmarks', 'node_modules', 'ansispeck');
 
 function packageRoot(name: string): string {
 	if (name === 'ansispeck') return BENCHMARK_PACKAGE;
-
 	const entry = Bun.fileURLToPath(import.meta.resolve(name));
 	const marker = `${sep}node_modules${sep}${name.split('/').join(sep)}${sep}`;
 	const at = entry.lastIndexOf(marker);

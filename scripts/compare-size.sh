@@ -56,8 +56,8 @@ read -r rt_bytes gz_bytes <<<"$(chain dist/index.js)"
 read -r ts_bytes _ <<<"$(chain dist/index.d.ts)"
 name=$(jq -r '.name' package.json)
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-full_commit=$(git rev-parse HEAD 2>/dev/null || echo "$commit")
-description=$(git describe --tags --always --abbrev=7 2>/dev/null || echo "$commit")
+full_commit=$(git rev-parse HEAD 2>/dev/null || echo "${commit}")
+description=$(git describe --tags --always --abbrev=7 2>/dev/null || echo "${commit}")
 dirty=false
 if [[ -n "$(git status --porcelain=v1 --untracked-files=normal 2>/dev/null)" ]]; then
 	description="${description}-dirty"
@@ -84,12 +84,12 @@ fi
 
 osc8() {
 	local url="${1}" label id="${3:-}"
-	label="${2:-$url}"
+	label="${2:-${url}}"
 
-	if [[ -n "$url" ]]; then
-		printf '\e]8;id=%s;%s\a%s\e]8;;\a' "$id" "$url" "$label"
+	if [[ -n "${url}" ]]; then
+		printf '\e]8;id=%s;%s\a%s\e]8;;\a' "${id}" "${url}" "${label}"
 	else
-		printf '%s' "$label"
+		printf '%s' "${label}"
 	fi
 }
 
@@ -99,9 +99,9 @@ case "${FMT}" in
 	table)
 		# dynamic widths from actual content (plain text only)
 		pkg_plain=ansispeck
-		rt_plain=$rt_kb
-		gz_plain=$gz_kb
-		ts_plain=$ts_kb
+		rt_plain=${rt_kb}
+		gz_plain=${gz_kb}
+		ts_plain=${ts_kb}
 		h0=Package
 		h1=Runtime
 		h2=Gzip
@@ -120,18 +120,18 @@ case "${FMT}" in
 		cell() {
 			local plain=$1 url=$2 w=$3 align=${4:-L}
 			local styled pad vis
-			if [[ -n $url ]]; then
-				styled=$(osc8 "$url" "$plain")
+			if [[ -n ${url} ]]; then
+				styled=$(osc8 "${url}" "${plain}")
 			else
-				styled=$plain
+				styled=${plain}
 			fi
 			vis=${#plain}
 			pad=$((w - vis))
-			[[ $pad -lt 0 ]] && pad=0
-			if [[ $align == L ]]; then
-				printf '%s%*s' "$styled" "$pad" ''
+			[[ ${pad} -lt 0 ]] && pad=0
+			if [[ ${align} == L ]]; then
+				printf '%s%*s' "${styled}" "${pad}" ''
 			else
-				printf '%*s%s' "$pad" '' "$styled"
+				printf '%*s%s' "${pad}" '' "${styled}"
 			fi
 		}
 		dashes() { printf '%*s' "$1" '' | tr ' ' '-'; }
@@ -139,39 +139,39 @@ case "${FMT}" in
 		# header (plain, L for pkg col, R for the rest)
 		body=$(
 			printf '  '
-			cell "$h0" '' "$w0" L
+			cell "${h0}" '' "${w0}" L
 			printf ' '
-			cell "$h1" '' "$w1" R
+			cell "${h1}" '' "${w1}" R
 			printf ' '
-			cell "$h2" '' "$w2" R
+			cell "${h2}" '' "${w2}" R
 			printf ' '
-			cell "$h3" '' "$w3" R
+			cell "${h3}" '' "${w3}" R
 		)
-		hdr=$body$'\n'
+		hdr=${body}$'\n'
 		# separator: exact dashes per computed width, same spacing
 		body=$(
 			printf '  '
-			dashes "$w0"
+			dashes "${w0}"
 			printf ' '
-			dashes "$w1"
+			dashes "${w1}"
 			printf ' '
-			dashes "$w2"
+			dashes "${w2}"
 			printf ' '
-			dashes "$w3"
+			dashes "${w3}"
 		)
-		sep=$body$'\n'
+		sep=${body}$'\n'
 		# data row: only pkg col gets the link, others plain; widths from plains
 		body=$(
 			printf '  '
-			cell "$pkg_plain" "$package_url" "$w0" L
+			cell "${pkg_plain}" "${package_url}" "${w0}" L
 			printf ' '
-			cell "$rt_plain" '' "$w1" R
+			cell "${rt_plain}" '' "${w1}" R
 			printf ' '
-			cell "$gz_plain" '' "$w2" R
+			cell "${gz_plain}" '' "${w2}" R
 			printf ' '
-			cell "$ts_plain" '' "$w3" R
+			cell "${ts_plain}" '' "${w3}" R
 		)
-		row=$body$'\n'
+		row=${body}$'\n'
 
 		# footer re-uses links for ver/sha (natural spacing, not forced into cols)
 		as_ver_label=$(osc8 "${package_url}" "${description}")
