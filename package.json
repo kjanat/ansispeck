@@ -109,7 +109,7 @@
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",
 		"dprint": "^0.57",
-		"dreamcli": "npm:@kjanat/dreamcli@^4.0.0-rc.2",
+		"dreamcli": "catalog:",
 		"importmapify": "^1",
 		"kleur": "catalog:bench",
 		"mitata": "catalog:bench",
@@ -131,6 +131,7 @@
 		"@actions/github-script": "github:actions/github-script",
 		"@types/bun": "^1.4",
 		"@types/node": ">=26",
+		"dreamcli": "npm:@kjanat/dreamcli@^4.0.0-rc.2",
 		"biome": "npm:@biomejs/biome@>=2.5",
 		"typescript": "^7"
 	},

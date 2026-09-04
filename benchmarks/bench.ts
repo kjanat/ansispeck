@@ -4,12 +4,12 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 import { URL } from 'node:url';
-import pkg from '../package.json' with { type: 'json' };
 import type { Out } from 'dreamcli';
 import { cli, command, flag } from 'dreamcli';
 import { run } from 'mitata';
 import { BENCH_LIBRARIES } from '#libraries';
 import { describeRevision } from '#revision';
+import pkg from '../package.json' with { type: 'json' };
 
 const ROOT = dirname(import.meta.dirname);
 

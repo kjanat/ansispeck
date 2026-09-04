@@ -26,7 +26,7 @@
 		"ansi-colors": "catalog:bench",
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",
-		"dreamcli": "npm:@kjanat/dreamcli@^3",
+		"dreamcli": "catalog:",
 		"kleur": "catalog:bench",
 		"mitata": "catalog:bench",
 		"picocolors": "catalog:bench"

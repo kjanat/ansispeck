@@ -1,10 +1,10 @@
+import ansi from 'ansi-colors';
 import ansispeck from 'ansispeck';
 import auto from 'ansispeck/auto';
 import noop from 'ansispeck/noop';
 import raw from 'ansispeck/raw';
 import rope from 'ansispeck/rope';
 import safe from 'ansispeck/safe';
-import ansi from 'ansi-colors';
 import chalk from 'chalk';
 import * as colorette from 'colorette';
 import kleur from 'kleur';
