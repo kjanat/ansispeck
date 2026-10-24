@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Importing an auto-detecting entrypoint under Deno no longer fails without
+  environment permission. Detection reads only the variables Deno has already
+  granted, as unset otherwise, and never triggers a permission prompt, so
+  `--allow-env=FORCE_COLOR` honors `FORCE_COLOR` alone and no grant falls back
+  to TTY detection. Reads that throw on any runtime count as unset.
+
 ## [0.4.2] - 2026-08-25
 
 ### Fixed

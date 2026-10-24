@@ -6,6 +6,48 @@
 
 const processRef = globalThis.process;
 
+/**
+ * Whether one variable may be read without failing or prompting.
+ *
+ * Deno raises `NotCapable` for a variable outside the granted set, and may
+ * prompt for one in an interactive session, so detection asks
+ * `Deno.permissions.querySync()` first and reads only granted variables.
+ * Other runtimes can always read.
+ */
+const envReadable = (name: string): boolean => {
+	const deno: unknown = Reflect.get(globalThis, 'Deno');
+	if (typeof deno !== 'object' || deno === null) return true;
+	const permissions: unknown = Reflect.get(deno, 'permissions');
+	if (typeof permissions !== 'object' || permissions === null) return true;
+	const querySync: unknown = Reflect.get(permissions, 'querySync');
+	if (typeof querySync !== 'function') return true;
+	const status: unknown = Reflect.apply(querySync, permissions, [{ name: 'env', variable: name }]);
+	return typeof status === 'object' && status !== null && Reflect.get(status, 'state') === 'granted';
+};
+
+/**
+ * A read-only view of `env` whose variables read as unset when `readable`
+ * refuses them or the read throws. Detection is optional, so an unavailable
+ * variable never fails an import.
+ */
+export const guardEnv = (
+	env: Readonly<Record<string, string | undefined>>,
+	readable: (name: string) => boolean,
+): Readonly<Record<string, string | undefined>> =>
+	new Proxy<Record<string, string | undefined>>(
+		{},
+		{
+			get: (_target, key) => {
+				if (typeof key !== 'string' || !readable(key)) return undefined;
+				try {
+					return env[key];
+				} catch {
+					return undefined;
+				}
+			},
+		},
+	);
+
 /** Runtime inputs used to determine terminal feature support. */
 export interface DetectionContext {
 	/** Process arguments used for explicit feature flags. */
@@ -20,7 +62,7 @@ export interface DetectionContext {
 
 const runtimeContext: DetectionContext = {
 	argv: processRef?.argv ?? [],
-	env: processRef?.env ?? {},
+	env: guardEnv(processRef?.env ?? {}, envReadable),
 	get isTTY(): boolean {
 		return processRef?.stdout?.isTTY === true;
 	},
