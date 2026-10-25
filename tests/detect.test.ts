@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { DetectionContext } from '#internal/detect';
-import { detectColorSupportFor, detectHyperlinkSupportFor } from '#internal/detect';
+import { detectColorSupportFor, detectHyperlinkSupportFor, guardEnv } from '#internal/detect';
 
 const context = (overrides: Partial<DetectionContext> = {}): DetectionContext => ({
 	argv: [],
@@ -99,5 +99,33 @@ describe('detectHyperlinkSupport precedence', () => {
 
 	test('dumb terminal disables TTY', () => {
 		expect(detectHyperlinkSupportFor(context({ env: { TERM: 'dumb' }, isTTY: true }))).toBe(false);
+	});
+});
+
+describe('guardEnv', () => {
+	test('reads permitted variables', () => {
+		const env = guardEnv({ NO_COLOR: '1' }, () => true);
+		expect(env['NO_COLOR']).toBe('1');
+	});
+
+	test('refused variables read as unset', () => {
+		const env = guardEnv({ NO_COLOR: '1', CI: 'true' }, (name) => name === 'CI');
+		expect(env['NO_COLOR']).toBeUndefined();
+		expect(env['CI']).toBe('true');
+		expect(detectColorSupportFor(context({ env }))).toBe(true);
+	});
+
+	test('a throwing read reads as unset', () => {
+		const denied = new Proxy<Record<string, string | undefined>>(
+			{},
+			{
+				get: () => {
+					throw new Error('NotCapable: Requires env access');
+				},
+			},
+		);
+		const env = guardEnv(denied, () => true);
+		expect(env['NO_HYPERLINKS']).toBeUndefined();
+		expect(detectHyperlinkSupportFor(context({ env, isTTY: true }))).toBe(true);
 	});
 });
