@@ -108,7 +108,7 @@
 		"biome": "catalog:",
 		"chalk": "catalog:bench",
 		"colorette": "catalog:bench",
-		"dprint": "^0.57",
+		"dprint": "^0.64.0",
 		"dreamcli": "catalog:",
 		"importmapify": "^1",
 		"kleur": "catalog:bench",
