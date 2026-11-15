@@ -25,7 +25,7 @@
         "rust-just": "^1",
         "sort-package-json": "^4",
         "tsdown": "^0.23",
-        "typescript": "<7",
+        "typescript": "<8",
       },
     },
     ".github/actions/benchmark-comment": {
