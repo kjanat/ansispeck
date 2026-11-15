@@ -22,7 +22,7 @@
 		"@typescript/native": "catalog:"
 	},
 	"volta": {
-		"node": "24.19.0",
+		"node": "26.13.1",
 		"npm": "11.19.0"
 	}
 }

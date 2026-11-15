@@ -123,7 +123,7 @@
 	},
 	"packageManager": "bun@1.4.4",
 	"volta": {
-		"node": "26.7.0",
+		"node": "26.13.1",
 		"npm": "11.19.0"
 	},
 	"catalog": {
