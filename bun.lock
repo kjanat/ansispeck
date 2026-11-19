@@ -16,7 +16,7 @@
         "colorette": "catalog:bench",
         "dprint": "^0.57",
         "dreamcli": "catalog:",
-        "importmapify": "^1",
+        "importmapify": "^2.0.0",
         "kleur": "catalog:bench",
         "mitata": "catalog:bench",
         "picocolors": "catalog:bench",
@@ -423,7 +423,7 @@
 
     "import-without-cache": ["import-without-cache@0.4.0", "", {}, "sha512-NkJQA7oZ4YHQhd2+H3BoRFKF3d/XNsiKpHZCQEMH9pDX27hQQLsTyOocyRgaIVtf8gHX3Nt3LPkR4e5EdtPAGQ=="],
 
-    "importmapify": ["importmapify@1.7.0", "", { "dependencies": { "dreamcli": "npm:@kjanat/dreamcli@^3.0.1" }, "bin": { "importmapify": "dist/mod.mjs" } }, "sha512-oAScmWPf0bZLwC1mzsH5hNZ7hV8f6JfcefnJR7ikrnlfkx3dzSnEjK4OWyiCs9eUdA8XLZQb1VF5brDjrTHTuQ=="],
+    "importmapify": ["importmapify@2.0.0", "", { "dependencies": { "dreamcli": "npm:@kjanat/dreamcli@^5.4.0" }, "bin": { "importmapify": "dist/mod.mjs" } }, "sha512-ZwCNIsoBui54kTJZZQQas3vD0tO/2l1f913+J0gLBbob4GL+QVIn+ZqKMQXJ3wHNMjK/Xcu3Q8KelYKIHcgRnQ=="],
 
     "is-plain-obj": ["is-plain-obj@4.1.0", "", {}, "sha512-+Pgi+vMuUNkJyExiMBt5IlFoMyKnr5zhJ4Uspz58WOhBF5QoIZkFyNHIbBAtHwzVAgk5RtndVNsDRN61/mmDqg=="],
 
@@ -577,7 +577,7 @@
 
     "cliui/string-width": ["string-width@7.2.0", "", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, "sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ=="],
 
-    "importmapify/dreamcli": ["@kjanat/dreamcli@3.0.1", "", { "dependencies": { "ansispeck": "^0.4.1" } }, "sha512-FY5uBPI7EQouhyUEpQdMEVew4jGEcshBZSSH6a8G47Bie+uBk1flLj8l2sJrVDOyd9lG1i1BaYyV0jmgdENp3A=="],
+    "importmapify/dreamcli": ["@kjanat/dreamcli@5.4.0", "", { "dependencies": { "ansispeck": "^0.4.3" } }, "sha512-LXJec9Ut82BoX8H9wWgQ/1ta0a5UDqJhd+HaiZEkn2AZWeu+cSvBPgFwyLf4YfZVI8u3Hi/oA3G6KoyZMocJzg=="],
 
     "npm-run-path/path-key": ["path-key@4.0.0", "", {}, "sha512-haREypq7xkM7ErfgIyA0z+Bj4AGKlMSdlQE2jvJo6huWD1EdkKYV+G/T4nq0YEF2vgTT8kqMFKo1uHn950r4SQ=="],
 
@@ -590,5 +590,7 @@
     "@octokit/plugin-rest-endpoint-methods/@octokit/types/@octokit/openapi-types": ["@octokit/openapi-types@27.0.0", "", {}, "sha512-whrdktVs1h6gtR+09+QsNk2+FO+49j6ga1c55YZudfEG+oKJVvJLQi3zkOm5JjiUXAagWK2tI2kTGKJ2Ys7MGA=="],
 
     "@octokit/plugin-retry/@octokit/types/@octokit/openapi-types": ["@octokit/openapi-types@28.0.0", "", {}, "sha512-0rFyLuyHvIj6uuZWuDslxkowFYdPXoNIkeAv4b27dzm2Tf4vGWXnPsMcxs7d65kLdMERgP3wc1AEPlqMz8e1cQ=="],
+
+    "importmapify/dreamcli/ansispeck": ["ansispeck@0.4.3", "", {}, "sha512-+U6dFeORz6VrHK0AYqkVpLsjsRZGWgVQDqp7c6KpKDzpGbCdNAyEH7K8wtomuElS3sX1Nne1YeMgCK0kfPB/9A=="],
   }
 }

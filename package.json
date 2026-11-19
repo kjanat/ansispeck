@@ -110,7 +110,7 @@
 		"colorette": "catalog:bench",
 		"dprint": "^0.57",
 		"dreamcli": "catalog:",
-		"importmapify": "^1",
+		"importmapify": "^2.0.0",
 		"kleur": "catalog:bench",
 		"mitata": "catalog:bench",
 		"picocolors": "catalog:bench",
